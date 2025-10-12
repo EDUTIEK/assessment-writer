@@ -54,9 +54,10 @@ export const useApiStore = defineStore('api', {
       // saved in storage
       backendUrl: '',                     // url to be used for REST calls
       returnUrl: '',                      // url to be called when the wsriter is closed
-      userKey: '',                        // identifying key of the writing user
-      environmentKey: '',                 // identifying key of the writing envirnonment (defining the task)
-      dataToken: '',                      // authentication token for transmission if data
+      userId: '',                         // identifying id of the writing user
+      assId: '',                          // identifying id of the assesment
+      contextId: '',                      // identifying id of the context fpr permission checks
+      dataToken: '',                      // authentication token for transmission of data
       fileToken: '',                      // authentication token for loading files
       timeOffset: 0,                      // differnce between server time and client time (ms)
 
@@ -112,9 +113,10 @@ export const useApiStore = defineStore('api', {
 
         // add authentication info as url parameters
         // use signature instead of token because it is visible
-        params.append('LongEssayUser', state.userKey);
-        params.append('LongEssayEnvironment', state.environmentKey);
-        params.append('LongEssaySignature', md5(state.userKey + state.environmentKey + token));
+        params.append('user_id', state.userId);
+        params.append('ass_id', state.assId);
+        params.append('context_id', state.contextId);
+        params.append('signature', md5(state.userId + state.assId + state.contextId + token));
 
         return {
           baseURL: baseURL,
@@ -135,7 +137,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (resourceKey) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/file/' + resourceKey + '?' + config.params.toString();
+        return config.baseURL + '/writer/file/' + resourceKey + '?' + config.params.toString();
       }
       return fn;
     },
@@ -186,39 +188,44 @@ export const useApiStore = defineStore('api', {
     async init() {
 
       let newContext = false;
-      let lastHash = Cookies.get('LongEssayHash');
+      let lastHash = Cookies.get('xlasLastHash');
 
       // take values formerly stored
-      this.backendUrl = localStorage.getItem('writerBackendUrl');
-      this.returnUrl = localStorage.getItem('writerReturnUrl');
-      this.userKey = localStorage.getItem('writerUserKey');
-      this.environmentKey = localStorage.getItem('writerEnvironmentKey');
-      this.dataToken = localStorage.getItem('writerDataToken');
-      this.fileToken = localStorage.getItem('writerFileToken');
-      this.timeOffset = Math.floor(localStorage.getItem('writerTimeOffset') ?? 0);
+      this.backendUrl = localStorage.getItem('xlasWriterBackendUrl');
+      this.returnUrl = localStorage.getItem('xlasWriterReturnUrl');
+      this.userId = localStorage.getItem('xlasWriterUserId');
+      this.assId = localStorage.getItem('xlasWriterAssId');
+      this.contextId = localStorage.getItem('xlasWriterContextId');
+      this.dataToken = localStorage.getItem('xlasWriterDataToken');
+      this.fileToken = localStorage.getItem('xlasWriterFileToken');
+      this.timeOffset = Math.floor(localStorage.getItem('xlasWriterTimeOffset') ?? 0);
 
       // check if context given by cookies differs and force a reload if neccessary
-      if (!!Cookies.get('LongEssayUser') && Cookies.get('LongEssayUser') !== this.userKey) {
-        this.userKey = Cookies.get('LongEssayUser');
+      if (!!Cookies.get('xlasUserId') && Cookies.get('xlasUserId') !== this.userId) {
+        this.userId = Cookies.get('xlasUserId');
         newContext = true;
       }
-      if (!!Cookies.get('LongEssayEnvironment') && Cookies.get('LongEssayEnvironment') !== this.environmentKey) {
-        this.environmentKey = Cookies.get('LongEssayEnvironment');
+      if (!!Cookies.get('xlasAssId') && Cookies.get('xlasAssId') !== this.assId) {
+        this.assId = Cookies.get('xlasAssId');
+        newContext = true;
+      }
+      if (!!Cookies.get('xlasContextId') && Cookies.get('xlasContextId') !== this.contextId) {
+        this.contextId = Cookies.get('xlasContextId');
         newContext = true;
       }
 
       // these values can be changed without forcing a reload
-      if (!!Cookies.get('LongEssayBackend') && Cookies.get('LongEssayBackend') !== this.backendUrl) {
-        this.backendUrl = Cookies.get('LongEssayBackend');
+      if (!!Cookies.get('xlasBackendUrl') && Cookies.get('xlasBackendUrl') !== this.backendUrl) {
+        this.backendUrl = Cookies.get('xlasBackendUrl');
       }
-      if (!!Cookies.get('LongEssayReturn') && Cookies.get('LongEssayReturn') !== this.returnUrl) {
-        this.returnUrl = Cookies.get('LongEssayReturn');
+      if (!!Cookies.get('xlasReturnUrl') && Cookies.get('xlasReturnUrl') !== this.returnUrl) {
+        this.returnUrl = Cookies.get('xlasReturnUrl');
       }
-      if (!!Cookies.get('LongEssayToken') && Cookies.get('LongEssayToken') !== this.dataToken) {
-        this.dataToken = Cookies.get('LongEssayToken');
+      if (!!Cookies.get('xlasToken') && Cookies.get('xlasToken') !== this.dataToken) {
+        this.dataToken = Cookies.get('xlasToken');
       }
 
-      if (!this.backendUrl || !this.returnUrl || !this.userKey || !this.environmentKey || !this.dataToken) {
+      if (!this.backendUrl || !this.returnUrl || !this.userId || !this.assId || !this.contextId || !this.dataToken) {
         this.showInitFailure = true;
         return;
       }
@@ -328,7 +335,7 @@ export const useApiStore = defineStore('api', {
 
       let response = {};
       try {
-        response = await axios.get('/data', this.getRequestConfig(this.dataToken));
+        response = await axios.get('/writer/data', this.getRequestConfig(this.dataToken));
         this.setTimeOffset(response);
         this.refreshToken(response);
       }
@@ -384,7 +391,7 @@ export const useApiStore = defineStore('api', {
       this.lastChangesTry = Date.now();
 
       try {
-        const response = await axios.get('/update', this.getRequestConfig(this.dataToken));
+        const response = await axios.get('/writer/update', this.getRequestConfig(this.dataToken));
         this.setTimeOffset(response);
         this.refreshToken(response);
 
@@ -417,7 +424,7 @@ export const useApiStore = defineStore('api', {
         started: this.getServerTime(Date.now())
       }
       try {
-        response = await axios.put('/start', data, this.getRequestConfig(this.dataToken));
+        response = await axios.put('/writer/start', data, this.getRequestConfig(this.dataToken));
         this.setTimeOffset(response);
         this.refreshToken(response);
         return true;
@@ -443,7 +450,7 @@ export const useApiStore = defineStore('api', {
 
       this.lastStepsTry = Date.now();
       try {
-        response = await axios.put('/steps', data, this.getRequestConfig(this.dataToken));
+        response = await axios.put('/writer/steps', data, this.getRequestConfig(this.dataToken));
         this.setTimeOffset(response);
         this.refreshToken(response);
         this.lastStepsTry = 0;
@@ -496,7 +503,7 @@ export const useApiStore = defineStore('api', {
             preferences: await preferencesStore.getChangedData(this.lastChangesTry)
           };
 
-          const response = await axios.put('/changes', data, this.getRequestConfig(this.dataToken));
+          const response = await axios.put('/writer/changes', data, this.getRequestConfig(this.dataToken));
           this.setTimeOffset(response);
           this.refreshToken(response);
 
@@ -563,19 +570,21 @@ export const useApiStore = defineStore('api', {
 
       // remove the cookies
       // needed to distinct the call from the backend from a later reload
-      Cookies.remove('LongEssayBackend');
-      Cookies.remove('LongEssayReturn');
-      Cookies.remove('LongEssayUser');
-      Cookies.remove('LongEssayEnvironment');
-      Cookies.remove('LongEssayToken');
-      Cookies.remove('LongEssayHash');
+      Cookies.remove('xlasBackendUrl');
+      Cookies.remove('xlasReturnUrl');
+      Cookies.remove('xlasUserId');
+      Cookies.remove('xlasAssId');
+      Cookies.remove('xlasContextId');
+      Cookies.remove('xlasToken');
+      Cookies.remove('xlasHash');
 
-      localStorage.setItem('writerBackendUrl', this.backendUrl);
-      localStorage.setItem('writerReturnUrl', this.returnUrl);
-      localStorage.setItem('writerUserKey', this.userKey);
-      localStorage.setItem('writerEnvironmentKey', this.environmentKey);
-      localStorage.setItem('writerDataToken', this.dataToken);
-      localStorage.setItem('writerFileToken', this.fileToken);
+      localStorage.setItem('xlasWriterBackendUrl', this.backendUrl);
+      localStorage.setItem('xlasWriterReturnUrl', this.returnUrl);
+      localStorage.setItem('xlasWriterUserId', this.userId);
+      localStorage.setItem('xlasWriterAssId', this.assId);
+      localStorage.setItem('xlasWriterContextId', this.contextId);
+      localStorage.setItem('xlasWriterDataToken', this.dataToken);
+      localStorage.setItem('xlasWriterFileToken', this.fileToken);
     },
 
 
@@ -591,7 +600,7 @@ export const useApiStore = defineStore('api', {
         const clientTimeMs = Date.now();
 
         this.timeOffset = clientTimeMs - serverTimeMs;
-        localStorage.setItem('writerTimeOffset', this.timeOffset);
+        localStorage.setItem('xlasWriterTimeOffset', this.timeOffset);
       }
     },
 
@@ -602,14 +611,14 @@ export const useApiStore = defineStore('api', {
      * Within this time a new REST call must be made to get a new valid token
      */
     refreshToken(response) {
-      if (response.headers['longessaydatatoken']) {
-        this.dataToken = response.headers['longessaydatatoken'];
-        localStorage.setItem('writerDataToken', this.dataToken);
+      if (response.headers['xlasdatatoken']) {
+        this.dataToken = response.headers['xlasdatatoken'];
+        localStorage.setItem('xlasWriterDataToken', this.dataToken);
       }
 
-      if (response.headers['longessayfiletoken']) {
-        this.fileToken = response.headers['longessayfiletoken'];
-        localStorage.setItem('writerFileToken', this.fileToken);
+      if (response.headers['xlasfiletoken']) {
+        this.fileToken = response.headers['xlasfiletoken'];
+        localStorage.setItem('xlasWriterFileToken', this.fileToken);
       }
     },
 
