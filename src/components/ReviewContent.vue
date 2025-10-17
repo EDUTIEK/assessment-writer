@@ -1,15 +1,17 @@
 <script setup>
 import { useApiStore } from '@/store/api';
-import { useTaskStore } from '@/store/task';
+import { useConfigStore } from '@/store/config';
+import { useWriterStore } from '@/store/writer';
 import { useEssayStore } from '@/store/essay';
 import { useNotesStore } from '@/store/notes';
 import { useSettingsStore } from '@/store/settings';
 import { usePreferencesStore } from "@/store/preferences";
 
 const apiStore = useApiStore();
+const configStore = useConfigStore();
 const essayStore = useEssayStore();
 const notesStore = useNotesStore();
-const taskStore = useTaskStore();
+const writerStore = useWriterStore();
 const settingsStore = useSettingsStore();
 const preferencesStore = usePreferencesStore();
 
@@ -32,12 +34,12 @@ const preferencesStore = usePreferencesStore();
         </div>
 
         <div class="col-footer bg-grey-lighten-4">
-          <v-btn class="ma-2" :color="settingsStore.primaryColorCss" @click="apiStore.retry()">
-            <v-icon :color="settingsStore.primaryTextColorCss" icon="mdi-refresh"></v-icon>
-            <span :style="settingsStore.primaryTextColorFullCss">{{ $t('reviewContentTryAgain') }}</span>
+          <v-btn class="ma-2" :color="configStore.primaryColorCss" @click="apiStore.retry()">
+            <v-icon :color="configStore.primaryTextColorCss" icon="mdi-refresh"></v-icon>
+            <span :style="configStore.primaryTextColorFullCss">{{ $t('reviewContentTryAgain') }}</span>
           </v-btn>
           <v-btn class="ma-2" @click="apiStore.review=false"
-                 v-show="!taskStore.writingEndReached && !taskStore.isExcluded">
+                 v-show="!writerStore.writingEndReached && !writerStore.isExcluded">
             <v-icon icon="mdi-file-edit-outline"></v-icon>
             <span>{{ $t('reviewContentContinueEditing') }}</span>
           </v-btn>
@@ -51,16 +53,16 @@ const preferencesStore = usePreferencesStore();
       </div>
 
       <div class="column" v-show="essayStore.openSendings <= 0">
-        <div class="col-header bg-grey-lighten-4" v-show="taskStore.isExcluded">
+        <div class="col-header bg-grey-lighten-4" v-show="writerStore.isExcluded">
           <h2 class="text-h6">{{ $t('reviewContentExcluded')}}</h2>
           <p>{{ $t('reviewContentEditingPrevented') }}</p>
         </div>
-        <div class="col-header bg-grey-lighten-4" v-show="taskStore.writingEndReached && !taskStore.isExcluded">
+        <div class="col-header bg-grey-lighten-4" v-show="writerStore.writingEndReached && !writerStore.isExcluded">
           <h2 class="text-h6">{{ $t('reviewContentTimeOver') }}</h2>
           <p>{{ $t('reviewContentEditingPrevented') }} {{$t('reviewContentPleaseCheckText') }} {{ $t('reviewContentYouMayScroll') }}
             <span v-if="notesStore.hasWrittenNotes">{{ $t('reviewContentNotesWillBePurged')}}</span></p>
         </div>
-        <div class="col-header bg-grey-lighten-4" v-show="!taskStore.writingEndReached && !taskStore.isExcluded">
+        <div class="col-header bg-grey-lighten-4" v-show="!writerStore.writingEndReached && !writerStore.isExcluded">
           <h2 class="text-h6">{{ $t('allEssay') }}</h2>
           <p>{{$t('reviewContentPleaseCheckText') }} {{ $t('reviewContentYouMayScroll') }}
             <span v-if="notesStore.hasWrittenNotes">{{ $t('reviewContentNotesWillBePurged')}}</span>
@@ -76,18 +78,18 @@ const preferencesStore = usePreferencesStore();
         </div>
 
         <div class="col-footer bg-grey-lighten-4">
-          <v-btn class="ma-2 primary" @click="apiStore.finalize(true)" :color="settingsStore.primaryColorCss"
-                 v-show="!taskStore.isExcluded">
-            <v-icon :color="settingsStore.primaryTextColorCss" icon="mdi-file-send-outline"></v-icon>
-            <span :style="settingsStore.primaryTextColorFullCss">{{ $t('reviewContentAuthorize') }}</span>
+          <v-btn class="ma-2 primary" @click="apiStore.finalize(true)" :color="configStore.primaryColorCss"
+                 v-show="!writerStore.isExcluded">
+            <v-icon :color="configStore.primaryTextColorCss" icon="mdi-file-send-outline"></v-icon>
+            <span :style="configStore.primaryTextColorFullCss">{{ $t('reviewContentAuthorize') }}</span>
           </v-btn>
           <v-btn class="ma-2" @click="apiStore.finalize(false)"
-                 v-show="taskStore.writingEndReached || taskStore.isExcluded">
+                 v-show="writerStore.writingEndReached || writerStore.isExcluded">
             <v-icon icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('reviewContentDontAuthorize') }}</span>
           </v-btn>
           <v-btn class="ma-2" @click="apiStore.review=false"
-                 v-show="!taskStore.writingEndReached && !taskStore.isExcluded">
+                 v-show="!writerStore.writingEndReached && !writerStore.isExcluded">
             <v-icon icon="mdi-file-edit-outline"></v-icon>
             <span>{{ $t('reviewContentContinueEditing') }}</span>
           </v-btn>

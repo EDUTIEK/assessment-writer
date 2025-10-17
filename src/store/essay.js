@@ -2,8 +2,9 @@ import { defineStore } from 'pinia';
 import localForage from "localforage";
 import DiffMatchPatch from 'diff-match-patch';
 import md5 from 'md5';
-import { useApiStore } from "./api";
-import { useTaskStore } from "./task";
+import { useApiStore } from "@/store/api";
+import { useTaskStore } from "@/store/task";
+import { useWriterStore } from "@/store/writer";
 import WritingStep from "@/data/WritingStep";
 
 const storage = localForage.createInstance({
@@ -133,7 +134,7 @@ export const useEssayStore = defineStore('essay', {
      * Load the full state from external data and save it to the storage
      * Called when the app is opened from the backend
      */
-    async loadFromData(data) {
+    async loadFromData(data = {}) {
       lockUpdate = 1;
 
       try {
@@ -238,8 +239,8 @@ export const useEssayStore = defineStore('essay', {
       }
 
       // don't accept changes after writing end
-      const taskStore = useTaskStore();
-      if (taskStore.writingEndReached) {
+      const writerStore = useWriterStore();
+      if (writerStore.writingEndReached) {
         return false;
       }
 

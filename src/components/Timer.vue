@@ -1,8 +1,8 @@
 <script setup>
-import { useTaskStore } from "../store/task";
+import { useWriterStore } from "../store/writer";
 import { useLayoutStore } from "../store/layout";
 
-const taskStore = useTaskStore();
+const writerStore = useWriterStore();
 const layoutStore = useLayoutStore();
 
 /**
@@ -33,9 +33,9 @@ function formatTimespan(timespan) {
 
 
 <template>
-  <v-btn class="app-header-item" @click="layoutStore.toggleTimer()" v-show="!taskStore.writingEndReached">
+  <v-btn class="app-header-item" @click="layoutStore.toggleTimer()" v-show="!writerStore.writingEndReached">
     <v-icon left icon="mdi-clock-outline"></v-icon>
-    <span v-show=layoutStore.showTimer>{{ formatTimespan(taskStore.remaining_time) }}</span>
+    <span v-show=layoutStore.showTimer>{{ formatTimespan(writerStore.remaining_time) }}</span>
     <span v-show=!layoutStore.showTimer>Restzeit</span>
   </v-btn>
 </template>

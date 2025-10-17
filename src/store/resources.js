@@ -104,7 +104,7 @@ export const useResourcesStore = defineStore('resources', {
       }
     },
 
-    async loadFromData(data) {
+    async loadFromData(data = []) {
       const apiStore = useApiStore();
 
       try {

@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia';
 import axios from 'axios'
 import Cookies from 'js-cookie';
+import { useConfigStore } from "@/store/config";
 import { useSettingsStore } from "@/store/settings";
+import { useWriterStore } from "@/store/writer";
 import { usePreferencesStore } from "@/store/preferences";
 import { useTaskStore } from "@/store/task";
 import { useLayoutStore } from "@/store/layout";
@@ -345,7 +347,9 @@ export const useApiStore = defineStore('api', {
         return;
       }
 
+      const configStore = useConfigStore();
       const settingsStore = useSettingsStore();
+      const writerStore = useWriterStore();
       const preferencesStore = usePreferencesStore();
       const taskStore = useTaskStore();
       const alertStore = useAlertStore();
@@ -356,21 +360,23 @@ export const useApiStore = defineStore('api', {
       const layoutStore = useLayoutStore();
       const annotationsStore = useAnnotationsStore();
 
-      await settingsStore.loadFromData(response.data.settings);
-      await preferencesStore.loadFromData(response.data.preferences);
-      await taskStore.loadFromData(response.data.task);
-      await alertStore.loadFromData(response.data.alerts, false);
-      await resourcesStore.loadFromData(response.data.resources);
-      await essayStore.loadFromData(response.data.essay);
-      await notesStore.loadFromData(response.data.notes);
-      await notesStore.prepareNotes(settingsStore.notice_boards);
-      await annotationsStore.loadFromData(response.data.annotations);
+      await configStore.loadFromBackend(response.data.Config);
+      await settingsStore.loadFromBackend(response.data.WritingSettings);
+      await writerStore.loadFromBackend(response.data.Writer);
+      await preferencesStore.loadFromBackend(response.data.WriterPrefs);
+      // await taskStore.loadFromData(response.data.task);
+      // await alertStore.loadFromData(response.data.alerts, false);
+      // await resourcesStore.loadFromData(response.data.resources);
+      // await essayStore.loadFromData(response.data.essay);
+      // await notesStore.loadFromData(response.data.notes);
+      // await notesStore.prepareNotes(settingsStore.notice_boards);
+      // await annotationsStore.loadFromData(response.data.annotations);
 
       await changesStore.clearStorage();
       await layoutStore.initialize();
 
       // send the time when the working on the task is started
-      if (!response.data.essay.started) {
+      if (!writerStore.working_start ?? false) {
         await this.sendStart();
       }
       this.initialized = true;
@@ -395,14 +401,18 @@ export const useApiStore = defineStore('api', {
         this.setTimeOffset(response);
         this.refreshToken(response);
 
+        const configStore = useConfigStore();
+        const settingsStore = useSettingsStore();
+        const writerStore = useWriterStore();
         const taskStore = useTaskStore();
         const alertStore = useAlertStore();
-        const settingsStore = useSettingsStore();
         const notesStore = useNotesStore();
-        await taskStore.loadFromUpdate(response.data.task);
-        await alertStore.loadFromData(response.data.alerts, true);
-        await settingsStore.loadFromData(response.data.settings);
-        await notesStore.prepareNotes(settingsStore.notice_boards);
+        await configStore.loadFromBackend(response.data.Config);
+        await settingsStore.loadFromBackend(response.data.WritingSettings);
+        await writerStore.loadFromBackend(response.data.Writer);
+        // await alertStore.loadFromData(response.data.alerts, true);
+        // await settingsStore.loadFromBackend(response.data);
+        // await notesStore.prepareNotes(settingsStore.notice_boards);
 
         this.lastChangesTry = 0;
         return true;

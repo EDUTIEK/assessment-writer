@@ -110,8 +110,10 @@ export default class TinyHelper {
      * Add classes for the headline styles to the overlay element of the tiny menu
      */
     applyFormat() {
-        for (const element of document.getElementsByClassName('tox-tinymce-aux')) {
-            element.classList.add(settingsStore.contentClass);
+        if (settingsStore.contentClass) {
+            for (const element of document.getElementsByClassName('tox-tinymce-aux')) {
+                element.classList.add(settingsStore.contentClass);
+            }
         }
     }
 

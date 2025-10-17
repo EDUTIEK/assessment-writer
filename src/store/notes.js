@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import localForage from "localforage";
 import { useApiStore } from "@/store/api";
 import { useTaskStore } from "@/store/task";
+import { useWriterStore } from "@/store/writer";
 import { useChangesStore } from "@/store/changes";
 
 import Note from "@/data/Note";
@@ -114,7 +115,7 @@ export const useNotesStore = defineStore('notes', {
      * @param {array} data - array of plain objects
      * @public
      */
-    async loadFromData(data) {
+    async loadFromData(data = []) {
       try {
         await storage.clear();
         this.$reset();
@@ -196,9 +197,9 @@ export const useNotesStore = defineStore('notes', {
       }
 
       // don't accept changes after writing end
-      const taskStore = useTaskStore();
-      if (taskStore.writingEndReached) {
-        return;
+      const writerStore = useWriterStore();
+      if (writerStore.writingEndReached) {
+        return false;
       }
 
       for (const key in this.editNotes) {

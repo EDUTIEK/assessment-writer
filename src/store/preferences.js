@@ -10,6 +10,14 @@ const storage = localForage.createInstance({
   description: "Preferences data",
 });
 
+const startState = {
+    // saved in storage
+    instructions_zoom: 1,                // zoom level of the instructions
+    editor_zoom: 1,                      // zoom level of the editors (essay and notes)
+    word_count_enabled: false,           // enabling of the word counter
+    word_count_characters: false         // word counter show characters
+}
+
 /**
  * Preferences Store
  * Stores local setings done by the corrector
@@ -17,13 +25,7 @@ const storage = localForage.createInstance({
  */
 export const usePreferencesStore = defineStore('preferences', {
   state: () => {
-    return {
-      // saved in storage
-      instructions_zoom: 1,                // zoom level of the instructions
-      editor_zoom: 1,                      // zoom level of the editors (essay and notes)
-      word_count_enabled: false,           // enabling of the word counter
-      word_count_characters: false         // word counter show characters
-    }
+    return startState;
   },
 
   getters: {
@@ -52,10 +54,7 @@ export const usePreferencesStore = defineStore('preferences', {
 
     async loadFromStorage() {
       try {
-        const data = await storage.getItem('preferences');
-        if (data) {
-          this.$patch(data);
-        }
+        this.$patch(await storage.getItem('preferences'));
       }
       catch (err) {
         console.log(err);
@@ -64,19 +63,22 @@ export const usePreferencesStore = defineStore('preferences', {
 
     async saveToStorage() {
       try {
-        await storage.setItem('preferences', this.allData);
+        await storage.setItem('preferences', Object.assign({}, this.$state));
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    loadFromData(data) {
+    loadFromBackend(data = {}) {
       try {
-        this.$patch(data);
-        this.sent = true;
+        this.$patch({
+          instructions_zoom: data.instructions_zoom ?? 1,
+          editor_zoom: data.editor_zoom ?? 1,
+          word_count_enabled: data.word_count_enabled ?? false,
+          word_count_characters: data.word_count_characters ?? false
+        });
         this.saveToStorage();
-
       }
       catch (err) {
         console.log(err);
@@ -84,7 +86,7 @@ export const usePreferencesStore = defineStore('preferences', {
     },
 
     /**
-     * Update the preferences in the sorage and mark them as changed
+     * Update the preferences in the storage and mark them as changed
      */
     async update() {
       const changesStore = useChangesStore();

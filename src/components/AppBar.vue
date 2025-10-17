@@ -8,7 +8,8 @@ import Alerts from "@/components/Alerts.vue";
 import Help from "@/components/Help.vue";
 
 import { useApiStore } from '@/store/api';
-import { useTaskStore } from "../store/task";
+import { useTaskStore } from "@/store/task";
+import { useWriterStore } from "@/store/writer";
 import { useAlertStore } from '@/store/alerts';
 import { useEssayStore } from '@/store/essay';
 import { useLayoutStore } from '@/store/layout';
@@ -16,6 +17,7 @@ import { nextTick, watch } from 'vue';
 
 const apiStore = useApiStore();
 const taskStore = useTaskStore();
+const writerStore = useWriterStore();
 const alertStore = useAlertStore();
 const essayStore = useEssayStore();
 const layoutStore = useLayoutStore();
@@ -65,7 +67,7 @@ async function openReview() {
 
     <help></help>
     <alerts v-if="alertStore.hasAlerts"></alerts>
-    <timer v-if="taskStore.hasWritingEnd"></timer>
+    <timer v-if="writerStore.hasWritingEnd"></timer>
 
     <v-btn class="app-header-item" v-show="!apiStore.review" @click="closeWriter()">
       <v-icon left icon="mdi-pause"></v-icon>

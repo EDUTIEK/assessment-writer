@@ -13,51 +13,29 @@ const storage = localForage.createInstance({
   description: "Settings data",
 });
 
-
 const { t } = i18n.global
+
+const startState = {
+  // saved in storage
+  headline_scheme: null,          // identifier (string) of the CSS scheme used for headlines
+  formatting_options: null,       // identifier (string) if the available formatting otions
+  notice_boards: 0,               // number (int) of available notice boards
+  copy_allowed: false,            // flag (bool) if copy/paste from other websites should be allowed
+  allow_spellcheck: false         // flag (bool) if spellcheck by browser is allowed
+}
 
 /**
  * Settings Store
- * Handles the editor settings of the writing task
+ * Handles the editor settings of the assessment
  */
 export const useSettingsStore = defineStore('settings', {
   state: () => {
-    return {
-      // saved in storage
-      headline_scheme: null,          // identifier (string) of the CSS scheme used for headlines
-      formatting_options: null,       // identifier (string) if the available formatting otions
-      notice_boards: 0,               // number (int) of available notice boards
-      copy_allowed: false,            // flag (bool) if copy/paste from other websites should be allowed
-      primary_color: null,            // color for the background of primary actions
-      primary_text_color: null,       // color for the text of primary actions
-      allow_spellcheck: false         // flag (bool) if spellcheck by browser is allowed
-    }
+    return startState;
   },
 
   getters: {
 
     hasNotes: state => state.notice_boards > 0,
-
-    primaryColorCss: state => {
-      if (state.primary_color) {
-        return '#' + state.primary_color
-      }
-      return '';
-    },
-
-    primaryTextColorCss: state => {
-      if (state.primary_text_color) {
-        return '#' + state.primary_text_color
-      }
-      return '';
-    },
-
-    primaryTextColorFullCss: state => {
-      if (state.primary_text_color) {
-        return 'color: #' + state.primary_text_color + ';'
-      }
-      return '';
-    },
 
     tinyToolbar: state => {
       switch (state.formatting_options) {
@@ -168,15 +146,6 @@ export const useSettingsStore = defineStore('settings', {
   },
 
   actions: {
-    setData(data) {
-      this.headline_scheme = data.headline_scheme;
-      this.formatting_options = data.formatting_options;
-      this.notice_boards = data.notice_boards;
-      this.copy_allowed = data.copy_allowed;
-      this.primary_color = data.primary_color;
-      this.primary_text_color = data.primary_text_color;
-      this.allow_spellcheck = data.allow_spellcheck;
-    },
 
     async clearStorage() {
       try {
@@ -185,23 +154,28 @@ export const useSettingsStore = defineStore('settings', {
       catch (err) {
         console.log(err);
       }
+      this.$reset();
     },
-
 
     async loadFromStorage() {
       try {
-        const data = await storage.getItem('settings');
-        this.setData(data);
+        this.$patch(await storage.getItem('settings'));
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    async loadFromData(data) {
+    async loadFromBackend(data = {}) {
       try {
-        await storage.setItem('settings', data);
-        this.setData(data);
+        this.$patch({
+          headline_scheme: data.headline_scheme ?? '',
+          formatting_options: data.formatting_options ?? null,
+          notice_boards: data.notice_boards ?? 0,
+          copy_allowed: data.copy_allowed ?? false,
+          allow_spellcheck: data.allow_spellcheck ?? false
+        });
+        await storage.setItem('settings',  Object.assign({}, this.$state));
       }
       catch (err) {
         console.log(err);
