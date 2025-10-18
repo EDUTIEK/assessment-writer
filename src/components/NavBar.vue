@@ -1,7 +1,7 @@
 <script setup>
 import { useLayoutStore } from "@/store/layout";
 import { useResourcesStore } from "@/store/resources";
-import { useTaskStore } from '@/store/task';
+import { useTasksStore } from '@/store/tasks';
 import { useSettingsStore } from "@/store/settings";
 import { useApiStore } from "@/store/api";
 import { nextTick, watch } from 'vue';
@@ -10,7 +10,7 @@ import SendingStatus from "@/components/SendingStatus.vue";
 
 const layoutStore = useLayoutStore();
 const resourcesStore = useResourcesStore();
-const taskStore = useTaskStore();
+const tasksStore = useTasksStore();
 const settingsStore = useSettingsStore();
 const apiStore = useApiStore();
 
@@ -77,7 +77,7 @@ function getResourceIcon(resource) {
     -->
     <v-list tabindex="-1">
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   v-if="taskStore.hasInstructions"
+                   v-if="tasksStore.hasInstructions"
                    @click="closeNavigation; layoutStore.showInstructions();"
                    :aria-label="$t('allInstructions') + (layoutStore.isInstructionsVisible ? $t('navBarSelectedAria') : '')"
                    :title="$t('allInstructions') + (layoutStore.isInstructionsVisible ? $t('navBarSelected') : '')"
@@ -113,10 +113,10 @@ function getResourceIcon(resource) {
         </template>
       </v-list-item>
 
-      <v-divider v-show="taskStore.hasInstructions || resourcesStore.hasResources" class="border-opacity-75"></v-divider>
+      <v-divider v-show="tasksStore.hasInstructions || resourcesStore.hasResources" class="border-opacity-75"></v-divider>
 
       <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
-                   v-if="taskStore.hasInstructions || resourcesStore.hasAnnotatableResource"
+                   v-if="tasksStore.hasInstructions || resourcesStore.hasAnnotatableResource"
                    @click="closeNavigation; layoutStore.showAnnotations();"
                    :aria-label="$t('allAnnotations') + (layoutStore.isAnnotationsVisible ? $t('navBarSelectedAria') : '')"
                    :title="$t('allAnnotations') + (layoutStore.isAnnotationsVisible ? $t('navBarSelected') : '')"

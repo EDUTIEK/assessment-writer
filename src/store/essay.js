@@ -3,7 +3,7 @@ import localForage from "localforage";
 import DiffMatchPatch from 'diff-match-patch';
 import md5 from 'md5';
 import { useApiStore } from "@/store/api";
-import { useTaskStore } from "@/store/task";
+import { useTasksStore } from "@/store/tasks";
 import { useWriterStore } from "@/store/writer";
 import WritingStep from "@/data/WritingStep";
 

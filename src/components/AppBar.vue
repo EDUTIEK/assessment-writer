@@ -8,7 +8,7 @@ import Alerts from "@/components/Alerts.vue";
 import Help from "@/components/Help.vue";
 
 import { useApiStore } from '@/store/api';
-import { useTaskStore } from "@/store/task";
+import { useTasksStore } from "@/store/tasks";
 import { useWriterStore } from "@/store/writer";
 import { useAlertStore } from '@/store/alerts';
 import { useEssayStore } from '@/store/essay';
@@ -16,7 +16,7 @@ import { useLayoutStore } from '@/store/layout';
 import { nextTick, watch } from 'vue';
 
 const apiStore = useApiStore();
-const taskStore = useTaskStore();
+const tasksStore = useTasksStore();
 const writerStore = useWriterStore();
 const alertStore = useAlertStore();
 const essayStore = useEssayStore();
@@ -35,7 +35,7 @@ async function handleFocusChange() {
 watch(() => layoutStore.focusChange, handleFocusChange);
 
 function getTitle() {
-  return (taskStore.writer_name == null ? '' : taskStore.writer_name + ', ') + (taskStore.title ?? '');
+  return (tasksStore.writer_name == null ? '' : tasksStore.writer_name + ', ') + (tasksStore.title ?? '');
 }
 
 function sleep(ms) {

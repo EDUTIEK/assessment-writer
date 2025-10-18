@@ -3,16 +3,15 @@ import localForage from "localforage";
 import { useApiStore } from "./api";
 
 const storage = localForage.createInstance({
-  storeName: "writer-task",
-  description: "Task data",
+  storeName: "writer-tasks",
+  description: "Tasks data",
 });
-
 
 /**
  * Task Store
  * Handles settings of the writing task
  */
-export const useTaskStore = defineStore('task', {
+export const useTasksStore = defineStore('tasks', {
   state: () => {
     return {
       // saved in storage
@@ -42,7 +41,7 @@ export const useTaskStore = defineStore('task', {
 
     async loadFromStorage() {
       try {
-        const data = await storage.getItem('task');
+        const data = await storage.getItem('tasks');
         this.setData(data);
       }
       catch (err) {
@@ -62,7 +61,7 @@ export const useTaskStore = defineStore('task', {
 
     async loadFromUpdate(data) {
       try {
-        await storage.setItem('task', {
+        await storage.setItem('tasks', {
           'title': this.title,
           'instructions': this.instructions,
         });

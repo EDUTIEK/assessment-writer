@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import localForage from "localforage";
 import { useApiStore } from "@/store/api";
-import { useTaskStore } from "@/store/task";
+import { useTasksStore } from "@/store/tasks";
 import { useWriterStore } from "@/store/writer";
 import { useChangesStore } from "@/store/changes";
 

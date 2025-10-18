@@ -3,7 +3,7 @@
 import {useApiStore} from "@/store/api";
 import {useLayoutStore} from "@/store/layout";
 import {useEssayStore} from "@/store/essay";
-import {useTaskStore} from "@/store/task";
+import {useTasksStore} from "@/store/tasks";
 import {useChangesStore} from "@/store/changes";
 import {ref} from "vue";
 import FileHandling from "@/lib/FileHandling";
@@ -12,7 +12,7 @@ import SendingResult from "@/data/SendingResult";
 const apiStore = useApiStore();
 const layoutStore = useLayoutStore();
 const essayStore = useEssayStore();
-const taskStore = useTaskStore();
+const tasksStore = useTasksStore();
 const changesStore = useChangesStore();
 const fileHandling = new FileHandling();
 
@@ -63,7 +63,7 @@ async function sendUpdate() {
 
 async function downloadEssay() {
   const blob = new Blob([essayStore.currentContent], { type: 'text/html' });
-  await fileHandling.saveFile(blob, taskStore.writer_name + '.html');
+  await fileHandling.saveFile(blob, tasksStore.writer_name + '.html');
 }
 
 </script>

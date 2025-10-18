@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import localForage from "localforage";
 import { useResourcesStore } from "@/store/resources";
-import { useTaskStore } from '@/store/task';
+import { useTasksStore } from '@/store/tasks';
 import Resource from "@/data/Resource";
 import Annotation from "@/data/Annotation";
 
@@ -92,9 +92,9 @@ export const useLayoutStore = defineStore('layout', {
       await this.clearStorage();
 
       const resourcesStore = useResourcesStore();
-      const taskStore = useTaskStore();
+      const tasksStore = useTasksStore();
 
-      this.leftContent = taskStore.hasInstructions ? 'instructions' :
+      this.leftContent = tasksStore.hasInstructions ? 'instructions' :
         resourcesStore.hasInstruction ? 'instructionsPdf' :
           resourcesStore.hasEmbeddedFileOrUrlResources ? 'resources' : ''
 

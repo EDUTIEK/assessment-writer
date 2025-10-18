@@ -5,7 +5,7 @@ import { useConfigStore } from "@/store/config";
 import { useSettingsStore } from "@/store/settings";
 import { useWriterStore } from "@/store/writer";
 import { usePreferencesStore } from "@/store/preferences";
-import { useTaskStore } from "@/store/task";
+import { useTasksStore } from "@/store/tasks";
 import { useLayoutStore } from "@/store/layout";
 import { useResourcesStore } from "@/store/resources";
 import { useEssayStore } from "@/store/essay";
@@ -298,7 +298,7 @@ export const useApiStore = defineStore('api', {
 
       const settingsStore = useSettingsStore();
       const preferencesStore = usePreferencesStore();
-      const taskStore = useTaskStore();
+      const tasksStore = useTasksStore();
       const alertStore = useAlertStore();
       const resourcesStore = useResourcesStore();
       const essayStore = useEssayStore();
@@ -309,7 +309,7 @@ export const useApiStore = defineStore('api', {
 
       await settingsStore.loadFromStorage();
       await preferencesStore.loadFromStorage();
-      await taskStore.loadFromStorage();
+      await tasksStore.loadFromStorage();
       await alertStore.loadFromStorage();
       await resourcesStore.loadFromStorage();
       await essayStore.loadFromStorage();
@@ -351,7 +351,7 @@ export const useApiStore = defineStore('api', {
       const settingsStore = useSettingsStore();
       const writerStore = useWriterStore();
       const preferencesStore = usePreferencesStore();
-      const taskStore = useTaskStore();
+      const tasksStore = useTasksStore();
       const alertStore = useAlertStore();
       const resourcesStore = useResourcesStore();
       const essayStore = useEssayStore();
@@ -364,7 +364,7 @@ export const useApiStore = defineStore('api', {
       await settingsStore.loadFromBackend(response.data.WritingSettings);
       await writerStore.loadFromBackend(response.data.Writer);
       await preferencesStore.loadFromBackend(response.data.WriterPrefs);
-      // await taskStore.loadFromData(response.data.task);
+      // await tasksStore.loadFromData(response.data.task);
       // await alertStore.loadFromData(response.data.alerts, false);
       // await resourcesStore.loadFromData(response.data.resources);
       // await essayStore.loadFromData(response.data.essay);
@@ -404,7 +404,7 @@ export const useApiStore = defineStore('api', {
         const configStore = useConfigStore();
         const settingsStore = useSettingsStore();
         const writerStore = useWriterStore();
-        const taskStore = useTaskStore();
+        const tasksStore = useTasksStore();
         const alertStore = useAlertStore();
         const notesStore = useNotesStore();
         await configStore.loadFromBackend(response.data.Config);
@@ -641,7 +641,7 @@ export const useApiStore = defineStore('api', {
     async finalize(authorize) {
 
       const settingsStore = useSettingsStore();
-      const taskStore = useTaskStore();
+      const tasksStore = useTasksStore();
       const resourcesStore = useResourcesStore();
       const essayStore = useEssayStore();
       const notesStore = useNotesStore();
@@ -664,7 +664,7 @@ export const useApiStore = defineStore('api', {
       }
 
       await settingsStore.clearStorage();
-      await taskStore.clearStorage();
+      await tasksStore.clearStorage();
       await resourcesStore.clearStorage();
       await essayStore.clearStorage();
       await notesStore.clearStorage();

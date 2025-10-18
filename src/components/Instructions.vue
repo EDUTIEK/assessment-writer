@@ -1,5 +1,5 @@
 <script setup>
-import { useTaskStore } from '@/store/task';
+import { useTasksStore } from '@/store/tasks';
 import { useLayoutStore } from '@/store/layout';
 import { usePreferencesStore } from "@/store/preferences";
 import { useClipbardStore } from "@/store/clipboard";
@@ -8,7 +8,7 @@ import TextMarker from '@/lib/TextMarker';
 import { ref, onMounted, nextTick, watch } from 'vue';
 import Annotation from "@/data/Annotation";
 
-const taskStore = useTaskStore();
+const tasksStore = useTasksStore();
 const layoutStore = useLayoutStore();
 const preferencesStore = usePreferencesStore();
 const clipboardStore = useClipbardStore();
@@ -188,7 +188,7 @@ function getHTMLOfSelection() {
     <div id="app-instructions" class="app-instructions-scroll long-essay-content"
          contenteditable="true"
          :style="'font-size:' + (preferencesStore.instructions_zoom) + 'rem;'"
-         v-html="taskStore.instructions"
+         v-html="tasksStore.instructions"
          @beforeinput="handleBeforeinput"
          @copy="handleCopy"
          @cut="handleCopy"

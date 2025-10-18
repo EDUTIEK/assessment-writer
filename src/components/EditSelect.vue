@@ -5,7 +5,7 @@ import { useNotesStore } from '@/store/notes';
 import { useSettingsStore } from "@/store/settings";
 import { usePreferencesStore } from "@/store/preferences";
 import {useAnnotationsStore} from "@/store/annotations";
-import {useTaskStore} from "@/store/task";
+import {useTasksStore} from "@/store/tasks";
 import {useResourcesStore} from "@/store/resources";
 import EditNote from "@/components/EditNote.vue";
 import EditEssay from "@/components/EditEssay.vue";
@@ -18,7 +18,7 @@ const settingsStore = useSettingsStore();
 const preferencesStore = usePreferencesStore();
 const annotationsStore = useAnnotationsStore();
 const resourcesStore = useResourcesStore();
-const taskStore = useTaskStore();
+const tasksStore = useTasksStore();
 
 const selectedEditor = ref('essay');
 updateSelectedEditor();
@@ -76,9 +76,9 @@ watch(() => annotationsStore.selectionChange, showAnnotations);
 <template>
   <div id="app-edit-select-wrapper">
     <div class="appEditChoices">
-      <v-btn-toggle v-if="settingsStore.hasNotes || taskStore.hasInstructions || resourcesStore.hasAnnotatableResource" density="comfortable" variant="outlined" divided
+      <v-btn-toggle v-if="settingsStore.hasNotes || tasksStore.hasInstructions || resourcesStore.hasAnnotatableResource" density="comfortable" variant="outlined" divided
                     v-model="selectedEditor" @click="selectEditor()">
-        <v-btn v-if = "taskStore.hasInstructions || resourcesStore.hasAnnotatableResource" aria-labelledby="app-edit-select-annotations" size="small"
+        <v-btn v-if = "tasksStore.hasInstructions || resourcesStore.hasAnnotatableResource" aria-labelledby="app-edit-select-annotations" size="small"
                value="annotations">
           <v-icon icon="mdi-marker"></v-icon>
           <span class="sr-only" id="app-edit-select-annotations">{{ $t("allAnnotations") }}</span>
