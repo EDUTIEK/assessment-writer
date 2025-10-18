@@ -35,7 +35,7 @@ async function handleFocusChange() {
 watch(() => layoutStore.focusChange, handleFocusChange);
 
 function getTitle() {
-  return (tasksStore.writer_name == null ? '' : tasksStore.writer_name + ', ') + (tasksStore.title ?? '');
+  return (writerStore.writer_name == null ? '' : writerStore.writer_name + ', ') + (tasksStore.currentTitle ?? '');
 }
 
 function sleep(ms) {

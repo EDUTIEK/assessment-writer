@@ -1,27 +1,34 @@
 import { defineStore } from 'pinia';
 import localForage from "localforage";
 import { useApiStore } from "./api";
+import Task from "@/data/Task";
 
 const storage = localForage.createInstance({
   storeName: "writer-tasks",
   description: "Tasks data",
 });
 
+const startState = {
+  // saved in storage
+  tasks: {},              // all task objects, indexed by string key
+
+  // not saved
+  current_key: null,      // key of the currently active task
+};
+
 /**
  * Task Store
- * Handles settings of the writing task
+ * Handles the list of the writing task
  */
 export const useTasksStore = defineStore('tasks', {
   state: () => {
-    return {
-      // saved in storage
-      title: null,            // title of the task - shown in the app bar
-      instructions: null,     // instructions - shown in the left column
-    }
+    return startState;
   },
 
   getters: {
-    hasInstructions: (state) => !!state.instructions,
+    currentTask: (state) => state.tasks[state.current_key],
+    currentTitle: (state) => state.currentTask?.title,
+    hasInstructions: (state) => !!state.currentTask?.instructions,
   },
 
   actions: {
@@ -37,34 +44,35 @@ export const useTasksStore = defineStore('tasks', {
       catch (err) {
         console.log(err);
       }
+      this.$reset();
     },
 
     async loadFromStorage() {
       try {
-        const data = await storage.getItem('tasks');
-        this.setData(data);
+        this.$reset();
+
+        const keys = JSON.parse(await storage.getItem('keys')) ?? [];
+        for (const key of keys) {
+          const task = new Task(JSON.parse(await storage.getItem(task.getKey())));
+          this.tasks[task.getKey()] = task;
+        }
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    async loadFromData(data) {
+    async loadFromBackend(data = []) {
       try {
-        await storage.setItem('task', data);
-        this.setData(data);
-      }
-      catch (err) {
-        console.log(err);
-      }
-    },
+        await storage.clear();
+        this.$reset();
 
-    async loadFromUpdate(data) {
-      try {
-        await storage.setItem('tasks', {
-          'title': this.title,
-          'instructions': this.instructions,
-        });
+        for (const task_data of data) {
+          const task = new Task(task_data)
+          this.tasks[task.getKey()] = task;
+          await storage.setItem(task.getKey(), JSON.stringify(task.getData()));
+        }
+        await storage.setItem('keys', JSON.stringify(Object.keys(this.tasks)));
       }
       catch (err) {
         console.log(err);

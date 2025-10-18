@@ -188,7 +188,7 @@ function getHTMLOfSelection() {
     <div id="app-instructions" class="app-instructions-scroll long-essay-content"
          contenteditable="true"
          :style="'font-size:' + (preferencesStore.instructions_zoom) + 'rem;'"
-         v-html="tasksStore.instructions"
+         v-html="tasksStore.currentTask?.instructions ?? ''"
          @beforeinput="handleBeforeinput"
          @copy="handleCopy"
          @cut="handleCopy"

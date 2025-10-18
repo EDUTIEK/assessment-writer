@@ -347,6 +347,8 @@ export const useApiStore = defineStore('api', {
         return;
       }
 
+      console.log(response.data);
+
       const configStore = useConfigStore();
       const settingsStore = useSettingsStore();
       const writerStore = useWriterStore();
@@ -360,11 +362,11 @@ export const useApiStore = defineStore('api', {
       const layoutStore = useLayoutStore();
       const annotationsStore = useAnnotationsStore();
 
-      await configStore.loadFromBackend(response.data.Config);
-      await settingsStore.loadFromBackend(response.data.WritingSettings);
-      await writerStore.loadFromBackend(response.data.Writer);
-      await preferencesStore.loadFromBackend(response.data.WriterPrefs);
-      // await tasksStore.loadFromData(response.data.task);
+      await configStore.loadFromBackend(response.data['Assessment']['Config']);
+      await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
+      await tasksStore.loadFromBackend(response.data['Task']['Tasks']);
+      await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
+      await preferencesStore.loadFromBackend(response.data['EssayTask']['WriterPrefs']);
       // await alertStore.loadFromData(response.data.alerts, false);
       // await resourcesStore.loadFromData(response.data.resources);
       // await essayStore.loadFromData(response.data.essay);
@@ -407,9 +409,11 @@ export const useApiStore = defineStore('api', {
         const tasksStore = useTasksStore();
         const alertStore = useAlertStore();
         const notesStore = useNotesStore();
-        await configStore.loadFromBackend(response.data.Config);
-        await settingsStore.loadFromBackend(response.data.WritingSettings);
-        await writerStore.loadFromBackend(response.data.Writer);
+        await configStore.loadFromBackend(response.data['Assessment']['Config']);
+        await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
+        await tasksStore.loadFromBackend(response.data['Task']['Tasks']);
+        await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
+        await preferencesStore.loadFromBackend(response.data['EssayTask']['WriterPrefs']);
         // await alertStore.loadFromData(response.data.alerts, true);
         // await settingsStore.loadFromBackend(response.data);
         // await notesStore.prepareNotes(settingsStore.notice_boards);

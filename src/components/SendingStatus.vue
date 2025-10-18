@@ -4,6 +4,7 @@ import {useApiStore} from "@/store/api";
 import {useLayoutStore} from "@/store/layout";
 import {useEssayStore} from "@/store/essay";
 import {useTasksStore} from "@/store/tasks";
+import {useWriterStore} from "@/store/writer";
 import {useChangesStore} from "@/store/changes";
 import {ref} from "vue";
 import FileHandling from "@/lib/FileHandling";
@@ -13,6 +14,7 @@ const apiStore = useApiStore();
 const layoutStore = useLayoutStore();
 const essayStore = useEssayStore();
 const tasksStore = useTasksStore();
+const writerStore = useWriterStore();
 const changesStore = useChangesStore();
 const fileHandling = new FileHandling();
 
@@ -63,7 +65,7 @@ async function sendUpdate() {
 
 async function downloadEssay() {
   const blob = new Blob([essayStore.currentContent], { type: 'text/html' });
-  await fileHandling.saveFile(blob, tasksStore.writer_name + '.html');
+  await fileHandling.saveFile(blob, writerStore.writer_name + '.html');
 }
 
 </script>
