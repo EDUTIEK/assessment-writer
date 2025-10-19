@@ -33,8 +33,8 @@ const alertStore = useAlertStore();
         {{ $t("alertsSupervisionMessage", alertStore.countAlerts) }}
       </v-card-title>
       <v-card-text>
-        <v-list-item v-for="alert in alertStore.alerts" v-bind:key="alert.key"
-                     :title="alertStore.formatTimestamp(alert.time)"
+        <v-list-item v-for="alert in alertStore.sortedAlerts" v-bind:key="alert.key"
+                     :title="alert.formatTime()"
                      :subtitle="alert.message">
         </v-list-item>
       </v-card-text>

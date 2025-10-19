@@ -97,13 +97,12 @@ export const useChangesStore = defineStore('changes', {
      */
     async clearStorage() {
       try {
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
         console.log(err);
       }
-      // initialize the state
-      this.$reset();
     },
 
     /**

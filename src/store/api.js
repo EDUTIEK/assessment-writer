@@ -347,8 +347,6 @@ export const useApiStore = defineStore('api', {
         return;
       }
 
-      console.log(response.data);
-
       const configStore = useConfigStore();
       const settingsStore = useSettingsStore();
       const writerStore = useWriterStore();
@@ -364,10 +362,10 @@ export const useApiStore = defineStore('api', {
 
       await configStore.loadFromBackend(response.data['Assessment']['Config']);
       await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
+      await alertStore.loadFromBackend(response.data['Assessment']['Alerts']);
       await tasksStore.loadFromBackend(response.data['Task']['Tasks']);
       await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
       await preferencesStore.loadFromBackend(response.data['EssayTask']['WriterPrefs']);
-      // await alertStore.loadFromData(response.data.alerts, false);
       // await resourcesStore.loadFromData(response.data.resources);
       // await essayStore.loadFromData(response.data.essay);
       // await notesStore.loadFromData(response.data.notes);
@@ -409,9 +407,8 @@ export const useApiStore = defineStore('api', {
         const tasksStore = useTasksStore();
         const alertStore = useAlertStore();
         const notesStore = useNotesStore();
-        //await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
-        //await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
-        //await alertStore.loadFromData(response.data.alerts, true);
+
+        // todo load leccessday data
 
         this.lastChangesTry = 0;
         return true;

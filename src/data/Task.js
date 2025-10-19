@@ -3,7 +3,7 @@
  *
  * This provides basic data for a list of tasks to be taken
  */
-class Task {
+export default class Task {
 
     static TYPE_ESSAY = 'essay';
 
@@ -63,7 +63,7 @@ class Task {
     }
 
     /**
-     * Get a numeric key of the task
+     * Get a string key of the task
      * @return {string}
      */
     getKey() {
@@ -78,5 +78,3 @@ class Task {
         return Object.assign({}, this)
     }
 }
-
-export default Task;
