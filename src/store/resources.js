@@ -1,13 +1,10 @@
 import { defineStore } from 'pinia';
-import localForage from "localforage";
+import { getStorage } from "@/lib/Storage";
 import { useApiStore } from "./api";
 import axios from 'axios';
 import Resource from "@/data/Resource";
 
-const storage = localForage.createInstance({
-  storeName: "writer-resources",
-  description: "Resource data",
-});
+const storage = getStorage('resources');
 
 /**
  * Resources Store

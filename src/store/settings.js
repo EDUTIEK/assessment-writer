@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import localForage from "localforage";
+import { getStorage } from "@/lib/Storage";
 import i18n from "@/plugins/i18n";
 
 import contentLocalCss from '@/styles/content.css?inline';
@@ -8,11 +8,7 @@ import headlinesThreeCss from '@/styles/headlines-three.css?inline';
 import headlinesNumericCss from '@/styles/headlines-numeric.css?inline';
 import headlinesEdutiekCss from '@/styles/headlines-edutiek.css?inline';
 
-const storage = localForage.createInstance({
-  storeName: "writer-settings",
-  description: "Settings data",
-});
-
+const storage = getStorage('settings');
 const { t } = i18n.global
 
 const startState = {

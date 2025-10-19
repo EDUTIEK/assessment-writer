@@ -1,14 +1,12 @@
 import { defineStore } from 'pinia';
+import { getStorage } from "@/lib/Storage";
 import localForage from "localforage";
 import { useResourcesStore } from "@/store/resources";
 import { useTasksStore } from '@/store/tasks';
 import Resource from "@/data/Resource";
 import Annotation from "@/data/Annotation";
 
-const storage = localForage.createInstance({
-  storeName: "writer-layout",
-  description: "Layout data",
-});
+const storage = getStorage('layout');
 
 /**
  * Layout Store

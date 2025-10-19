@@ -1,14 +1,10 @@
 import { defineStore } from 'pinia';
-import localForage from "localforage";
+import { getStorage } from "@/lib/Storage";
 import { useChangesStore } from "@/store/changes";
 import { useApiStore } from '@/store/api';
 import Change from '@/data/Change';
 
-
-const storage = localForage.createInstance({
-  storeName: "writer-preferences",
-  description: "Preferences data",
-});
+const storage = getStorage('preferences');
 
 const startState = {
     // saved in storage

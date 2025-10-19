@@ -1,13 +1,9 @@
 import { defineStore } from 'pinia';
-import localForage from "localforage";
+import { getStorage } from "@/lib/Storage";
 import { useApiStore } from "./api";
 import Task from "@/data/Task";
 
-const storage = localForage.createInstance({
-  storeName: "writer-tasks",
-  description: "Tasks data",
-});
-
+const storage = getStorage('tasks');
 const startState = {
   // saved in storage
   tasks: {},              // all task objects, indexed by string key

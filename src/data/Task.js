@@ -67,7 +67,7 @@ class Task {
      * @return {string}
      */
     getKey() {
-        return 'TASK_' + this.task_id.toString()
+        return 'T' + this.task_id.toString()
     }
 
     /**
@@ -75,7 +75,7 @@ class Task {
      * @return {object}
      */
     getData() {
-        return Object.assign({})
+        return Object.assign({}, this)
     }
 }
 

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import localForage from "localforage";
+import { getStorage } from "@/lib/Storage";
 import DiffMatchPatch from 'diff-match-patch';
 import md5 from 'md5';
 import { useApiStore } from "@/store/api";
@@ -7,10 +7,7 @@ import { useTasksStore } from "@/store/tasks";
 import { useWriterStore } from "@/store/writer";
 import WritingStep from "@/data/WritingStep";
 
-const storage = localForage.createInstance({
-  storeName: "writer-essay",
-  description: "Essay data",
-});
+const storage = getStorage('essay');
 
 const dmp = new DiffMatchPatch();
 

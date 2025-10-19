@@ -6,7 +6,7 @@
 
 // Plugins
 import vuetify from './vuetify'
-import pinia from '../store'
+import pinia from './pinia'
 import i18n from './i18n'
 
 // this way you can switch the language programmatically in a function

@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { getStorage } from "@/lib/Storage";
 import localForage from "localforage";
 import { useApiStore } from "@/store/api";
 import { useTasksStore } from "@/store/tasks";
@@ -8,11 +9,7 @@ import { useChangesStore } from "@/store/changes";
 import Note from "@/data/Note";
 import Change from "@/data/Change";
 
-
-const storage = localForage.createInstance({
-  storeName: "writer-notes",
-  description: "Writer notes data",
-});
+const storage = getStorage('notes');
 
 // set check interval very short to update the grade level according the points
 const checkInterval = 200;      // time (ms) to wait for a new update check (e.g. 0.2s to 1s)

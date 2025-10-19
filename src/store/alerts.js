@@ -1,10 +1,7 @@
 import { defineStore } from 'pinia';
-import localForage from "localforage";
+import { getStorage } from "@/lib/Storage";
 
-const storage = localForage.createInstance({
-  storeName: "writer-alerts",
-  description: "Alert Messages",
-});
+const storage = getStorage('alerts');
 
 /**
  * Resources Store

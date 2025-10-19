@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import localForage from "localforage";
+import { getStorage } from "@/lib/Storage";
 import {useApiStore} from "@/store/api";
 import {useResourcesStore} from "@/store/resources";
 import {useLayoutStore} from "@/store/layout";
@@ -8,11 +8,7 @@ import Annotation from "@/data/Annotation";
 import Change from '@/data/Change';
 import resource from "@/data/Resource";
 
-
-const storage = localForage.createInstance({
-  storeName: "writer-annotations",
-  description: "Writer annotations data",
-});
+const storage = getStorage('annotations');
 
 function startState() {
 

@@ -409,14 +409,9 @@ export const useApiStore = defineStore('api', {
         const tasksStore = useTasksStore();
         const alertStore = useAlertStore();
         const notesStore = useNotesStore();
-        await configStore.loadFromBackend(response.data['Assessment']['Config']);
-        await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
-        await tasksStore.loadFromBackend(response.data['Task']['Tasks']);
-        await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
-        await preferencesStore.loadFromBackend(response.data['EssayTask']['WriterPrefs']);
-        // await alertStore.loadFromData(response.data.alerts, true);
-        // await settingsStore.loadFromBackend(response.data);
-        // await notesStore.prepareNotes(settingsStore.notice_boards);
+        //await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
+        //await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
+        //await alertStore.loadFromData(response.data.alerts, true);
 
         this.lastChangesTry = 0;
         return true;

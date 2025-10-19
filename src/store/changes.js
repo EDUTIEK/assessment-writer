@@ -1,12 +1,8 @@
 import { defineStore } from 'pinia';
-import localForage from "localforage";
+import { getStorage } from "@/lib/Storage";
 import Change from '@/data/Change';
 
-const storage = localForage.createInstance({
-  storeName: "writer-changes",
-  description: "Writer changes data",
-});
-
+const storage = getStorage('changes');
 
 function startState() {
   const state = {
