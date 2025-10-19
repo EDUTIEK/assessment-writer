@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { getStorage } from "@/lib/Storage";
 import { useApiStore } from "./api";
 import Task from "@/data/Task";
+import Alert from "@/data/Alert";
 
 const storage = getStorage('tasks');
 const startState = {
@@ -9,7 +10,11 @@ const startState = {
   tasks: {},              // all task objects, indexed by string key
 
   // not saved
+  firstKey: null,
+  lastKey: null,
   currentKey: null,      // key of the currently active task
+  previousKey: null,
+  nextKey: null,
 };
 
 /**
@@ -22,16 +27,14 @@ export const useTasksStore = defineStore('tasks', {
   },
 
   getters: {
-    currentTask: (state) => state.tasks[state.currentKey],
-    currentTitle: (state) => state.currentTask?.title,
-    hasInstructions: (state) => !!state.currentTask?.instructions,
+    countTasks: state => Object.keys(state.tasks).length,
+    currentTask: state => state.tasks[state.currentKey],
+    currentTitle: state => state.currentTask?.title,
+    hasInstructions: state => !!state.currentTask?.instructions,
+    sortedTasks: state => Object.values(state.tasks).toSorted(Task.order),
   },
 
   actions: {
-    setData(data) {
-      this.title = data.title;
-      this.instructions = data.instructions;
-    },
 
     async clearStorage() {
       try {
@@ -51,6 +54,7 @@ export const useTasksStore = defineStore('tasks', {
         for (const key of keys) {
           this.tasks[key] = new Task(await storage.getItem(key));
         }
+        this.updateCurrentKeys();
       }
       catch (err) {
         console.log(err);
@@ -68,10 +72,47 @@ export const useTasksStore = defineStore('tasks', {
           await storage.setItem(task.getKey(), task.getData());
         }
         await storage.setItem('keys', Object.keys(this.tasks));
+        this.updateCurrentKeys();
       }
       catch (err) {
         console.log(err);
       }
     },
+
+    /**
+     * Select the current task
+     * @param string key of the current task
+     */
+    selectTask(key) {
+      this.currentKey = key;
+      this.updateCurrentKeys();
+    },
+
+    /**
+     * Update the first, last, previous and next key
+     */
+    updateCurrentKeys() {
+      if (this.countTasks) {
+        const sorted = this.sortedTasks;
+        const first = 0;
+        const last = sorted.length -1;
+
+        this.firstKey = sorted[first].getKey();
+        this.lastKey = sorted[last].getKey();
+
+        if (this.currentKey === null) {
+          this.currentKey = this.firstKey;
+        };
+
+        for (let i = first; i <= last; i++) {
+          let task = sorted[i];
+          if (task.getKey() == this.currentKey) {
+            this.previousKey = i > first ? sorted[i - 1].getKey() : null;
+            this.nextKey = i < last ? sorted[i + 1].getKey() : null;
+            break;
+          }
+        }
+      }
+    }
   }
 });

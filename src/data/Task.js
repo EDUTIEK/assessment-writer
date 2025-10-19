@@ -9,6 +9,12 @@ export default class Task {
 
     static ALLOWED_TYPES = [Task.TYPE_ESSAY];
 
+    static order(alert1, alert2) {
+        return alert1.position < alert2.position ? -1
+            : alert1.position > alert2.position ? 1
+                : 0
+    }
+
     /**
      * Id of the task
      * @type {integer}
@@ -40,6 +46,13 @@ export default class Task {
     instructions = null;
 
     /**
+     * Calculated key (needed as item key in v-autocomple)
+     * @type {string}
+     */
+    key = null;
+
+
+    /**
      * Constructor - gets properties from a data object
      * @param {object} data
      */
@@ -60,6 +73,7 @@ export default class Task {
             this.instructions = data.instructions.toString();
         }
 
+        this.key = 'T' + this.task_id.toString();
     }
 
     /**
@@ -67,7 +81,7 @@ export default class Task {
      * @return {string}
      */
     getKey() {
-        return 'T' + this.task_id.toString()
+        return this.key;
     }
 
     /**

@@ -3,12 +3,12 @@
 /**
  * AApplication bar
  */
+import Tasks from "@/components/Tasks.vue";
 import Timer from "@/components/Timer.vue";
 import Alerts from "@/components/Alerts.vue";
 import Help from "@/components/Help.vue";
 
 import { useApiStore } from '@/store/api';
-import { useTasksStore } from "@/store/tasks";
 import { useWriterStore } from "@/store/writer";
 import { useAlertStore } from '@/store/alerts';
 import { useEssayStore } from '@/store/essay';
@@ -16,7 +16,6 @@ import { useLayoutStore } from '@/store/layout';
 import { nextTick, watch } from 'vue';
 
 const apiStore = useApiStore();
-const tasksStore = useTasksStore();
 const writerStore = useWriterStore();
 const alertStore = useAlertStore();
 const essayStore = useEssayStore();
@@ -35,7 +34,7 @@ async function handleFocusChange() {
 watch(() => layoutStore.focusChange, handleFocusChange);
 
 function getTitle() {
-  return (writerStore.writer_name == null ? '' : writerStore.writer_name + ', ') + (tasksStore.currentTitle ?? '');
+  return (writerStore.writer_name == null ? '' : writerStore.writer_name);
 }
 
 function sleep(ms) {
@@ -63,6 +62,7 @@ async function openReview() {
 <template>
   <v-app-bar elevation="1" color="white" density="compact">
     <v-app-bar-title>{{ getTitle() }}</v-app-bar-title>
+    <tasks></tasks>
     <v-spacer></v-spacer>
 
     <help></help>
