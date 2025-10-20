@@ -26,7 +26,7 @@ export const usePreferencesStore = defineStore('preferences', {
 
   getters: {
 
-    allData: state => {
+    allData(state) {
       return {
         instructions_zoom: state.instructions_zoom,
         editor_zoom: state.editor_zoom,

@@ -1,63 +1,76 @@
 import { defineStore } from 'pinia';
 import { getStorage } from "@/lib/Storage";
 import { useApiStore } from "./api";
+import { useTasksStore } from "./tasks";
 import axios from 'axios';
 import Resource from "@/data/Resource";
+import Alert from "@/data/Alert";
 
 const storage = getStorage('resources');
+const startState = {
+  resources: {},
+
+  /** @private  key of the active resource, may be outdated if the active task changes */
+  activeKey: ''
+};
 
 /**
  * Resources Store
  */
 export const useResourcesStore = defineStore('resources', {
   state: () => {
-    return {
-      // saved in storage
-      keys: [],               // list of string keys
-      resources: [],          // list of resource objects
-      activeKey: ''           // key of the active resource
-    }
+    return startState;
   },
 
   getters: {
-    hasResources: (state) => state.resources.length > 0,
+
+    currentResources(state) {
+      const taskStore = useTasksStore();
+      return Object.values(state.resources).filter(element =>
+          element.task_id === taskStore.currentTask?.task_id || element.task_id === null);
+    },
+
+    hasResources(state) {
+      return state.currentResources.length > 0;
+    },
 
     hasInstruction(state) {
-      const resource = state.resources.find(element => element.type == Resource.TYPE_INSTRUCTION);
-      return resource ? true : false;
+      return !! state.currentResources.find(element => element.type === Resource.TYPE_INSTRUCTION);
     },
 
     getInstruction(state) {
-      return state.resources.find(element => element.type == Resource.TYPE_INSTRUCTION);
+      return state.currentResources.find(element => element.type === Resource.TYPE_INSTRUCTION);
     },
 
     hasAnnotatableResource(state) {
-      const resource = state.resources.find(element => element.type == Resource.TYPE_INSTRUCTION || element.type == Resource.TYPE_FILE);
-      return resource ? true : false;
+      return !! state.currentResources.find(element =>
+          element.type === Resource.TYPE_INSTRUCTION || element.type === Resource.TYPE_FILE);
     },
 
     hasEmbeddedFileOrUrlResources(state) {
-      const resource = state.resources.find(element => (element.type == Resource.TYPE_FILE || element.type == Resource.TYPE_URL)
-        && element.embedded == true);
-      return resource ? true : false;
+      return !! state.currentResources.find(element =>
+          (element.type === Resource.TYPE_FILE || element.type === Resource.TYPE_URL) && element.embedded === true);
     },
 
     getFileOrUrlResources(state) {
-      return state.resources.filter(element => element.type == Resource.TYPE_FILE || element.type == Resource.TYPE_URL);
+      return state.currentResources.filter(element =>
+          element.type == Resource.TYPE_FILE || element.type === Resource.TYPE_URL);
     },
 
-    activeTitle(state) {
-      const resource = state.resources.find(element => element.key == state.activeKey);
-
-      return resource ? resource.title : ""
+    activeResource(state) {
+      return state.currentResources.find(element => element.key === state.activeKey);
     },
 
     getResource(state) {
-      return (key) => state.resources.find(element => element.key == key)
+      return (key) => state.currentResources.find(element => element.key === key);
     },
 
     isActive(state) {
-      return (resource) => state.activeKey == resource.key
+      return (resource) => resource.key === state.activeResource?.key;
+    },
+
+    isAvailable(state) {
+      return (resource) => !! state.currentResources.find(element => element.key === resource.key);
     }
   },
 
@@ -65,6 +78,7 @@ export const useResourcesStore = defineStore('resources', {
 
     async clearStorage() {
       try {
+        this.$reset();
         await storage.clear();
       }
       catch (err) {
@@ -74,56 +88,39 @@ export const useResourcesStore = defineStore('resources', {
 
     async loadFromStorage() {
       try {
-        const keys = await storage.getItem('keys');
-        if (keys) {
-          this.keys = JSON.parse(keys);
+        this.$reset();
+
+        const keys = await storage.getItem('keys') ?? [];
+        for (const key of keys) {
+          this.resources[key] = new Resource(await storage.getItem(key));
         }
-        this.activeKey = await storage.getItem('activeKey') ?? [];
-        this.resources = [];
-
-        for (const key of this.keys) {
-          const stored = await storage.getItem(key);
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (typeof parsed === 'object' && parsed !== null) {
-              const resource = new Resource(parsed);
-              this.resources.push(resource);
-            }
-          }
-
-        }
-
+        this.activeKey = await storage.getItem('activeKey') ?? '';
         await this.loadFiles();
-
       }
       catch (err) {
         console.log(err);
       }
     },
 
-    async loadFromData(data = []) {
+    async loadFromBackend(data = []) {
       const apiStore = useApiStore();
 
       try {
         await storage.clear();
         this.$reset();
 
-        for (const resource_data of data) {
-          const resource = new Resource(resource_data);
-          if (resource.type != Resource.TYPE_URL) {
-            resource.url = apiStore.getResourceUrl(resource.key);
+        for (const item of data) {
+          const resource = new Resource(item);
+          if (resource.hasFileToLoad()) {
+            resource.url = apiStore.getResourceUrl(resource);
           }
-          this.resources.push(resource);
-          if (this.activeKey == '' && resource.isEmbeddedSelectable()) {
-            this.activeKey = resource.key;
+          this.resources[resource.getKey()] = resource;
+          await storage.setItem(resource.getKey(), resource.getData());
+          if (this.activeKey === '' && resource.isEmbeddedSelectable()) {
+            await this.selectResource(resource);
           }
-
-          this.keys.push(resource.getKey());
-          await storage.setItem(resource.getKey(), JSON.stringify(resource.getData()));
         }
-        ;
-        await storage.setItem('keys', JSON.stringify(this.keys));
-        await storage.setItem('activeKey', this.activeKey);
+        await storage.setItem('keys', Object.keys(this.resources));
 
         // proload files in the background (don't wait)
         this.loadFiles();
@@ -134,8 +131,11 @@ export const useResourcesStore = defineStore('resources', {
     },
 
     async selectResource(resource) {
-      this.activeKey = resource.key;
-      await storage.setItem('activeKey', this.activeKey);
+
+      if (this.isAvailable(resource)) {
+        this.activeKey = resource.key;
+        await storage.setItem('activeKey', this.activeKey);
+      }
     },
 
     /**
@@ -146,8 +146,7 @@ export const useResourcesStore = defineStore('resources', {
      * https://stackoverflow.com/a/50387899
      */
     async loadFiles() {
-      for (const key of this.keys) {
-        let resource = this.getResource(key);
+      for (const resource of Object.values(this.resources)) {
         let response = null;
         if (resource.hasFileToLoad()) {
           try {
@@ -158,7 +157,6 @@ export const useResourcesStore = defineStore('resources', {
           }
           catch (error) {
             console.error(error);
-            // return false;
           }
         }
       }

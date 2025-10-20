@@ -52,7 +52,7 @@ export const useLayoutStore = defineStore('layout', {
     isEssayVisible: (state) => (state.expandedColumn != 'left' && state.rightContent == 'essay'),
     isNotesVisible: (state) => (state.expandedColumn != 'left' && state.rightContent == 'notes'),
 
-    isResourceShown: state => {
+    isResourceShown(state) {
 
       const resourcesStore = useResourcesStore();
       /**
@@ -60,25 +60,22 @@ export const useLayoutStore = defineStore('layout', {
        * @returns {bool}
        */
       const fn = function (resource) {
-        return (state.isInstructionsPdfVisible && resource.type == Resource.TYPE_INSTRUCTION ||
+        return (state.isInstructionsPdfVisible && resource.type === Resource.TYPE_INSTRUCTION ||
             state.isResourcesVisible && resourcesStore.isActive(resource));
       }
       return fn;
     },
 
-    selectedResourceKey: (state) => {
+    selectedResourceKey(state) {
       const resourcesStore = useResourcesStore();
       if (state.isInstructionsSelected) {
           return Annotation.KEY_INSTRUCTIONS;
       }
       else if (state.isInstructionsPdfSelected) {
-        const resource = resourcesStore.getInstruction;
-        if (resource) {
-          return resource.key;
-        }
+        return resourcesStore.getInstruction?.key ?? null;
       }
       else if (state.isResourcesSelected) {
-        return resourcesStore.activeKey;
+        return resourcesStore.activeResource?.key ?? null;
       }
       return null;
     }

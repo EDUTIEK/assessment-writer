@@ -1,7 +1,7 @@
 /**
  * Resource
  */
-class Resource {
+export default class Resource {
 
   static TYPE_FILE = 'file';
   static TYPE_URL = 'url';
@@ -10,11 +10,24 @@ class Resource {
 
   static ALLOWED_TYPES = [Resource.TYPE_FILE, Resource.TYPE_URL, Resource.TYPE_INSTRUCTION, Resource.TYPE_SOLUTION];
 
+  static order(res1, res2) {
+    return res1.title < res2.title ? -1
+        : res1.title > res2.title ? 1
+            : 0
+  }
+
   /**
-   * Key of the resource
-   * @type {string}
+   * Id of the resource
+   * @type {integer}
    */
-  key = '';
+  id = '';
+
+  /**
+   * Id of the task to which the resource belongs
+   * null, if the resource should belong to all tasks
+   * @type {integer}
+   */
+  task_id = null;
 
   /**
    * title
@@ -61,20 +74,21 @@ class Resource {
   size = null;
 
   /**
+   * Calculated key
+   * @type {string}
+   */
+  key = null;
+
+  /**
    * Constructor - gets properties from a data object
    * @param {object} data
    */
   constructor(data = {}) {
-    this.setData(data);
-  }
-
-  /**
-   * Set the data from a plain object
-   * @param {object} data
-   */
-  setData(data) {
-    if (data.key !== undefined && data.key !== null) {
-      this.key = data.key.toString();
+    if (data.id !== undefined && data.id !== null) {
+      this.id =  parseInt(data.id);
+    }
+    if (data.task_id !== undefined && data.task_id !== null) {
+      this.task_id =  parseInt(data.task_id);
     }
     if (data.title !== undefined && data.title !== null) {
       this.title = data.title.toString();
@@ -87,9 +101,6 @@ class Resource {
     }
     if (data.source !== undefined && data.source !== null) {
       this.source = data.source.toString();
-      if (this.type == Resource.TYPE_URL) {
-        this.url = this.source
-      }
     }
     if (data.url !== undefined && data.url !== null) {
       this.url = data.url.toString();
@@ -100,6 +111,16 @@ class Resource {
     if (data.size !== undefined && data.size !== null) {
       this.size = parseInt(data.size);
     }
+
+    this.key = 'R' + this.id.toString();
+  }
+
+  /**
+   * Get a string key of the resource
+   * @return {string}
+   */
+  getKey() {
+    return this.key;
   }
 
   /**
@@ -107,15 +128,7 @@ class Resource {
    * @returns {object}
    */
   getData() {
-    return {
-      key: this.key,
-      title: this.title,
-      type: this.type,
-      embedded: this.embedded,
-      url: this.url,
-      mimetype: this.mimetype,
-      size: this.size,
-    }
+    return Object.assign({}, this)
   }
 
   isPdf() {
@@ -141,26 +154,5 @@ class Resource {
   hasFileToLoad() {
     return [Resource.TYPE_FILE, Resource.TYPE_SOLUTION, Resource.TYPE_INSTRUCTION].includes(this.type);
   }
-
-
-  /**
-   * @return {string}
-   */
-  getKey() {
-    return this.key
-  }
-
-  getSignature() {
-    return JSON.stringify(this.getData());
-  }
-
-  /**
-   * Get a clone of the object
-   * @returns {Resource}
-   */
-  getClone() {
-    return new Resource(this.getData());
-  }
 }
 
-export default Resource;

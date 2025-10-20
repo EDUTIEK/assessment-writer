@@ -27,11 +27,21 @@ export const useTasksStore = defineStore('tasks', {
   },
 
   getters: {
-    countTasks: state => Object.keys(state.tasks).length,
-    currentTask: state => state.tasks[state.currentKey],
-    currentTitle: state => state.currentTask?.title,
-    hasInstructions: state => !!state.currentTask?.instructions,
-    sortedTasks: state => Object.values(state.tasks).toSorted(Task.order),
+    countTasks(state) {
+      return Object.keys(state.tasks).length;
+    },
+    currentTask(state) {
+      return state.tasks[state.currentKey];
+    },
+    currentTitle(state) {
+      return state.currentTask?.title;
+    },
+    hasInstructions(state) {
+      return !!state.currentTask?.instructions;
+    },
+    sortedTasks(state) {
+      return Object.values(state.tasks).toSorted(Task.order);
+    },
   },
 
   actions: {

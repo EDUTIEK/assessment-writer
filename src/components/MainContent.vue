@@ -32,7 +32,8 @@ onMounted(async () => {
           <h1 class="headline">{{
               layoutStore.isInstructionsSelected ? $t('allInstructions')
                   : layoutStore.isInstructionsPdfSelected ?  $t('allInstructionsPdf')
-                      : layoutStore.isResourcesSelected ? resourcesStore.activeTitle : $t('mainContentLeftColumn')
+                      : layoutStore.isResourcesSelected ? resourcesStore.activeResource?.title
+                          : $t('mainContentLeftColumn')
             }}
           </h1>
           <v-btn-group density="comfortable">
@@ -79,7 +80,7 @@ onMounted(async () => {
                 <span> {{
                     layoutStore.isInstructionsSelected ? $t('allInstructions')
                         : layoutStore.isInstructionsPdfSelected ? $t('allInstructionsPdf')
-                            : layoutStore.isResourcesSelected ? resourcesStore.activeTitle
+                            : layoutStore.isResourcesSelected ? resourcesStore.activeResource?.title
                                 : $t('mainContentExpandLeftColumn')
                   }}
                 </span>

@@ -14,6 +14,8 @@ import { useAlertStore } from "@/store/alerts";
 import { useChangesStore } from "@/store/changes";
 import { useAnnotationsStore } from '@/store/annotations';
 
+import Resource from "@/data/Resource";
+
 import md5 from 'md5';
 import Change from "@/data/Change";
 import SendingResult from "@/data/SendingResult";
@@ -135,11 +137,11 @@ export const useApiStore = defineStore('api', {
 
       /**
        * Get the Url for loading a file ressource
-       * @param {string}  resourceKey
+       * @param {Resource}
        */
-      const fn = function (resourceKey) {
+      const fn = function (resource) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/writer/file/' + resourceKey + '?' + config.params.toString();
+        return config.baseURL + '/writer/file/resource/' + resource.id + '?' + config.params.toString();
       }
       return fn;
     },
@@ -175,8 +177,6 @@ export const useApiStore = defineStore('api', {
       }
       return fn;
     }
-
-
   },
 
 
@@ -364,9 +364,10 @@ export const useApiStore = defineStore('api', {
       await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
       await alertStore.loadFromBackend(response.data['Assessment']['Alerts']);
       await tasksStore.loadFromBackend(response.data['Task']['Tasks']);
+      await resourcesStore.loadFromBackend(response.data['Task']['Resources']);
       await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
       await preferencesStore.loadFromBackend(response.data['EssayTask']['WriterPrefs']);
-      // await resourcesStore.loadFromData(response.data.resources);
+
       // await essayStore.loadFromData(response.data.essay);
       // await notesStore.loadFromData(response.data.notes);
       // await notesStore.prepareNotes(settingsStore.notice_boards);

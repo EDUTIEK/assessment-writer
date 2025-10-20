@@ -27,10 +27,18 @@ export const useWriterStore = defineStore('writer', {
   },
 
   getters: {
-    hasWritingEnd: (state) => !!state.working_deadline,
-    writingEndReached: (state) => state.remaining_time === 0,
-    isAuthorized: (state) => state.is_authorized > 0,
-    isExcluded: (state) => state.is_excluded > 0
+    hasWritingEnd(state) {
+      return !!state.working_deadline;
+    },
+    writingEndReached(state) {
+      return state.remaining_time === 0;
+    },
+    isAuthorized(state) {
+      return state.is_authorized > 0;
+    },
+    isExcluded(state) {
+      return state.is_excluded > 0;
+    }
   },
 
   actions: {

@@ -31,9 +31,11 @@ export const useSettingsStore = defineStore('settings', {
 
   getters: {
 
-    hasNotes: state => state.notice_boards > 0,
+    hasNotes(state) {
+      return state.notice_boards > 0;
+    },
 
-    tinyToolbar: state => {
+    tinyToolbar(state) {
       switch (state.formatting_options) {
         case 'full':
           return 'undo redo styles bold italic underline bullist numlist removeformat charmap wordcount';
@@ -50,7 +52,7 @@ export const useSettingsStore = defineStore('settings', {
     /**
      * @see https://www.tiny.cloud/docs/configure/content-filtering/#valid_elements
      */
-    tinyValidElements: state => {
+    tinyValidElements(state) {
       switch (state.formatting_options) {
         case 'full':
           return 'p/div,br,strong/b,em/i,u,ol,ul,li,h1,h2,h3,h4,h5,h6,pre';
@@ -65,10 +67,14 @@ export const useSettingsStore = defineStore('settings', {
 
     },
 
-    tinyH1Size: state => state.headline_scheme == 'three' ? 1.3 : 1,
-    tinyH2Size: state => state.headline_scheme == 'three' ? 1.15 : 1,
+    tinyH1Size(state) {
+      return state.headline_scheme == 'three' ? 1.3 : 1;
+    },
+    tinyH2Size(state) {
+      return state.headline_scheme == 'three' ? 1.15 : 1;
+    },
 
-    tinyStyles: state => {
+    tinyStyles(state) {
       switch (state.headline_scheme) {
         case 'single':
           return [
@@ -101,13 +107,13 @@ export const useSettingsStore = defineStore('settings', {
     /**
      * @see https://www.tiny.cloud/docs/configure/content-formatting/#formats
      */
-    tinyFormats: state => {
+    tinyFormats(state) {
       return {
         underline: { inline: 'u', remove: 'all' }
       }
     },
 
-    tinyContentStyle: state => {
+    tinyContentStyle(state) {
       const baseStyle = contentLocalCss.toString();
 
       switch (state.headline_scheme) {
@@ -124,7 +130,7 @@ export const useSettingsStore = defineStore('settings', {
       }
     },
 
-    contentClass: state => {
+    contentClass(state) {
       switch (state.headline_scheme) {
         case 'single':
           return 'headlines-single';

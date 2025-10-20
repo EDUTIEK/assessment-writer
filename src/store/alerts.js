@@ -27,10 +27,6 @@ export const useAlertStore = defineStore('alerts', {
     hasActiveAlert: state => state.activeKey !== '',
     activeMessage: state => state.alerts[state.activeKey]?.message ?? '',
     sortedAlerts: state => Object.values(state.alerts).toSorted(Alert.order),
-
-    getAlert: state => function (key) {
-      return (key) => state.alerts[state.activeKey];
-    },
   },
 
   actions: {

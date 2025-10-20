@@ -29,21 +29,21 @@ export const useConfigStore = defineStore('config', {
 
   getters: {
 
-    primaryColorCss: state => {
+    primaryColorCss(state) {
       if (state.primary_color) {
         return '#' + state.primary_color
       }
       return '';
     },
 
-    primaryTextColorCss: state => {
+    primaryTextColorCss(state) {
       if (state.primary_text_color) {
         return '#' + state.primary_text_color
       }
       return '';
     },
 
-    primaryTextColorFullCss: state => {
+    primaryTextColorFullCss(state) {
       if (state.primary_text_color) {
         return 'color: #' + state.primary_text_color + ';'
       }
