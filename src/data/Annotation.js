@@ -18,7 +18,7 @@ class Annotation {
 
   /**
    * Get a minimal annotation from an annotation key
-   * This is used to create the playload of a delete change
+   * This is used to create the payload of a delete change
    * @param {string} key
    * @returns {Annotation}
    */
@@ -103,15 +103,6 @@ class Annotation {
    * @param {object} data
    */
   constructor(data = {}) {
-    this.setData(data);
-  }
-
-
-  /**
-   * Set the data from a plain object
-   * @param {object} data
-   */
-  setData(data) {
     if (data.resource_key !== undefined && data.resource_key !== null) {
       this.resource_key = data.resource_key.toString();
     }
@@ -137,22 +128,14 @@ class Annotation {
     }
   }
 
-  /**
-   * Get a plain data object from the public properties
-   * @returns {object}
-   */
-  getData() {
-    return {
-      resource_key: this.resource_key,
-      mark_key: this.mark_key,
-      mark_value: this.mark_value,
-      parent_number: this.parent_number,
-      start_position: this.start_position,
-      end_position: this.end_position,
-      comment: this.comment
-    }
-  }
 
+  /**
+   * Set the data from a plain object
+   * @param {object} data
+   */
+  setData(data) {
+
+  }
 
   /**
    * @return {string}
@@ -161,17 +144,12 @@ class Annotation {
     return Annotation.buildKey(this.resource_key, this.mark_key);
   }
 
-
-  getSignature() {
-    return JSON.stringify(this.getData());
-  }
-
   /**
-   * Get a clone of the object
-   * @returns {Summary}
+   * Get a plain data object from the public properties
+   * @returns {object}
    */
-  getClone() {
-    return new Annotation(this.getData());
+  getData() {
+    return Object.assign({}, this)
   }
 }
 
