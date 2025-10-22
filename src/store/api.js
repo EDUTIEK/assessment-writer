@@ -348,23 +348,29 @@ export const useApiStore = defineStore('api', {
       }
 
       const configStore = useConfigStore();
-      const settingsStore = useSettingsStore();
       const writerStore = useWriterStore();
-      const preferencesStore = usePreferencesStore();
-      const tasksStore = useTasksStore();
       const alertStore = useAlertStore();
+
+      const tasksStore = useTasksStore();
       const resourcesStore = useResourcesStore();
+      const annotationsStore = useAnnotationsStore();
+
+      const settingsStore = useSettingsStore();
+      const preferencesStore = usePreferencesStore();
       const essayStore = useEssayStore();
       const notesStore = useNotesStore();
+
       const changesStore = useChangesStore();
       const layoutStore = useLayoutStore();
-      const annotationsStore = useAnnotationsStore();
 
       await configStore.loadFromBackend(response.data['Assessment']['Config']);
       await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
       await alertStore.loadFromBackend(response.data['Assessment']['Alerts']);
+
       await tasksStore.loadFromBackend(response.data['Task']['Tasks']);
       await resourcesStore.loadFromBackend(response.data['Task']['Resources']);
+      await annotationsStore.loadFromBackend(response.data['Task']['Annotations']);
+
       await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
       await preferencesStore.loadFromBackend(response.data['EssayTask']['WriterPrefs']);
 
@@ -402,14 +408,13 @@ export const useApiStore = defineStore('api', {
         this.setTimeOffset(response);
         this.refreshToken(response);
 
-        const configStore = useConfigStore();
-        const settingsStore = useSettingsStore();
         const writerStore = useWriterStore();
-        const tasksStore = useTasksStore();
         const alertStore = useAlertStore();
-        const notesStore = useNotesStore();
+        const settingsStore = useSettingsStore();
 
-        // todo load leccessday data
+        // await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
+        // await alertStore.loadFromBackend(response.data['Assessment']['Alerts']);
+        // await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
 
         this.lastChangesTry = 0;
         return true;

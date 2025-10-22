@@ -61,8 +61,8 @@ export const useResourcesStore = defineStore('resources', {
       return state.currentResources.find(element => element.key === state.activeKey);
     },
 
-    getResource(state) {
-      return (key) => state.currentResources.find(element => element.key === key);
+    getResourceById(state) {
+      return (resource_id) => state.currentResources.find(element => element.id === resource_id);
     },
 
     isActive(state) {

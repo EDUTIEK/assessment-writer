@@ -66,16 +66,19 @@ export const useLayoutStore = defineStore('layout', {
       return fn;
     },
 
-    selectedResourceKey(state) {
+    /**
+     * @returns {null|integer}
+     */
+    selectedResourceId(state) {
       const resourcesStore = useResourcesStore();
       if (state.isInstructionsSelected) {
-          return Annotation.KEY_INSTRUCTIONS;
+          return Annotation.RESOURCE_ID_INSTRUCTIONS;
       }
       else if (state.isInstructionsPdfSelected) {
-        return resourcesStore.getInstruction?.key ?? null;
+        return resourcesStore.getInstruction?.id ?? null;
       }
       else if (state.isResourcesSelected) {
-        return resourcesStore.activeResource?.key ?? null;
+        return resourcesStore.activeResource?.id ?? null;
       }
       return null;
     }
@@ -162,9 +165,9 @@ export const useLayoutStore = defineStore('layout', {
       this.saveToStorage();
     },
 
-    showForResourceKey(key) {
+    showResourceForId(resource_id) {
       const resourcesStore = useResourcesStore();
-      const resource = resourcesStore.getResource(key);
+      const resource = resourcesStore.getResourceById(resource_id);
       if (resource) {
         if (resource.type == Resource.TYPE_INSTRUCTION) {
           this.showInstructionsPdf();

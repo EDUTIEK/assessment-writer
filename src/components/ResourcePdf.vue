@@ -37,7 +37,7 @@ watch(() => layoutStore.focusChange, handleFocusChange);
 
 function loadAnnotations() {
   const all = [];
-  for (const annotation of annotationsStore.getAnnotationsForResource(resource.key)) {
+  for (const annotation of annotationsStore.getAnnotationsForResourceId(resource.id)) {
     all.push({
       id: annotation.mark_key,
       page: annotation.parent_number,
@@ -51,7 +51,7 @@ function loadAnnotations() {
 async function createAnnotation(event) {
   const annotation = new Annotation(
       {
-        resource_key: resource.key,
+        resource_id: resource.id,
         mark_key: event.detail.id,
         mark_value: JSON.stringify(event.detail.intern),
         parent_number: event.detail.page,
@@ -63,7 +63,7 @@ async function createAnnotation(event) {
 }
 
 function updateAnnotation(event) {
-  const annotation = annotationsStore.getAnnotation(Annotation.buildKey(resource.key, event.detail.id));
+  const annotation = annotationsStore.getAnnotation(Annotation.buildKey(resource.id, event.detail.id));
   if (annotation) {
     annotation.mark_value = JSON.stringify(event.detail.intern);
     annotationsStore.updateAnnotation(annotation);
@@ -72,13 +72,13 @@ function updateAnnotation(event) {
 
 function deleteAnnotation(event) {
   if (event.detail) {
-    annotationsStore.deleteAnnotation(Annotation.buildKey(resource.key, event.detail.id));
+    annotationsStore.deleteAnnotation(Annotation.buildKey(resource.id, event.detail.id));
   }
 }
 
 function selectAnnotation(event) {
   if (event.detail) {
-    annotationsStore.selectAnnotation(Annotation.buildKey(resource.key, event.detail.id));
+    annotationsStore.selectAnnotation(Annotation.buildKey(resource.id, event.detail.id));
   }
 }
 
@@ -92,7 +92,7 @@ function pageChanged(event) {
 
 function refreshSelection() {
   const annotation = annotationsStore.getAnnotation(annotationsStore.selectedKey);
-  if (annotation && annotation.resource_key == resource.key) {
+  if (annotation && annotation.resource_id === resource.id) {
     pdfjs.select(annotation.mark_key);
   }
 }
@@ -101,7 +101,7 @@ watch(() => annotationsStore.selectionChange, refreshSelection);
 function handleDeleted()
 {
   const annotation = Annotation.getFromKey(annotationsStore.deletedKey);
-  if (annotation.resource_key == resource.key) {
+  if (annotation.resource_id == resource.id) {
     pdfjs.delete(annotation.mark_key);
   }
 }

@@ -83,7 +83,7 @@ async function onSelection(selected) {
     // selected text => create a new annotation
     marker.removeSelection();
     const annotation = new Annotation({
-          resource_key: Annotation.KEY_INSTRUCTIONS,
+          resource_id: Annotation.RESOURCE_ID_INSTRUCTIONS,
           parent_number: selected.parentNumber,
           start_position: selected.firstWord,
           end_position: selected.lastWord

@@ -62,7 +62,7 @@ async function handleTextKeydown() {
     switch (event.key) {
       case "Enter":
         event.preventDefault();
-        layoutStore.showForResourceKey();
+        layoutStore.showResourceForId(annotation.resource_id);
         await nextTick();
         annotationsStore.setCaretRequest();
         break;

@@ -7,25 +7,20 @@ import { useChangesStore } from "@/store/changes";
 import Annotation from "@/data/Annotation";
 import Change from '@/data/Change';
 import resource from "@/data/Resource";
+import Resource from "@/data/Resource";
 
 const storage = getStorage('annotations');
+const startState = {
+  annotations: {},                // list of all annotation objects
 
-function startState() {
+  // not saved in storage
+  markerChange: 0,                // for watchers: timestamp of the last change that affects the text markers (not the selection)
+  selectionChange: 0,             // for watchers: timestamp of the last change of the selected annotation
+  caretRequest: 0,                // for watchers: timestamp of the last request to set the caret to the mark of selected comment
 
-  return {
-    // saved in storage
-    keys: [],                   // list of string keys
-    annotations: [],            // list of all annotation objects
-
-    // not saved in storage
-    markerChange: 0,                // for watchers: timestamp of the last change that affects the text markers (not the selection)
-    selectionChange: 0,             // for watchers: timestamp of the last change of the selected annotation
-    caretRequest: 0,                // for watchers: timestamp of the last request to set the caret to the mark of selected comment
-
-    selectedKey: '',                // key of the currently selected annotation
-    deletedKey: '',                 // key of the last deleted annotation
-    firstVisibleKey: '',            // key of the first visible comment in the scrolled text
-  }
+  selectedKey: '',                // key of the currently selected annotation
+  deletedKey: '',                 // key of the last deleted annotation
+  firstVisibleKey: '',            // key of the first visible comment in the scrolled text
 }
 
 /**
@@ -33,7 +28,7 @@ function startState() {
  */
 export const useAnnotationsStore = defineStore('annotations', {
   state: () => {
-    return startState();
+    return startState;
   },
 
   /**
@@ -41,40 +36,42 @@ export const useAnnotationsStore = defineStore('annotations', {
    */
   getters: {
 
-    activeAnnotations: state => {
+    activeAnnotations(state) {
       const layoutStore = useLayoutStore();
-      const selectedResourceKey = layoutStore.selectedResourceKey;
-      if (selectedResourceKey !== null) {
-        return state.annotations.filter(annotation => annotation.resource_key === selectedResourceKey);
+      const selectedResourceId = layoutStore.selectedResourceId;
+      if (selectedResourceId !== null) {
+        return Object.values(state.annotations)
+            .filter(annotation => annotation.resource_id === selectedResourceId)
+            .sort(Annotation.order);
       }
       return [];
     },
 
-    getAnnotation: state => {
+    getAnnotation(state) {
 
         /**
          * Get an annotation by key
          * @param {string} key
          */
         const fn = function (key) {
-          return state.annotations.find(element => element.getKey() === key);
+          return state.annotations[key] ?? null;
         }
         return fn;
     },
 
-    getAnnotationsForResource: state => {
+    getAnnotationsForResourceId(state) {
 
         /**
          * Get the annotations for a resource
-         * @param {string} resource_key
+         * @param {integer} resource_id
          */
-        const fn = function (resource_key) {
-          return state.annotations.filter(element => element.resource_key === resource_key);
+        const fn = function (resource_id) {
+          return Object.values(state.annotations).filter(element => element.resource_id === resource_id);
         }
         return fn;
       },
 
-    getActiveAnotationsInRange: state => {
+    getActiveAnotationsInRange(state) {
 
       /**
        * Get the active comments in a range of marked text
@@ -91,7 +88,7 @@ export const useAnnotationsStore = defineStore('annotations', {
       return fn;
     },
 
-    getActiveAnnotationsByStartPosition: state => {
+    getActiveAnnotationsByStartPosition(state) {
 
       /**
        * Get the active annotations with a start position
@@ -101,13 +98,13 @@ export const useAnnotationsStore = defineStore('annotations', {
        */
       const fn = function (start_position) {
         return state.activeAnnotations.filter(annotation =>
-            annotation.start_position == start_position
+            annotation.start_position === start_position
         );
       }
       return fn;
     },
 
-    getActiveAnnotationsByParentNumber: state => {
+    getActiveAnnotationsByParentNumber(state) {
 
       /**
        * Get the active annotations with a start position
@@ -117,7 +114,7 @@ export const useAnnotationsStore = defineStore('annotations', {
        */
       const fn = function (parent_number) {
         return state.activeAnnotations.filter(annotation =>
-            annotation.parent_number == parent_number
+            annotation.parent_number === parent_number
         );
       }
       return fn;
@@ -135,7 +132,6 @@ export const useAnnotationsStore = defineStore('annotations', {
       this.firstVisibleKey = key;
     },
 
-
     /**
      * Set timestamp of the last change that affects the text markers (not the selection)
      * @public
@@ -145,7 +141,7 @@ export const useAnnotationsStore = defineStore('annotations', {
     },
 
     /**
-     * Set timestamp of the last request to set the carent to the selected comment
+     * Set timestamp of the last request to set the caret to the selected comment
      * @public
      */
     setCaretRequest() {
@@ -173,15 +169,14 @@ export const useAnnotationsStore = defineStore('annotations', {
       const changesStore = useChangesStore();
 
       // first do state changes (trigger watchers)
-      this.keys.push(annotation.getKey());
-      this.annotations.push(annotation);
-      await this.sortAndLabelAnnotations();
+      this.annotations[annotation.getKey()] = annotation;
+      await this.labelAnnotations();
       this.setMarkerChange();
-      this.selectAnnotation(annotation);
+      this.selectAnnotation(annotation.getKey());
 
       // then save the annotation
-      await storage.setItem(annotation.getKey(), JSON.stringify(annotation.getData()));
-      await storage.setItem('keys', JSON.stringify(this.keys));
+      await storage.setItem(annotation.getKey(), annotation.getData());
+      await storage.setItem('keys', Object.keys(this.annotations));
       await changesStore.setChange(new Change({
         type: Change.TYPE_ANNOTATIONS,
         action: Change.ACTION_SAVE,
@@ -199,9 +194,9 @@ export const useAnnotationsStore = defineStore('annotations', {
       const apiStore = useApiStore();
       const changesStore = useChangesStore();
 
-      if (this.keys.includes(annotation.getKey())
+      if (Object.keys(this.annotations).includes(annotation.getKey())
       ) {
-        await storage.setItem(annotation.getKey(), JSON.stringify(annotation.getData()));
+        await storage.setItem(annotation.getKey(), annotation.getData());
         await changesStore.setChange(new Change({
           type: Change.TYPE_ANNOTATIONS,
           action: Change.ACTION_SAVE,
@@ -209,7 +204,7 @@ export const useAnnotationsStore = defineStore('annotations', {
         }))
 
         if (sort) {
-          await this.sortAndLabelAnnotations();
+          await this.labelAnnotations();
           this.setMarkerChange();
         }
       }
@@ -221,48 +216,44 @@ export const useAnnotationsStore = defineStore('annotations', {
      * @private
      */
     async deleteAnnotation(removeKey) {
-      if (this.selectedKey == removeKey) {
+      if (this.selectedKey === removeKey) {
         this.selectAnnotation('');
       }
-      const annotation = this.annotations.find(element => element.getKey() == removeKey);
 
-      this.annotations = this.annotations.filter(element => element.getKey() != removeKey);
-      if (this.keys.includes(removeKey)) {
-        this.keys = this.keys.filter(key => key != removeKey)
-        await storage.setItem('keys', JSON.stringify(this.keys));
-        await storage.removeItem(removeKey);
-      }
+      delete this.annotations[removeKey];
+      await storage.removeItem(removeKey);
+      await storage.setItem('keys', Object.keys(this.annotations));
       this.deletedKey = removeKey;
 
       const changesStore = useChangesStore();
       const change = new Change({
         type: Change.TYPE_ANNOTATIONS,
         action: Change.ACTION_DELETE,
-        key: annotation.getKey()
+        key: removeKey
       });
 
       await changesStore.setChange(change);
-      await this.sortAndLabelAnnotations();
+      await this.labelAnnotations();
       this.setMarkerChange();
     },
 
 
     /**
-     * Sort and label the annotations of a resource by position
+     * Sort and label the annotations by position in their resource
      * @private
      */
-    async sortAndLabelAnnotations() {
-      this.annotations = this.annotations.sort(Annotation.compare);
+    async labelAnnotations() {
+      const annotations = Object.values(this.annotations).sort(Annotation.order);
 
       let resource_key = '';
       let parent = 0;
       let number = 0;
-      for (const annotation of this.annotations) {
+      for (const annotation of annotations) {
         if (annotation.resource_key !== resource_key) {
           resource_key = annotation.resource_key;
           parent = 0;
           number = 1;
-        }else if (annotation.parent_number > parent) {
+        } else if (annotation.parent_number > parent) {
           parent = annotation.parent_number;
           number = 1;
         } else {
@@ -296,22 +287,11 @@ export const useAnnotationsStore = defineStore('annotations', {
       try {
         this.$reset();
 
-        const keys = await storage.getItem('keys');
-        if (keys) {
-          this.keys = JSON.parse(keys);
+        const keys = await storage.getItem('keys') ?? [];
+        for (const key of keys) {
+          this.annotations[key] = new Annotation(await storage.getItem(key));
         }
-
-        for (const key of this.keys) {
-          const stored = await storage.getItem(key);
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (typeof parsed === 'object' && parsed !== null) {
-              const annotation = new Annotation(parsed);
-              this.annotations.push(annotation);
-            }
-          }
-        }
-        await this.sortAndLabelAnnotations();
+        await this.labelAnnotations();
       }
       catch (err) {
         console.log(err);
@@ -325,21 +305,18 @@ export const useAnnotationsStore = defineStore('annotations', {
      * @param {array} data - array of plain objects
      * @public
      */
-    async loadFromData(data) {
+    async loadFromBackend(data) {
       try {
         await storage.clear();
         this.$reset();
 
-        for (const annotation_data of data) {
-          const annotation = new Annotation(annotation_data);
-          this.annotations.push(annotation);
-
-          this.keys.push(annotation.getKey());
-          await storage.setItem(annotation.getKey(), JSON.stringify(annotation.getData()));
+        for (const item of data) {
+          const annotation = new Annotation(item);
+          this.annotations[annotation.getKey()] = annotation;
+          await storage.setItem(annotation.getKey(), annotation.getData());
         }
-        ;
-        await storage.setItem('keys', JSON.stringify(this.keys));
-        await this.sortAndLabelAnnotations();
+        await storage.setItem('keys', Object.keys(this.annotations));
+        await this.labelAnnotations();
       }
       catch (err) {
         console.log(err);
@@ -360,7 +337,7 @@ export const useAnnotationsStore = defineStore('annotations', {
       for (const change of changesStore.getChangesFor(Change.TYPE_ANNOTATIONS, sendingTime)) {
         const data = await storage.getItem(change.key);
         if (data) {
-          changes.push(apiStore.getChangeDataToSend(change, JSON.parse(data)));
+          changes.push(apiStore.getChangeDataToSend(change, data));
         } else {
           changes.push(apiStore.getChangeDataToSend(change, Annotation.getFromKey(change.key)));
         }

@@ -11,11 +11,11 @@ const layoutStore = useLayoutStore();
 const resourcesStore = useResourcesStore();
 
 function annotationsPossible() {
-  const key = layoutStore.selectedResourceKey;
-  if (key === Annotation.KEY_INSTRUCTIONS) {
+  const id = layoutStore.selectedResourceId;
+  if (id === Annotation.RESOURCE_ID_INSTRUCTIONS) {
     return true;
   }
-  const resource = resourcesStore.getResource(key);
+  const resource = resourcesStore.getResourceById(id);
   if (resource !== null && resource.canBeAnnoteted()) {
     return true;
   }

@@ -10,6 +10,10 @@ export default class Resource {
 
   static ALLOWED_TYPES = [Resource.TYPE_FILE, Resource.TYPE_URL, Resource.TYPE_INSTRUCTION, Resource.TYPE_SOLUTION];
 
+  static buildKey(resource_id) {
+    return 'R' + resource_id.toString();
+  }
+
   static order(res1, res2) {
     return res1.title < res2.title ? -1
         : res1.title > res2.title ? 1
@@ -112,7 +116,7 @@ export default class Resource {
       this.size = parseInt(data.size);
     }
 
-    this.key = 'R' + this.id.toString();
+    this.key = Resource.buildKey(this.id);
   }
 
   /**
@@ -128,7 +132,7 @@ export default class Resource {
    * @returns {object}
    */
   getData() {
-    return Object.assign({}, this)
+    return Object.assign({}, this);
   }
 
   isPdf() {
