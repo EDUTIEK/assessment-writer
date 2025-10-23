@@ -4,6 +4,7 @@ import {useApiStore} from "@/store/api";
 import {useResourcesStore} from "@/store/resources";
 import {useLayoutStore} from "@/store/layout";
 import { useChangesStore } from "@/store/changes";
+import { useTasksStore} from "@/store/tasks";
 import Annotation from "@/data/Annotation";
 import Change from '@/data/Change';
 import resource from "@/data/Resource";
@@ -38,10 +39,12 @@ export const useAnnotationsStore = defineStore('annotations', {
 
     activeAnnotations(state) {
       const layoutStore = useLayoutStore();
+      const taskStore = useTasksStore();
       const selectedResourceId = layoutStore.selectedResourceId;
       if (selectedResourceId !== null) {
         return Object.values(state.annotations)
-            .filter(annotation => annotation.resource_id === selectedResourceId)
+            .filter(annotation => annotation.resource_id === selectedResourceId
+              && annotation.task_id == taskStore.currentTask?.task_id)
             .sort(Annotation.order);
       }
       return [];
@@ -177,11 +180,7 @@ export const useAnnotationsStore = defineStore('annotations', {
       // then save the annotation
       await storage.setItem(annotation.getKey(), annotation.getData());
       await storage.setItem('keys', Object.keys(this.annotations));
-      await changesStore.setChange(new Change({
-        type: Change.TYPE_ANNOTATIONS,
-        action: Change.ACTION_SAVE,
-        key: annotation.getKey()
-      }))
+      await changesStore.setChange(annotation.getChange(Change.ACTION_SAVE));
     },
 
     /**
@@ -197,11 +196,7 @@ export const useAnnotationsStore = defineStore('annotations', {
       if (Object.keys(this.annotations).includes(annotation.getKey())
       ) {
         await storage.setItem(annotation.getKey(), annotation.getData());
-        await changesStore.setChange(new Change({
-          type: Change.TYPE_ANNOTATIONS,
-          action: Change.ACTION_SAVE,
-          key: annotation.getKey()
-        }))
+        await changesStore.setChange(annotation.getChange(Change.ACTION_SAVE));
 
         if (sort) {
           await this.labelAnnotations();
@@ -220,21 +215,18 @@ export const useAnnotationsStore = defineStore('annotations', {
         this.selectAnnotation('');
       }
 
-      delete this.annotations[removeKey];
-      await storage.removeItem(removeKey);
-      await storage.setItem('keys', Object.keys(this.annotations));
-      this.deletedKey = removeKey;
+      const annotation = this.annotations[removeKey];
+      if (annotation) {
+        delete this.annotations[removeKey];
+        await storage.removeItem(removeKey);
+        await storage.setItem('keys', Object.keys(this.annotations));
+        this.deletedKey = removeKey;
 
-      const changesStore = useChangesStore();
-      const change = new Change({
-        type: Change.TYPE_ANNOTATIONS,
-        action: Change.ACTION_DELETE,
-        key: removeKey
-      });
-
-      await changesStore.setChange(change);
-      await this.labelAnnotations();
-      this.setMarkerChange();
+        const changesStore = useChangesStore();
+        await changesStore.setChange(annotation.getChange(Change.ACTION_DELETE));
+        await this.labelAnnotations();
+        this.setMarkerChange();
+      }
     },
 
 
@@ -335,12 +327,8 @@ export const useAnnotationsStore = defineStore('annotations', {
       const changesStore = useChangesStore();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_ANNOTATIONS, sendingTime)) {
-        const data = await storage.getItem(change.key);
-        if (data) {
-          changes.push(apiStore.getChangeDataToSend(change, data));
-        } else {
-          changes.push(apiStore.getChangeDataToSend(change, Annotation.getFromKey(change.key)));
-        }
+        const payload = await storage.getItem(change.key) ?? null;
+        changes.push(apiStore.getChangeDataToSend(change, payload));
       }
       return changes;
     }

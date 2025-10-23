@@ -1,7 +1,7 @@
 /**
  * Notion of a change that has been sent to the backend
  */
-class Change {
+export default class Change {
 
   static ACTION_SAVE = 'save';
   static ACTION_DELETE = 'delete';
@@ -39,7 +39,7 @@ class Change {
    * Timestamp of the last change (Microseconds)
    * @type {integer}
    */
-  last_change = 0;
+  last_change = null;
 
 
   /**
@@ -49,24 +49,11 @@ class Change {
    */
   payload = null;
 
-
   /**
    * Constructor - gets properties from a data object
    * @param {object} data
    */
   constructor(data = {}) {
-    this.setData(data);
-
-    if (this.last_change == 0) {
-      this.last_change = Date.now();
-    }
-  }
-
-  /**
-   * Set the data from a plain object
-   * @param {object} data
-   */
-  setData(data) {
     if (data.action !== undefined && Change.ALLOWED_ACTIONS.includes(data.action)) {
       this.action = data.action.toString()
     }
@@ -82,25 +69,22 @@ class Change {
     if (data.payload !== undefined && data.payload !== null) {
       this.payload = data.payload;
     }
-  }
 
+    if (this.last_change === null) {
+      this.last_change = Date.now();
+    }
+  }
 
   /**
    * Get a plain data object from the public properties
    * @returns {object}
    */
   getData() {
-    return {
-      action: this.action,
-      type: this.type,
-      key: this.key,
-      last_change: this.last_change,
-      payload: this.payload
-    }
+    return Object.assign({}, this);
   }
 
   /**
-   * Gheck if the change data is valid
+   * Check if the change data is valid
    * @returns {boolean}
    */
   isValid() {
@@ -111,5 +95,3 @@ class Change {
     );
   }
 }
-
-export default Change;

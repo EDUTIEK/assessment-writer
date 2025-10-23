@@ -23,14 +23,16 @@ onMounted(() => {
   refreshMarks();
 });
 
-function refreshMarks() {
+async function refreshMarks() {
   if (layoutStore.isInstructionsSelected) {
+    await nextTick();
     marker.hideAllMarksAndLabels();
     annotationsStore.activeAnnotations.forEach(annotation => updateMark(annotation));
   }
 }
 
 watch(() => annotationsStore.markerChange, refreshMarks);
+watch(() => tasksStore.currentKey, refreshMarks);
 
 function refreshSelection() {
   if (layoutStore.isInstructionsSelected) {
@@ -83,6 +85,7 @@ async function onSelection(selected) {
     // selected text => create a new annotation
     marker.removeSelection();
     const annotation = new Annotation({
+          task_id: tasksStore.currentTask.task_id,
           resource_id: Annotation.RESOURCE_ID_INSTRUCTIONS,
           parent_number: selected.parentNumber,
           start_position: selected.firstWord,

@@ -160,7 +160,7 @@ export const useApiStore = defineStore('api', {
     },
 
 
-    getChangeDataToSend: state => {
+    getChangeDataToSend(state) {
 
       /**
        * Get the data of a change to be sent to the backend
@@ -172,7 +172,7 @@ export const useApiStore = defineStore('api', {
         if (payload) {
           data.payload = payload;
         }
-        data.server_time = state.getServerTime(change.last_change);
+        data.last_change = state.getServerTime(change.last_change);
         return data;
       }
       return fn;
@@ -284,7 +284,7 @@ export const useApiStore = defineStore('api', {
      */
     async timedSync() {
       await this.saveChangesToBackend();
-      await this.loadUpdateFromBackend();
+      //await this.loadUpdateFromBackend();
     },
 
 
@@ -377,7 +377,6 @@ export const useApiStore = defineStore('api', {
       // await essayStore.loadFromData(response.data.essay);
       // await notesStore.loadFromData(response.data.notes);
       // await notesStore.prepareNotes(settingsStore.notice_boards);
-      // await annotationsStore.loadFromData(response.data.annotations);
 
       await changesStore.clearStorage();
       await layoutStore.initialize();
@@ -510,9 +509,13 @@ export const useApiStore = defineStore('api', {
 
         try {
           const data = {
-            annotations: await annotationsStore.getChangedData(this.lastChangesTry),
-            notes: await notesStore.getChangedData(this.lastChangesTry),
-            preferences: await preferencesStore.getChangedData(this.lastChangesTry)
+            'Task': {
+              'Annotations': await annotationsStore.getChangedData(this.lastChangesTry)
+            },
+            'EssayTask': {
+              'WriterPrefs': await preferencesStore.getChangedData(this.lastChangesTry),
+              'Notes': await notesStore.getChangedData(this.lastChangesTry),
+            }
           };
 
           const response = await axios.put('/writer/changes', data, this.getRequestConfig(this.dataToken));
@@ -520,14 +523,14 @@ export const useApiStore = defineStore('api', {
           this.refreshToken(response);
 
           await changesStore.setChangesSent(Change.TYPE_ANNOTATIONS,
-              response.data.annotations,
-              this.lastChangesTry);
+              response.data['Task']['Annotations'] ?? [], this.lastChangesTry);
+
           await changesStore.setChangesSent(Change.TYPE_NOTES,
-            response.data.notes,
-            this.lastChangesTry);
+              response.data['EssayTask']['Notes'] ?? [], this.lastChangesTry);
+
           await changesStore.setChangesSent(Change.TYPE_PREFERENCES,
-            response.data.preferences,
-            this.lastChangesTry);
+              response.data['EssayTask']['WriterPrefs'] ?? [], this.lastChangesTry);
+
 
           this.lastChangesTry = 0;
           return new SendingResult({

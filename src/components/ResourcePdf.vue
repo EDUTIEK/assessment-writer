@@ -1,5 +1,6 @@
 <script setup>
 import {useLayoutStore} from '@/store/layout';
+import {useTasksStore} from "@/store/tasks";
 import {useResourcesStore} from '@/store/resources';
 import {useAnnotationsStore} from '@/store/annotations';
 import Annotation from "@/data/Annotation";
@@ -7,6 +8,7 @@ import createPDFJsApi from 'annotate-pdf/pdfjs-api';
 import {nextTick, onMounted, ref, watch} from 'vue';
 
 const layoutStore = useLayoutStore();
+const tasksStore = useTasksStore();
 const resourcesStore = useResourcesStore();
 const annotationsStore = useAnnotationsStore();
 
@@ -51,6 +53,7 @@ function loadAnnotations() {
 async function createAnnotation(event) {
   const annotation = new Annotation(
       {
+        task_id: tasksStore.currentTask.task_id,
         resource_id: resource.id,
         mark_key: event.detail.id,
         mark_value: JSON.stringify(event.detail.intern),

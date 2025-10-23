@@ -1,7 +1,9 @@
+import Change from "@/data/Change";
+
 /**
  * PDF Annotation
  */
-class Annotation {
+export default class Annotation {
 
   static RESOURCE_ID_INSTRUCTIONS = 0;
 
@@ -18,7 +20,7 @@ class Annotation {
 
   /**
    * Get a minimal annotation from an annotation key
-   * This is used to create the payload of a delete change
+   * This is used for pdfjs to delete the mark of an annotation
    * @param {string} key
    * @returns {Annotation}
    */
@@ -49,15 +51,21 @@ class Annotation {
     }
   }
 
+  static newMarkKey() {
+    const min = 100000000;
+    const max = 999999999;
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
   /**
-   * Id if the resource to annotate
-   * @type {string}
+   * Id of the resource to annotate
+   * @type {integer}
    */
   resource_id = null;
 
   /**
-   * Id of task to which the annotation belongs
-   * @type {string}
+   * Id of the task to which the resource belongs
+   * @type {integer}
    */
   task_id = null;
 
@@ -118,7 +126,7 @@ class Annotation {
     if (data.mark_key !== undefined && data.mark_key !== null) {
       this.mark_key = data.mark_key
     } else {
-      this.mark_key = Math.random().toString();
+      this.mark_key = Annotation.newMarkKey();
     }
     if (data.mark_value !== undefined && data.mark_value !== null) {
       this.mark_value = data.mark_value;
@@ -137,13 +145,28 @@ class Annotation {
     }
   }
 
-
   /**
    * Get a plain data object from the public properties
    * @returns {object}
    */
   getData() {
     return Object.assign({}, this);
+  }
+
+  /**
+   * Get a change info for the server
+   * @param action
+   */
+  getChange(action) {
+    return new Change({
+      type: Change.TYPE_ANNOTATIONS,
+      action: action,
+      key: this.getKey(),
+      payload: (action === Change.ACTION_DELETE) ? {
+        resource_id: this.resource_id,
+        mark_key: this.mark_key
+      } : null
+    });
   }
 
   /**
@@ -155,4 +178,3 @@ class Annotation {
 
 }
 
-export default Annotation;

@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia';
 import { getStorage } from "@/lib/Storage";
 import Change from '@/data/Change';
+import ChangeResponse from "@/data/ChangeReponse";
 
 const storage = getStorage('changes');
 
 function startState() {
   const state = {
     changes: {},
-    lastSave: 0,          // timestamp (ms) of the lastsaving in the storage
+    lastSave: 0,            // timestamp (ms) of the lastsaving in the storage
     lastSendingSuccess: 0   // timestamp (ms) of the last successful sending to the backend
   };
   for (const type of Change.ALLOWED_TYPES) {
@@ -200,27 +201,30 @@ export const useChangesStore = defineStore('changes', {
      * This will delete all changes that are responded as processed and that are not newer than the sending time
      *
      * @param {string} type see Change.ALLOWED_TYPES
-     * @param {object} processed - old key: new key or null if the data has been deleted
-     * @param {integer} maxTime maximum timestamp until processed changes should be deleted
+     * @param {object} response - old key: new key or null if the data has been deleted
+     * @param {integer} maxDeleteTime maximum timestamp until processed changes should be deleted
      * @see getChangesFor
      */
-    async setChangesSent(type, processed, maxTime) {
+    async setChangesSent(type, responses = [], maxDeleteTime) {
 
       const changes = this.changes[type];
       let toStore = false;
 
-      for (const old_key in processed) {
-        const new_key = processed[old_key];
-        const change = changes[old_key];
+      for (const response_data of responses) {
+        const response = new ChangeResponse(response_data);
+        const new_key = response.getNewKey();
+        const change = changes[response.key];
 
         if (change) {
-          if (change.last_change <= maxTime) {
-            delete changes[old_key];
+          if (change.last_change <= maxDeleteTime) {
+            delete changes[change.key];
             toStore = true;
-          } else if (new_key == null || new_key != old_key) {
+
+          } else if (new_key !== null || new_key !== change.key) {
             change.key = new_key;
             changes[new_key] = change;
-            delete changes[old_key];
+            delete changes[change.key];
+
             toStore = true;
           }
         }
