@@ -373,10 +373,12 @@ export const useApiStore = defineStore('api', {
 
       await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
       await preferencesStore.loadFromBackend(response.data['EssayTask']['WriterPrefs']);
+      await notesStore.loadFromBackend(response.data['EssayTask']['WriterNotices']);
+      await notesStore.prepareNotes(settingsStore.notice_boards);
 
       // await essayStore.loadFromData(response.data.essay);
-      // await notesStore.loadFromData(response.data.notes);
-      // await notesStore.prepareNotes(settingsStore.notice_boards);
+
+
 
       await changesStore.clearStorage();
       await layoutStore.initialize();

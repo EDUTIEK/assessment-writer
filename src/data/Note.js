@@ -3,10 +3,15 @@
  */
 class Note {
 
+  /**
+   * Number of the task o which the note belongs
+   * @type {integer}
+   */
+  task_id = 0;
 
   /**
    * Number of the notice board
-   * @type {number}
+   * @type {integer}
    */
   note_no = 0;
 
@@ -31,8 +36,8 @@ class Note {
     this.setData(data);
   }
 
-  static getKeyForNo(note_no) {
-    return 'NOTE_' + note_no;
+  static getKeyForNo(note_no, task_id) {
+    return 'N' + note_no + '_' + task_id;
   }
 
   /**
@@ -40,6 +45,9 @@ class Note {
    * @param {object} data
    */
   setData(data) {
+    if (data.task_id !== undefined && data.task_id !== null) {
+      this.task_id = parseInt(data.task_id);
+    }
     if (data.note_no !== undefined && data.note_no !== null) {
       this.note_no = parseInt(data.note_no);
     }
@@ -56,21 +64,15 @@ class Note {
    * @returns {object}
    */
   getData() {
-    return {
-      note_no: this.note_no,
-      note_text: this.note_text,
-      last_change: this.last_change
-    }
+    return Object.assign({}, this);
   }
-
 
   /**
    * @return {string}
    */
   getKey() {
-    return Note.getKeyForNo(this.note_no);
+    return Note.getKeyForNo(this.note_no, this.task_id);
   }
-
 
   /**
    * Get a clone of the object

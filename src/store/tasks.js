@@ -42,6 +42,13 @@ export const useTasksStore = defineStore('tasks', {
     sortedTasks(state) {
       return Object.values(state.tasks).toSorted(Task.order);
     },
+    taskIds(state) {
+      let ids = [];
+      for (const task of state.sortedTasks) {
+        ids.push(task.task_id);
+      }
+      return ids;
+    }
   },
 
   actions: {

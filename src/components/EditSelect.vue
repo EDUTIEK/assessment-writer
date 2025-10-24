@@ -37,9 +37,14 @@ function updateSelectedEditor() {
   }
 }
 
+function handleTaskChange() {
+  notesStore.handleTaskChange();
+  updateSelectedEditor();
+}
 
 watch(() => layoutStore.rightContent, updateSelectedEditor);
 watch(() => notesStore.activeKey, updateSelectedEditor);
+watch(() => tasksStore.currentKey, handleTaskChange);
 
 function selectEditor() {
 
@@ -91,15 +96,15 @@ watch(() => annotationsStore.selectionChange, showAnnotations);
           <span aria-hidden="true">{{ $t('editSelectText') }}</span>
         </v-btn>
         <v-btn size="small"
-               v-for="key in notesStore.keys"
-               :aria-labelledby="'app-edit-select-note' + notesStore.notes[key].note_no"
-               :key="key"
-               :value="key">
+               v-for="note in notesStore.currentNotes"
+               :aria-labelledby="'app-edit-select-note' + note.note_no"
+               :key="note.getKey()"
+               :value="note.getKey()">
           <v-icon icon="mdi-clipboard-outline"></v-icon>
           <span class="sr-only"
-                :id="'app-edit-select-note' + notesStore.notes[key].note_no">{{ settingsStore.notice_boards == 1 ? $t("editSelectEditNotes") : $t("editSelectEditNote", [notesStore.notes[key].note_no + 1]) }}</span>
+                :id="'app-edit-select-note' + note.note_no">{{ settingsStore.notice_boards == 1 ? $t("editSelectEditNotes") : $t("editSelectEditNote", [note.note_no + 1]) }}</span>
           <span
-              aria-hidden="true">{{ settingsStore.notice_boards == 1 ? $t("editSelectNotes") : notesStore.notes[key].note_no + 1 }}</span>
+              aria-hidden="true">{{ settingsStore.notice_boards == 1 ? $t("editSelectNotes") : note.note_no + 1 }}</span>
         </v-btn>
       </v-btn-toggle>
       &nbsp;

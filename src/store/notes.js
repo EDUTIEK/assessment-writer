@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { getStorage } from "@/lib/Storage";
 import localForage from "localforage";
 import { useApiStore } from "@/store/api";
+import {useSettingsStore} from "@/store/settings";
 import { useTasksStore } from "@/store/tasks";
 import { useWriterStore } from "@/store/writer";
 import { useChangesStore } from "@/store/changes";
@@ -44,10 +45,16 @@ export const useNotesStore = defineStore('notes', {
    */
   getters: {
 
+    currentNotes(state) {
+      const tasksStore = useTasksStore();
+      const current_task_id =  tasksStore.currentTask?.task_id;
+      return Object.values(state.notes).filter(note => note.task_id === current_task_id);
+    },
+
     /**
      * Check if the user has entered notes
      */
-    hasWrittenNotes: state => {
+    hasWrittenNotes(state) {
       for (const key in state.notes) {
         if (state.notes[key].note_text.length > 0) {
           return true;
@@ -98,7 +105,8 @@ export const useNotesStore = defineStore('notes', {
             }
           }
         }
-
+        this.prepareNotes();
+        this.handleTaskChange();
       }
       catch (err) {
         console.log(err);
@@ -112,7 +120,7 @@ export const useNotesStore = defineStore('notes', {
      * @param {array} data - array of plain objects
      * @public
      */
-    async loadFromData(data = []) {
+    async loadFromBackend(data = []) {
       try {
         await storage.clear();
         this.$reset();
@@ -125,8 +133,9 @@ export const useNotesStore = defineStore('notes', {
           this.keys.push(note.getKey());
           await storage.setItem(note.getKey(), JSON.stringify(note.getData()));
         }
-        ;
         await storage.setItem('keys', JSON.stringify(this.keys));
+        this.prepareNotes();
+        this.handleTaskChange();
       }
       catch (err) {
         console.log(err);
@@ -140,38 +149,44 @@ export const useNotesStore = defineStore('notes', {
 
     /**
      * Prepare notes to be used
-     * Must be called after loadFromStorage() or loadFromData()
-     * @param notes_count
+     * Must be called from loadFromStorage() or loadFromBackend()
+     * @private
      */
-    async prepareNotes(notes_count) {
+    async prepareNotes() {
+
+      const settingsStore = useSettingsStore();
+      const tasksStore = useTasksStore();
 
       // ensure all notice boards exist
       const keys = [];
-      let activeKeyIsValid = false;
-
-      for (let no = 0; no < notes_count; no++) {
-        const key = Note.getKeyForNo(no);
-        keys.push(key);
-        if (this.activeKey == key) {
-          activeKeyIsValid = true;
-        }
-
-        if (!(key in this.notes)) {
-          const note = new Note({ note_no: no });
-          this.notes[key] = note;
-          this.editNotes[key] = note.getClone();
-
-          await storage.setItem(key, JSON.stringify(note.getData()));
+      for (const task_id of tasksStore.taskIds) {
+        for (let no = 0; no < settingsStore.notice_boards; no++) {
+          const key = Note.getKeyForNo(no, task_id);
+          keys.push(key);
+          if (!(key in this.notes)) {
+            const note = new Note({ task_id: task_id, note_no: no });
+            this.notes[key] = note;
+            this.editNotes[key] = note.getClone();
+            await storage.setItem(key, JSON.stringify(note.getData()));
+          }
         }
       }
+
       this.keys = keys;
       await storage.setItem('keys', JSON.stringify(this.keys));
-
-      if (notes_count > 0 && !activeKeyIsValid) {
-        this.activeKey = Note.getKeyForNo(0);
-      }
     },
 
+    /**
+     * Reelect the active note when the task changed
+     */
+    handleTaskChange() {
+      const settingsStore = useSettingsStore();
+      const tasksStore = useTasksStore();
+
+      if (settingsStore.notice_boards > 0) {
+        this.activeKey = Note.getKeyForNo(0, tasksStore.currentTask?.task_id);
+      }
+    },
 
     /**
      * Update the stored content
@@ -201,7 +216,6 @@ export const useNotesStore = defineStore('notes', {
 
       for (const key in this.editNotes) {
         try {
-
           // ensure it is not changed because it is bound to tiny
           const clonedNote = this.editNotes[key].getClone();
           const storedNote = this.notes[key] ?? new Note();
