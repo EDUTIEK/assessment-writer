@@ -16,7 +16,7 @@ function annotationsPossible() {
     return true;
   }
   const resource = resourcesStore.getResourceById(id);
-  if (resource !== null && resource.canBeAnnoteted()) {
+  if (resource && resource.canBeAnnoteted()) {
     return true;
   }
   return false;

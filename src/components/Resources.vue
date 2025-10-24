@@ -1,11 +1,20 @@
 <script setup>
 import {useLayoutStore} from '@/store/layout';
 import {useResourcesStore} from '@/store/resources';
+import {useTasksStore} from "@/store/tasks";
 import ResourcePdf from "@/components/ResourcePdf.vue";
 import ResourceUrl from "@/components/ResourceUrl.vue";
+import {nextTick, watch} from "vue";
 
 const layoutStore = useLayoutStore();
 const resourcesStore = useResourcesStore();
+const tasksStore = useTasksStore();
+
+async function setActiveResource() {
+  await nextTick();
+  resourcesStore.selectFirstEmbeddedResource();
+}
+watch(() => tasksStore.currentKey, setActiveResource);
 
 </script>
 

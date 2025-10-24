@@ -27,7 +27,8 @@ export const useResourcesStore = defineStore('resources', {
     currentResources(state) {
       const taskStore = useTasksStore();
       return Object.values(state.resources).filter(element =>
-          element.task_id === taskStore.currentTask?.task_id || element.task_id === null);
+          element.task_id === taskStore.currentTask?.task_id || element.task_id === null)
+          .sort(Resource.order);
     },
 
     hasResources(state) {
@@ -116,14 +117,12 @@ export const useResourcesStore = defineStore('resources', {
           }
           this.resources[resource.getKey()] = resource;
           await storage.setItem(resource.getKey(), resource.getData());
-          if (this.activeKey === '' && resource.isEmbeddedSelectable()) {
-            await this.selectResource(resource);
-          }
         }
         await storage.setItem('keys', Object.keys(this.resources));
 
         // proload files in the background (don't wait)
         this.loadFiles();
+        this.selectFirstEmbeddedResource();
       }
       catch (err) {
         console.log(err);
@@ -135,6 +134,17 @@ export const useResourcesStore = defineStore('resources', {
       if (this.isAvailable(resource)) {
         this.activeKey = resource.key;
         await storage.setItem('activeKey', this.activeKey);
+      }
+    },
+
+    async selectFirstEmbeddedResource() {
+
+      if (!this.activeResource) {
+        for (const resource of this.currentResources) {
+          if (resource.isEmbeddedSelectable) {
+            await this.selectResource(resource);
+          }
+        }
       }
     },
 
