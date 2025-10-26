@@ -524,15 +524,16 @@ export const useApiStore = defineStore('api', {
           this.setTimeOffset(response);
           this.refreshToken(response);
 
-          await changesStore.setChangesSent(Change.TYPE_ANNOTATIONS,
-              response.data['Task']['Annotations'] ?? [], this.lastChangesTry);
-
-          await changesStore.setChangesSent(Change.TYPE_NOTES,
-              response.data['EssayTask']['Notes'] ?? [], this.lastChangesTry);
-
-          await changesStore.setChangesSent(Change.TYPE_PREFERENCES,
-              response.data['EssayTask']['WriterPrefs'] ?? [], this.lastChangesTry);
-
+          if (response.data['Task']) {
+            await changesStore.setChangesSent(Change.TYPE_ANNOTATIONS,
+                response.data['Task']['Annotations'] ?? [], this.lastChangesTry);
+          }
+          if (response.data['EssayTask']) {
+            await changesStore.setChangesSent(Change.TYPE_NOTES,
+                response.data['EssayTask']['Notes'] ?? [], this.lastChangesTry);
+            await changesStore.setChangesSent(Change.TYPE_PREFERENCES,
+                response.data['EssayTask']['WriterPrefs'] ?? [], this.lastChangesTry);
+          }
 
           this.lastChangesTry = 0;
           return new SendingResult({
@@ -543,6 +544,7 @@ export const useApiStore = defineStore('api', {
         }
         catch (error) {
           this.lastChangesTry = 0;
+          console.log(error);
          return getSendingResultFromError(error);
         }
       }
