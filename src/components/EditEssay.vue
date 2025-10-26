@@ -20,6 +20,8 @@ import '@/plugins/tiny_de.js';
 import 'tinymce/plugins/lists';
 import 'tinymce/plugins/charmap';
 import 'tinymce/plugins/wordcount';
+import 'tinymce/plugins/table';
+import 'tinymce/plugins/pagebreak';
 
 /* content UI CSS is required */
 import 'tinymce/skins/ui/oxide/content.js';

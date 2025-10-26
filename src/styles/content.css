@@ -76,6 +76,12 @@
     counter-increment: h6;
 }
 
+.mce-pagebreak {
+    width: 100%;
+    height: 1px;
+    border: 1px solid gray;
+}
+
 /*
     Make font sizes in the tiny formats menu independent from changing font sizes in the content area
     May be refined by headlines css files
