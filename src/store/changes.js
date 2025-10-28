@@ -8,7 +8,7 @@ const storage = getStorage('changes');
 function startState() {
   const state = {
     changes: {},
-    lastSave: 0,            // timestamp (ms) of the lastsaving in the storage
+    lastSave: 0,            // timestamp (ms) of the last saving in the storage
     lastSendingSuccess: 0   // timestamp (ms) of the last successful sending to the backend
   };
   for (const type of Change.ALLOWED_TYPES) {
@@ -20,7 +20,7 @@ function startState() {
 /**
  * Changes Store
  *
- * This stores unsent change markers for all created, updated or deleted objects of certain types, e.g. Comment
+ * This stores unsent change markers for all created, updated or deleted objects of certain types, e.g. WritingStep
  * The stored changes just give the type, keys and timestamp of the change
  * The actual changed will be  added as a payload when the change is sent to the backend
  */
@@ -112,17 +112,16 @@ export const useChangesStore = defineStore('changes', {
      * @public
      */
     async loadFromStorage() {
-      const state = startState();
+      this.$reset();
 
       try {
-        for (const type in state.changes) {
-          const stored = await storage.getItem(type);
-          if (stored) {
+        for (const type in this.changes) {
+          const keys = storage.getItem(type) ?? [];
+          for (const key of keys) {
+            const stored = await storage.getItem(Change.buildChangeKey(type, key));
             const parsed = JSON.parse(stored);
             if (typeof parsed === 'object' && parsed !== null) {
-              for (const key in parsed) {
-                state.changes[type][key] = new Change(parsed[key]);
-              }
+              state.changes[type][key] = new Change(parsed);
             }
           }
         }
@@ -132,25 +131,6 @@ export const useChangesStore = defineStore('changes', {
       catch (err) {
         console.log(err);
       }
-
-      // replace the state with a new one
-      this.$patch(state);
-    },
-
-    /**
-     * Save changes of a type to the storage
-     * Saves the change objects as plain data
-     * @param {string} type see Change.ALLOWED_TYPES
-     */
-    async saveChangesOfTypeToStorage(type) {
-      const data = {};
-      for (const key in this.changes[type]) {
-        const change = this.changes[type][key];
-        data[key] = change.getData();
-      }
-      await storage.setItem(type, JSON.stringify(data));
-      this.lastSave = Date.now();
-      await storage.setItem('lastSave', this.lastSave);
     },
 
     /**
@@ -159,17 +139,10 @@ export const useChangesStore = defineStore('changes', {
      */
     async hasChangesInStorage() {
       for (const type in this.changes) {
-        const stored = await storage.getItem(type);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Object.keys(parsed).length > 0) {
-            return true;
-          }
-        }
+        const keys = await storage.getItem(type) ?? [];
+        return keys.length > 0;
       }
-      return false;
     },
-
 
     /**
      * Set a change and save the changes
@@ -180,7 +153,10 @@ export const useChangesStore = defineStore('changes', {
     async setChange(change) {
       if (change.isValid()) {
         this.changes[change.type][change.key] = change;
-        await this.saveChangesOfTypeToStorage(change.type);
+        await storage.setItem(change.getChangeKey(), JSON.stringify(change.getData()));
+        await storage.setItem(change.type, Object.keys(this.changes[change.type]));
+        this.lastSave = Date.now();
+        await storage.setItem('lastSave', this.lastSave);
       }
     },
 
@@ -191,10 +167,12 @@ export const useChangesStore = defineStore('changes', {
     async unsetChange(change) {
       if (change.isValid()) {
         delete this.changes[change.type][change.key];
-        await this.saveChangesOfTypeToStorage(change.type);
+        await storage.removeItem(change.getChangeKey());
+        await storage.setItem(change.type, Object.keys(this.changes[change.type]));
+        this.lastSave = Date.now();
+        await storage.setItem('lastSave', this.lastSave);
       }
     },
-
 
     /**
      * Cleanup changes that have been sent to the backend
@@ -207,31 +185,48 @@ export const useChangesStore = defineStore('changes', {
      */
     async setChangesSent(type, responses = [], maxDeleteTime) {
 
-      const changes = this.changes[type];
-      let toStore = false;
+      let store_keys = false;
 
       for (const response_data of responses) {
         const response = new ChangeResponse(response_data);
+        const old_key = response.key;
         const new_key = response.getNewKey();
-        const change = changes[response.key];
+        const change = this.changes[type][old_key];
 
         if (change) {
           if (change.last_change <= maxDeleteTime) {
-            delete changes[change.key];
-            toStore = true;
 
-          } else if (new_key !== null || new_key !== change.key) {
+            // change that has not been updated since the sending
+
+            // => delete it
+            delete this.changes[type][old_key];
+            await storage.removeItem(change.getChangeKey());
+            store_keys = true;
+
+          } else if (new_key !== null && new_key !== old_key) {
+
+            // a new key is returned for a change that was update meanwhile
+
+            // => delete the change with the old key
+            delete this.changes[type][old_key];
+            await storage.removeItem(change.getChangeKey());
+
+            // => save the same change with the new key
             change.key = new_key;
-            changes[new_key] = change;
-            delete changes[change.key];
-
-            toStore = true;
+            this.changes[type][new_key] = change;
+            await storage.setItem(change.getChangeKey(), JSON.stringify(change.getData()));
+            store_keys = true;
           }
         }
       }
-      if (toStore) {
-        await this.saveChangesOfTypeToStorage(type);
+
+      // finally save the keys if needed (avoid multiple writes)
+      if (store_keys) {
+        this.lastSave = Date.now();
+        await storage.setItem(type, Object.keys(this.changes[type]));
+        await storage.setItem('lastSave', this.lastSave);
       }
+
       this.lastSendingSuccess = Date.now();
       await storage.setItem('lastSendingSuccess', this.lastSendingSuccess);
     }

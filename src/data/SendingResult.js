@@ -1,7 +1,7 @@
 /**
  * Result from sending date to the backend
  */
-class SendingResult
+export default class SendingResult
 {
     /**
      * Step is a delta saving
@@ -58,5 +58,3 @@ class SendingResult
         }
     }
 }
-
-export default SendingResult;

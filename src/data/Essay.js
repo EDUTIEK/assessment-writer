@@ -1,7 +1,7 @@
 /**
  * Written Essay
  */
-class Essay {
+export default class Essay {
 
   static buildKey(task_id) {
     return 'E' + task_id;
@@ -114,4 +114,3 @@ class Essay {
   }
 }
 
-export default Note;

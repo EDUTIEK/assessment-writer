@@ -8,13 +8,16 @@ export default class Change {
 
   static ALLOWED_ACTIONS = [Change.ACTION_SAVE, Change.ACTION_DELETE];
 
-  static TYPE_ANNOTATIONS = 'annotations';
-  static TYPE_NOTES = 'notes';
-  static TYPE_PREFERENCES = 'preferences';
-  static TYPE_STEPS = 'steps';
+  static TYPE_ANNOTATIONS = 'anno';
+  static TYPE_NOTES = 'note';
+  static TYPE_PREFERENCES = 'pref';
+  static TYPE_STEPS = 'step';
 
   static ALLOWED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES, Change.TYPE_STEPS];
 
+  static buildChangeKey(type, key) {
+    return type + '_' + key;
+  }
 
   /**
    * Action to be executed
@@ -82,6 +85,10 @@ export default class Change {
    */
   getData() {
     return Object.assign({}, this);
+  }
+
+  getChangeKey() {
+    return Change.buildChangeKey(this.type, this.key);
   }
 
   /**

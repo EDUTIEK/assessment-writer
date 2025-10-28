@@ -146,13 +146,15 @@ export const useEssayStore = defineStore('essay', {
      * @param forced - force the updates
      */
     async checkUpdates(forced = false) {
+
       for (const key in this.essays) {
-        await this.checkUpdates(key, forced);
+        await this.updateContent(key, forced);
       }
 
       // reset the interval
       // this should start the interval again if it stopped accidentally
-      apiStore.setInterval('essayStore.checkUpdates', this.updateContent, checkInterval);
+      const apiStore = useApiStore();
+      apiStore.setInterval('essayStore.checkUpdates', this.checkUpdates, checkInterval);
     },
 
     /**
@@ -169,6 +171,10 @@ export const useEssayStore = defineStore('essay', {
       const stepsStore = useStepsStore();
 
       const essay = this.essays[key];
+      if (!essay) {
+        console.log('essay with key ' + key + ' not found!');
+        return false;
+      }
 
       // avoid too many checks
       const currentTime = Date.now();
@@ -211,13 +217,14 @@ export const useEssayStore = defineStore('essay', {
           const result = dmp.patch_apply(dmp.patch_fromText(difftext), storedContent);
 
           // make a full save if ...
-          if (!stepsStore.counts[essay.task_id] ?? 0                // it is the first save
+          if (!(stepsStore.counts[essay.task_id] ?? 0)              // it is the first save
             || forced
-            || difftext.length > currentContent.length                    // or diff would be longer than full text
+            || difftext.length > currentContent.length              // or diff would be longer than full text
             || essay.sum_of_distances + distance > maxDistance      // or enough changes are saved as diffs
-            || result[0] != currentContent                                // or patch is wrong
+            || result[0] != currentContent                          // or patch is wrong
           ) {
             step = new WritingStep({
+              task_id: essay.task_id,
               is_delta: 0,
               timestamp: apiStore.getServerTime(currentTime),
               content: currentContent,
@@ -231,6 +238,7 @@ export const useEssayStore = defineStore('essay', {
             || currentTime - this.lastSave > saveInterval         // enough time since last save
           ) {
             step = new WritingStep({
+              task_id: essay.task_id,
               is_delta: 1,
               timestamp: apiStore.getServerTime(currentTime),
               content: difftext,

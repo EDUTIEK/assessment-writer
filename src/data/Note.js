@@ -1,7 +1,7 @@
 /**
  * Writing Note
  */
-class Note {
+export default class Note {
 
   static buildKey(note_no, task_id) {
     return 'N' + note_no + '_' + task_id;
@@ -98,4 +98,3 @@ class Note {
   }
 }
 
-export default Note;

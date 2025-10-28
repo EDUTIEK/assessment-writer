@@ -1,5 +1,5 @@
 /**
- * SAving of a writing step (
+ * Saving of a textual change in a written essay
  */
 export default class WritingStep
 {
