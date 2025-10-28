@@ -1,8 +1,25 @@
 /**
  * SAving of a writing step (
  */
-class WritingStep
+export default class WritingStep
 {
+    static buildKey(index, task_id) {
+        return 'S' + index + '_' + task_id;
+    }
+
+
+    /**
+     * Number of the task o which the writing step belongs
+     * @type {integer}
+     */
+    task_id = 0;
+
+    /**
+     * Index of the step in the sequence for the task
+     * @type {integer}
+     */
+    index = 0;
+
     /**
      * Step is an incremental saving saving
      * true: the property content is a diff to the content before
@@ -54,6 +71,12 @@ class WritingStep
      * @param {object} data
      */
     setData(data) {
+        if (data.task_id !== undefined && data.task_id !== null) {
+            this.task_id = parseInt(data.task_id);
+        }
+        if (data.index !== undefined && data.index !== null) {
+            this.index = parseInt(data.index);
+        }
         if (data.is_delta !== undefined && data.is_delta !== null) {
             this.is_delta = !!data.is_delta;
         }
@@ -61,7 +84,7 @@ class WritingStep
             this.timestamp = parseInt(data.timestamp);
         }
         if (data.content !== undefined && data.content !== null) {
-            this.content =data.content.toString()
+            this.content = data.content.toString()
         }
         if (data.hash_before !== undefined && data.hash_before !== null) {
             this.hash_before =data.hash_before.toString()
@@ -79,15 +102,13 @@ class WritingStep
      * @returns {object}
      */
     getData() {
-        return {
-            is_delta: this.is_delta,
-            timestamp: this.timestamp,
-            content: this.content,
-            hash_before: this.hash_before,
-            hash_after: this.hash_after,
-            distance: this.distance
-        }
+        return Object.assign({}, this);
+    }
+
+    /**
+     * @returns {string}
+     */
+    getKey() {
+        return WritingStep.buildKey(this.index, this.task_id);
     }
 }
-
-export default WritingStep;

@@ -39,7 +39,7 @@ export const useChangesStore = defineStore('changes', {
      * @param {object} state
      * @returns {number}
      */
-    countChanges: state => {
+    countChanges(state) {
       let count = 0;
       for (const type in state.changes) {
         count += Object.keys(state.changes[type]).length;
@@ -47,7 +47,7 @@ export const useChangesStore = defineStore('changes', {
       return count;
     },
 
-    getCountOfChangesFor: state => {
+    getCountOfChangesFor(state) {
 
       /**
        * Get the count of changes for an object type
@@ -64,7 +64,7 @@ export const useChangesStore = defineStore('changes', {
       return fn;
     },
 
-    getChangesFor: state => {
+    getChangesFor(state) {
 
       /**
        * Get the changes of a type

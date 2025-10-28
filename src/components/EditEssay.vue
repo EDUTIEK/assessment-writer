@@ -37,21 +37,26 @@ import { useEssayStore } from '@/store/essay';
 import { useSettingsStore } from "@/store/settings";
 import { usePreferencesStore } from "@/store/preferences";
 import { useLayoutStore } from "@/store/layout";
+import { useTasksStore } from "@/store/tasks";
 import {nextTick, watch} from 'vue';
 
 const essayStore = useEssayStore();
 const settingsStore = useSettingsStore();
 const preferencesStore = usePreferencesStore();
 const layoutStore = useLayoutStore();
+const tasksStore = useTasksStore();
 
-const helper = new TinyHelper('app-essay');
+const props = defineProps(['taskKey', 'essayKey']);
+
+const helper = new TinyHelper('app-essay-' + props.essayKey);
 
 watch(() => settingsStore.contentClass, helper.applyFormat.bind(helper));
 watch(() => preferencesStore.editor_zoom, helper.applyZoom.bind(helper));
 watch(() => layoutStore.focusChange, handleFocusChange);
 
 async function handleFocusChange() {
-  if (layoutStore.focusTarget == 'right' && layoutStore.isEssayVisible) {
+  if (layoutStore.focusTarget == 'right' && layoutStore.isEssayVisible
+      && tasksStore.currentKey == props.taskKey) {
     helper.applyFocus();
     await nextTick();
     helper.restoreScrolling();
@@ -63,13 +68,13 @@ function handleInit() {
 }
 
 function handleChange() {
-  essayStore.updateContent(true);
+  essayStore.updateContent(props.essayKey);
   helper.applyZoom();
   helper.applyWordCount();
 }
 
 function handleKeyUp() {
-  essayStore.updateContent(true);
+  essayStore.updateContent(props.essayKey);
   helper.applyWordCount();
 }
 
@@ -80,8 +85,8 @@ function handleKeyUp() {
     <label for="app-essay" class="hidden">{{ $t("editEssayHiddenField") }}</label>
     <div class="tinyWrapper">
       <editor
-          id="app-essay"
-          v-model="essayStore.currentContent"
+          :id="'app-essay-' + props.essayKey"
+          v-model="essayStore.editEssays[props.essayKey].content"
           @init="handleInit"
           @change="handleChange"
           @keyup="handleKeyUp"

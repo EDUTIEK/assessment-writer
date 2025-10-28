@@ -42,7 +42,7 @@ function sleep(ms) {
 }
 
 async function closeWriter() {
-  await essayStore.updateContent(false, true);
+  await essayStore.checkUpdates(true);
   await sleep(500);
   if (essayStore.openSendings > 0) {
     apiStore.review = true;
@@ -52,7 +52,7 @@ async function closeWriter() {
 }
 
 async function openReview() {
-  await essayStore.updateContent(false, true);
+  await essayStore.checkUpdates(true);
   await sleep(500);
   apiStore.review = true;
 }

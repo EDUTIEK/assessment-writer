@@ -1,18 +1,21 @@
 <script setup>
 import { ref, watch } from "vue";
 import { useLayoutStore } from "@/store/layout";
+import { useEssayStore } from '@/store/essay';
 import { useNotesStore } from '@/store/notes';
 import { useSettingsStore } from "@/store/settings";
 import { usePreferencesStore } from "@/store/preferences";
 import {useAnnotationsStore} from "@/store/annotations";
 import {useTasksStore} from "@/store/tasks";
 import {useResourcesStore} from "@/store/resources";
+import Task from "@/data/Task";
 import EditNote from "@/components/EditNote.vue";
 import EditEssay from "@/components/EditEssay.vue";
 import Annotations from "@/components/Annotations.vue";
 
 
 const layoutStore = useLayoutStore();
+const essayStore = useEssayStore();
 const notesStore = useNotesStore();
 const settingsStore = useSettingsStore();
 const preferencesStore = usePreferencesStore();
@@ -123,14 +126,21 @@ watch(() => annotationsStore.selectionChange, showAnnotations);
     </div>
     <!-- Ally: use v-show to keep cursor at position when editors are switched -->
     <annotations class="appEditors" v-show="layoutStore.isAnnotationsSelected"></annotations>
-    <edit-essay class="appEditors" v-show="layoutStore.isEssaySelected"/>
+    <edit-essay class="appEditors"
+      v-for="essay in essayStore.essays"
+      v-show="layoutStore.isEssaySelected && tasksStore.currentKey == Task.buildKey(essay.task_id)"
+      :key="essay.getKey()"
+      :essayKey="essay.getKey()"
+      :taskKey="Task.buildKey(essay.task_id)"
+    >
+    </edit-essay>
     <edit-note class="appEditors"
-        v-if="settingsStore.notice_boards > 0"
-        v-show="layoutStore.isNotesSelected && notesStore.activeKey == key"
-        v-for="key in notesStore.keys"
-        :key="key"
-        :noteKey="key"
-        :noteLabel="settingsStore.notice_boards == 1 ? $t('editSelectEditNotes') : $t('editSelectEditNote', [notesStore.notes[key].note_no + 1])"
+      v-for="note in notesStore.notes"
+      v-if="settingsStore.notice_boards > 0"
+      v-show="layoutStore.isNotesSelected && notesStore.activeKey == note.getKey()"
+      :key="note.getKey()"
+      :noteKey="note.getKey()"
+      :noteLabel="settingsStore.notice_boards == 1 ? $t('editSelectEditNotes') : $t('editSelectEditNote', note.note_no + 1)"
     >
     </edit-note>
   </div>

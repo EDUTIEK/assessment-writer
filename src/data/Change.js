@@ -11,8 +11,9 @@ export default class Change {
   static TYPE_ANNOTATIONS = 'annotations';
   static TYPE_NOTES = 'notes';
   static TYPE_PREFERENCES = 'preferences';
+  static TYPE_STEPS = 'steps';
 
-  static ALLOWED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES];
+  static ALLOWED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES, Change.TYPE_STEPS];
 
 
   /**

@@ -75,8 +75,6 @@ export const useApiStore = defineStore('api', {
       showFinalizeFailure: false,         // show a failure message for the final saving
       showAuthorizeFailure: false,        // show a failure message for the final authorization
 
-      // should be unified in the next version
-      lastStepsTry: 0,                    // timestamp of the last try to send writing steps
       lastChangesTry: 0,                  // timestamp of the last try to send changes
     }
   },
@@ -93,7 +91,7 @@ export const useApiStore = defineStore('api', {
     },
 
     isSending: state => {
-      state.lastChangesTry > 0 || state.lastStepsTry > 0;
+      state.lastChangesTry > 0;
     },
 
     getRequestConfig: state => {
@@ -373,12 +371,9 @@ export const useApiStore = defineStore('api', {
 
       await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
       await preferencesStore.loadFromBackend(response.data['EssayTask']['WriterPrefs']);
+      await essayStore.loadFromBackend(response.data['EssayTask']['Essays']);
       await notesStore.loadFromBackend(response.data['EssayTask']['WriterNotices']);
       await notesStore.prepareNotes(settingsStore.notice_boards);
-
-      // await essayStore.loadFromData(response.data.essay);
-
-
 
       await changesStore.clearStorage();
       await layoutStore.initialize();
@@ -449,36 +444,6 @@ export const useApiStore = defineStore('api', {
       }
     },
 
-
-    /**
-     * Save the writing steps to the backend
-     * @param WritingStep[] steps
-     * @return SendingResult
-     */
-    async saveWritingStepsToBackend(steps) {
-      let response = {};
-      let data = {
-        steps: steps.map(step => step.getData())
-      }
-
-      this.lastStepsTry = Date.now();
-      try {
-        response = await axios.put('/writer/steps', data, this.getRequestConfig(this.dataToken));
-        this.setTimeOffset(response);
-        this.refreshToken(response);
-        this.lastStepsTry = 0;
-        return new SendingResult({
-          success: true,
-          message: response.statusText,
-          details: response.data
-        })
-      }
-      catch (error) {
-        this.lastStepsTry = 0;
-        return getSendingResultFromError(error);
-      }
-    },
-
     /**
      * Periodically send changes to the backend
      * Timer is set in initialisation
@@ -529,6 +494,8 @@ export const useApiStore = defineStore('api', {
                 response.data['Task']['Annotations'] ?? [], this.lastChangesTry);
           }
           if (response.data['EssayTask']) {
+            await changesStore.setChangesSent(Change.TYPE_STEPS,
+                response.data['EssayTask']['Steps'] ?? [], this.lastChangesTry);
             await changesStore.setChangesSent(Change.TYPE_NOTES,
                 response.data['EssayTask']['Notes'] ?? [], this.lastChangesTry);
             await changesStore.setChangesSent(Change.TYPE_PREFERENCES,
@@ -658,19 +625,21 @@ export const useApiStore = defineStore('api', {
       const alertStore = useAlertStore();
       const changesStore = useChangesStore();
 
-      if (authorize || essayStore.openSendings > 0) {
-        if (!await this.saveFinalContentToBackend(
-          essayStore.unsentHistory,
-          essayStore.storedContent,
-          essayStore.storedHash,
-          authorize,
-        )) {
-          this.review = true
-          this.showFinalizeFailure = true
-          this.showAuthorizeFailure = authorize
-          return;
-        }
-      }
+      // todo: migrate to task and changes
+
+      // if (authorize || essayStore.openSendings > 0) {
+      //   if (!await this.saveFinalContentToBackend(
+      //     essayStore.unsentHistory,
+      //     essayStore.storedContent,
+      //     essayStore.storedHash,
+      //     authorize,
+      //   )) {
+      //     this.review = true
+      //     this.showFinalizeFailure = true
+      //     this.showAuthorizeFailure = authorize
+      //     return;
+      //   }
+      // }
 
       await settingsStore.clearStorage();
       await tasksStore.clearStorage();
@@ -693,17 +662,19 @@ export const useApiStore = defineStore('api', {
      */
     async retry() {
 
-      const essayStore = useEssayStore();
-      if (await this.saveFinalContentToBackend(
-        essayStore.unsentHistory,
-        essayStore.storedContent,
-        essayStore.storedHash,
-        false,
-      )) {
-        await essayStore.setAllSavingsSent();
-      } else {
-        this.showFinalizeFailure = true
-      }
+      // todo: migtate to task and changes
+      // const essayStore = useEssayStore();
+      // if (await this.saveFinalContentToBackend(
+      //
+      //   essayStore.unsentHistory,
+      //   essayStore.storedContent,
+      //   essayStore.storedHash,
+      //   false,
+      // )) {
+      //   await essayStore.setAllSavingsSent();
+      // } else {
+      //   this.showFinalizeFailure = true
+      // }
 
       this.review = true;
     },

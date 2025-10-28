@@ -15,6 +15,10 @@ export default class Task {
                 : 0
     }
 
+    static buildKey(task_id) {
+        return 'T' + task_id;
+    }
+
     /**
      * Id of the task
      * @type {integer}
@@ -73,7 +77,7 @@ export default class Task {
             this.instructions = data.instructions.toString();
         }
 
-        this.key = 'T' + this.task_id.toString();
+        this.key = Task.buildKey(this.task_id);
     }
 
     /**

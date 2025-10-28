@@ -3,6 +3,10 @@
  */
 class Note {
 
+  static buildKey(note_no, task_id) {
+    return 'N' + note_no + '_' + task_id;
+  }
+
   /**
    * Number of the task o which the note belongs
    * @type {integer}
@@ -35,10 +39,7 @@ class Note {
   constructor(data = {}) {
     this.setData(data);
   }
-
-  static getKeyForNo(note_no, task_id) {
-    return 'N' + note_no + '_' + task_id;
-  }
+  
 
   /**
    * Set the data from a plain object
@@ -71,20 +72,21 @@ class Note {
    * @return {string}
    */
   getKey() {
-    return Note.getKeyForNo(this.note_no, this.task_id);
+    return Note.buildKey(this.note_no, this.task_id);
   }
 
   /**
    * Get a clone of the object
-   * @returns {Summary}
+   * @returns {Note}
    */
   getClone() {
     return new Note(this.getData());
   }
 
   /**
-   * Check if this object is equal to another summary
-   * @param other
+   * Check if this object is equal to another object
+   * @param {Note} other
+   * @return boolean
    */
   isEqual(other) {
     for (const key in this) {

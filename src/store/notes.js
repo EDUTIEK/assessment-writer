@@ -15,18 +15,16 @@ const storage = getStorage('notes');
 // set check interval very short to update the grade level according the points
 const checkInterval = 200;      // time (ms) to wait for a new update check (e.g. 0.2s to 1s)
 
-function startState() {
+const startState = {
 
-  return {
-    // saved in storage
-    keys: [],                   // list of string keys, indexed by notes_no
-    notes: {},                  // list of all note objects, indexed by key
+  // saved in storage
+  keys: [],                   // list of string keys, indexed by notes_no
+  notes: {},                  // list of all note objects, indexed by key
 
-    // not saved in storage
-    editNotes: {},              // notes that are actively edited
-    lastCheck: 0,               // timestamp (ms) of the last check if an update needs a storage
-    activeKey: null
-  }
+  // not saved in storage
+  editNotes: {},              // notes that are actively edited
+  lastCheck: 0,               // timestamp (ms) of the last check if an update needs a storage
+  activeKey: null
 }
 
 let lockUpdate = 0;             // prevent updates during a processing
@@ -37,7 +35,7 @@ let lockUpdate = 0;             // prevent updates during a processing
  */
 export const useNotesStore = defineStore('notes', {
   state: () => {
-    return startState();
+    return startState;
   },
 
   /**
@@ -161,7 +159,7 @@ export const useNotesStore = defineStore('notes', {
       const keys = [];
       for (const task_id of tasksStore.taskIds) {
         for (let no = 0; no < settingsStore.notice_boards; no++) {
-          const key = Note.getKeyForNo(no, task_id);
+          const key = Note.buildKey(no, task_id);
           keys.push(key);
           if (!(key in this.notes)) {
             const note = new Note({ task_id: task_id, note_no: no });
@@ -184,7 +182,7 @@ export const useNotesStore = defineStore('notes', {
       const tasksStore = useTasksStore();
 
       if (settingsStore.notice_boards > 0) {
-        this.activeKey = Note.getKeyForNo(0, tasksStore.currentTask?.task_id);
+        this.activeKey = Note.buildKey(0, tasksStore.currentTask?.task_id);
       }
     },
 
@@ -271,7 +269,6 @@ export const useNotesStore = defineStore('notes', {
           changes.push(apiStore.getChangeDataToSend(change));
         }
       }
-      ;
       return changes;
     },
   }
