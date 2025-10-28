@@ -14,6 +14,8 @@ export default class Change {
   static TYPE_STEPS = 'step';
 
   static ALLOWED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES, Change.TYPE_STEPS];
+  static WRITING_TYPES = [Change.TYPE_STEPS];
+  static OTHER_TYPES =  [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES];
 
   static buildChangeKey(type, key) {
     return type + '_' + key;

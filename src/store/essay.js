@@ -41,8 +41,6 @@ export const useEssayStore = defineStore('essay', {
   },
 
   getters: {
-    // todo rewrite calls to look for changes of type steps
-    openSendings: (state) => false,
 
     /**
      * Format a timestamp as string like '2022-02-21 21:22:22'

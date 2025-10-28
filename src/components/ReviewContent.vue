@@ -6,6 +6,7 @@ import { useEssayStore } from '@/store/essay';
 import { useNotesStore } from '@/store/notes';
 import { useSettingsStore } from '@/store/settings';
 import { usePreferencesStore } from "@/store/preferences";
+import { useChangesStore } from '@/store/changes';
 
 const apiStore = useApiStore();
 const configStore = useConfigStore();
@@ -14,12 +15,13 @@ const notesStore = useNotesStore();
 const writerStore = useWriterStore();
 const settingsStore = useSettingsStore();
 const preferencesStore = usePreferencesStore();
+const changesStore = useChangesStore();
 
 </script>
 
 <template>
   <v-main fill-height>
-      <div class="column" v-show="essayStore.openSendings > 0">
+      <div class="column" v-show="changesStore.hasWritingChanges">
         <div class="col-header bg-grey-lighten-4">
           <h2 class="text-h6" style="color:#f00000;">{{ $t('reviewContentNotYetSent') }}</h2>
           <p>{{ $t('reviewContentTryAgainLater') }}</p>
@@ -52,7 +54,7 @@ const preferencesStore = usePreferencesStore();
         </div>
       </div>
 
-      <div class="column" v-show="essayStore.openSendings <= 0">
+      <div class="column" v-show="!changesStore.hasWritingChanges">
         <div class="col-header bg-grey-lighten-4" v-show="writerStore.isExcluded">
           <h2 class="text-h6">{{ $t('reviewContentExcluded')}}</h2>
           <p>{{ $t('reviewContentEditingPrevented') }}</p>

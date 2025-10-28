@@ -84,17 +84,17 @@ export const useApiStore = defineStore('api', {
    */
   getters: {
 
-    isAllSent: state => {
+    isAllSent(state) {
       const essayStore = useEssayStore();
       const changesStore = useChangesStore();
-      return !state.isSending && essayStore.openSendings + changesStore.countChanges == 0;
+      return !state.isSending && changesStore.countChanges == 0;
     },
 
     isSending: state => {
       state.lastChangesTry > 0;
     },
 
-    getRequestConfig: state => {
+    getRequestConfig(state) {
 
       /**
        * Get the config object for REST requests
@@ -131,7 +131,7 @@ export const useApiStore = defineStore('api', {
       return fn;
     },
 
-    getResourceUrl: state => {
+    getResourceUrl(state) {
 
       /**
        * Get the Url for loading a file ressource
@@ -144,7 +144,7 @@ export const useApiStore = defineStore('api', {
       return fn;
     },
 
-    getServerTime: state => {
+    getServerTime(state) {
 
       /**
        * Get the server unix timestamp (s) corresponding to a client timestamp (ms)

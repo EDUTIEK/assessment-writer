@@ -35,34 +35,57 @@ export const useChangesStore = defineStore('changes', {
   getters: {
 
     /**
+     * Check if writing changes still have to be sent
+     */
+    hasWritingChanges(state) {
+      for (const type of Change.WRITING_TYPES) {
+        if (Object.keys(state.changes[type]).length > 0) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /**
+     * Check if other changes than writingSteps
+     */
+    hasOtherChanges(state) {
+      for (const type of Change.OTHER_TYPES) {
+        if (Object.keys(state.changes[type]).length > 0) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /**
      * Count the number of changes
      * @param {object} state
      * @returns {number}
      */
     countChanges(state) {
       let count = 0;
-      for (const type in state.changes) {
+      for (const type of Change.ALLOWED_TYPES) {
         count += Object.keys(state.changes[type]).length;
       }
       return count;
     },
 
-    getCountOfChangesFor(state) {
+    getChangesCount(state) {
 
       /**
-       * Get the count of changes for an object type
-       * @param {string} type see Change.ALLOWED_TYPES
-       * @returns {number}
+       * Get the number of changes of a type
+       * @param {array} types - types to count
        */
-      const fn = function (type) {
-        if (!Change.ALLOWED_TYPES.includes(type)) {
-          console.log('wrong type' + type);
-          return 0;
+      const fn = function (types = Change.ALLOWED_TYPES) {
+        let count = 0;
+        for (const type of types) {
+          count += Object.keys(state.changes[type]).length;
         }
-        return Object.keys(state.changes[type]).length;
+        return count;
       }
       return fn;
-    },
+    } ,
 
     getChangesFor(state) {
 

@@ -7,19 +7,23 @@ import Tasks from "@/components/Tasks.vue";
 import Timer from "@/components/Timer.vue";
 import Alerts from "@/components/Alerts.vue";
 import Help from "@/components/Help.vue";
+import Change from '@/data/Change';
 
 import { useApiStore } from '@/store/api';
 import { useWriterStore } from "@/store/writer";
 import { useAlertStore } from '@/store/alerts';
 import { useEssayStore } from '@/store/essay';
 import { useLayoutStore } from '@/store/layout';
+import { useChangesStore } from '@/store/changes';
 import { nextTick, watch } from 'vue';
+
 
 const apiStore = useApiStore();
 const writerStore = useWriterStore();
 const alertStore = useAlertStore();
 const essayStore = useEssayStore();
 const layoutStore = useLayoutStore();
+const ChangesStore = useChangesStore();
 
 async function handleFocusChange() {
   if (layoutStore.focusTarget == 'header') {
@@ -44,7 +48,7 @@ function sleep(ms) {
 async function closeWriter() {
   await essayStore.checkUpdates(true);
   await sleep(500);
-  if (essayStore.openSendings > 0) {
+  if (changesStore.hasWritingChanges) {
     apiStore.review = true;
   } else {
     window.location = apiStore.returnUrl;

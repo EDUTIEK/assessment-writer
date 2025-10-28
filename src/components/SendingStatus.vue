@@ -9,6 +9,7 @@ import {useChangesStore} from "@/store/changes";
 import {ref} from "vue";
 import FileHandling from "@/lib/FileHandling";
 import SendingResult from "@/data/SendingResult";
+import Change from '@/data/Change';
 
 const apiStore = useApiStore();
 const layoutStore = useLayoutStore();
@@ -93,34 +94,7 @@ async function downloadEssay() {
             <br>{{sendingResult.message}}
             <br>{{sendingResult.details}}
           </v-alert>
-          <h3>{{ $t('sendingStatusWritingSteps') }}</h3>
-          <v-container>
-            <v-row>
-              <v-col cols="6">
-                {{ $t('sendingStatusLastBrowserSave') }}
-              </v-col>
-              <v-col cols="6">
-                {{essayStore.lastSave > 0 ? formatTimestamp(essayStore.lastSave) : 'keine'}}
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="6">
-                {{ $t('sendingStatusLastSending') }}
-              </v-col>
-                <v-col cols="6">
-                {{essayStore.lastSendingSuccess > 0 ? formatTimestamp(essayStore.lastSendingSuccess) : 'keine'}}
-              </v-col>
-            </v-row>
-              <v-row>
-                <v-col cols="6">
-                  {{ $t('sendingStatusStatus') }}
-              </v-col>
-              <v-col cols="6">
-                {{essayStore.openSendings > 0 ? (essayStore.openSendings  + ' noch nicht übertragen') : 'alle sind übertragen' }}
-              </v-col>
-            </v-row>
-          </v-container>
-          <h3>{{ $t('sendingStatusOtherChanges') }}</h3>
+
           <v-container>
             <v-row>
               <v-col cols="6">
@@ -134,19 +108,28 @@ async function downloadEssay() {
               <v-col cols="6">
                 {{ $t('sendingStatusLastSending') }}
               </v-col>
-              <v-col cols="6">
+                <v-col cols="6">
                 {{changesStore.lastSendingSuccess > 0 ? formatTimestamp(changesStore.lastSendingSuccess) : $t('sendingStatusNone')}}
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="6">
-                {{ $t('sendingStatusStatus') }}
+                {{ $t('sendingStatusWritingSteps') }}
               </v-col>
               <v-col cols="6">
-                {{changesStore.countChanges > 0 ? $t('sendingStatusNumNotSent', changesStore.countChanges) : 'alle sind übertragen' }}
+                {{changesStore.hasWritingChanges ? $t('sendingStatusNumNotSent', changesStore.getChangesCount(Change.WRITING_TYPES)) : $t('sendingStatusAllSent') }}
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="6">
+                {{$t('sendingStatusOtherChanges') }}
+              </v-col>
+              <v-col cols="6">
+                {{changesStore.hasOtherChanges > 0 ? $t('sendingStatusNumNotSent', changesStore.getChangesCount(Change.OTHER_TYPES)) : $t('sendingStatusAllSent') }}
               </v-col>
             </v-row>
           </v-container>
+
         </v-card-text>
         <v-card-actions>
           <v-btn @click="sendUpdate()">
