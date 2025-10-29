@@ -1,29 +1,21 @@
 <script setup>
 
 /**
- * AApplication bar
+ * Application bar
  */
 import Tasks from "@/components/Tasks.vue";
 import Timer from "@/components/Timer.vue";
 import Alerts from "@/components/Alerts.vue";
 import Help from "@/components/Help.vue";
-import Change from '@/data/Change';
+import {stores} from "@/store";
+import {nextTick, watch} from 'vue';
 
-import { useApiStore } from '@/store/api';
-import { useWriterStore } from "@/store/writer";
-import { useAlertStore } from '@/store/alerts';
-import { useEssayStore } from '@/store/essay';
-import { useLayoutStore } from '@/store/layout';
-import { useChangesStore } from '@/store/changes';
-import { nextTick, watch } from 'vue';
-
-
-const apiStore = useApiStore();
-const writerStore = useWriterStore();
-const alertStore = useAlertStore();
-const essayStore = useEssayStore();
-const layoutStore = useLayoutStore();
-const ChangesStore = useChangesStore();
+const apiStore = stores.api();
+const writerStore = stores.writer();
+const alertStore = stores.alert();
+const essayStore = stores.essay();
+const layoutStore = stores.layout();
+const changesStore = stores.changes();
 
 async function handleFocusChange() {
   if (layoutStore.focusTarget == 'header') {

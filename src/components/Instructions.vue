@@ -2,7 +2,7 @@
 import { useTasksStore } from '@/store/tasks';
 import { useLayoutStore } from '@/store/layout';
 import { usePreferencesStore } from "@/store/preferences";
-import { useClipbardStore } from "@/store/clipboard";
+import { useClipboardStore } from "@/store/clipboard";
 import {useAnnotationsStore} from "@/store/annotations";
 import TextMarker from '@/lib/TextMarker';
 import { ref, onMounted, nextTick, watch } from 'vue';
@@ -11,7 +11,7 @@ import Annotation from "@/data/Annotation";
 const tasksStore = useTasksStore();
 const layoutStore = useLayoutStore();
 const preferencesStore = usePreferencesStore();
-const clipboardStore = useClipbardStore();
+const clipboardStore = useClipboardStore();
 const annotationsStore = useAnnotationsStore();
 
 const markingActive = ref(0);

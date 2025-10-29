@@ -1,6 +1,6 @@
 import tinymce from "tinymce";
 import {useSettingsStore} from "@/store/settings";
-import {useClipbardStore} from "@/store/clipboard";
+import {useClipboardStore} from "@/store/clipboard";
 import {usePreferencesStore} from "@/store/preferences";
 import {nextTick, ref, watch} from 'vue';
 import i18n from "@/plugins/i18n";
@@ -25,7 +25,7 @@ export default class TinyHelper {
         this.editor_id = editor_id;
 
         settingsStore = useSettingsStore();
-        clipboardStore = useClipbardStore();
+        clipboardStore = useClipboardStore();
         preferencesStore = usePreferencesStore();
     }
 

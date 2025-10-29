@@ -279,32 +279,6 @@ export const useEssayStore = defineStore('essay', {
       }
 
       lockUpdate = 0;
-    },
-
-
-    /**
-     * Note that all
-     */
-    async setAllSavingsSent() {
-      // todo: refactor to changes store
-    },
-
-    /**
-     * Check if unsent savings are in the storage
-     * (called from api store at initialisation)
-     */
-    async hasUnsentSavingsInStorage() {
-      // todo: refactor to changes store
-      return false;
-    },
-
-    /**
-     * Check if the current hash from the server is saved in the storage
-     * (called from api store at initialisation)
-     */
-    async hasHashInStorage(hash) {
-      // todo refactor to changes store
-      return false;
     }
   }
 });

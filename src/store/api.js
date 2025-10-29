@@ -1,27 +1,12 @@
-import { defineStore } from 'pinia';
+import {defineStore} from 'pinia';
 import axios from 'axios'
 import Cookies from 'js-cookie';
-import { useConfigStore } from "@/store/config";
-import { useSettingsStore } from "@/store/settings";
-import { useWriterStore } from "@/store/writer";
-import { usePreferencesStore } from "@/store/preferences";
-import { useTasksStore } from "@/store/tasks";
-import { useLayoutStore } from "@/store/layout";
-import { useResourcesStore } from "@/store/resources";
-import { useEssayStore } from "@/store/essay";
-import { useNotesStore } from "@/store/notes";
-import { useAlertStore } from "@/store/alerts";
-import { useChangesStore } from "@/store/changes";
-import { useAnnotationsStore } from '@/store/annotations';
-
-import Resource from "@/data/Resource";
-
+import {clearAllStores, stores} from "@/store";
 import md5 from 'md5';
 import Change from "@/data/Change";
 import SendingResult from "@/data/SendingResult";
 
 const syncInterval = 5000;      // time (ms) to wait for syncing with the backend
-
 
 function getSendingResultFromError(error) {
   if (error.response) {
@@ -85,9 +70,7 @@ export const useApiStore = defineStore('api', {
   getters: {
 
     isAllSent(state) {
-      const essayStore = useEssayStore();
-      const changesStore = useChangesStore();
-      return !state.isSending && changesStore.countChanges == 0;
+      return !state.isSending && stores.changes().countChanges == 0;
     },
 
     isSending: state => {
@@ -188,7 +171,6 @@ export const useApiStore = defineStore('api', {
     async init() {
 
       let newContext = false;
-      let lastHash = Cookies.get('xlasLastHash');
 
       // take values formerly stored
       this.backendUrl = localStorage.getItem('xlasWriterBackendUrl');
@@ -230,46 +212,29 @@ export const useApiStore = defineStore('api', {
         return;
       }
 
-      const essayStore = useEssayStore();
-      const changesStore = useChangesStore();
+      const changesStore = stores.changes();
+      await changesStore.loadFromStorage();
 
       if (newContext) {
         // switching to a new task or user always requires a load from the backend
         // be shure that existing data is not unintentionally replaced
 
-        if (await essayStore.hasUnsentSavingsInStorage()
-          || changesStore.countChanges > 0) {
+        if (changesStore.countChanges > 0) {
           console.log('init: new context, open savings');
           this.showReplaceConfirmation = true;
         } else {
           console.log('init: new context, no open savings');
           await this.loadDataFromBackend();
         }
-      } else if (lastHash) {
-        // savings already exists on the server
-        // check that it matches with the data in the app
-
-        if (await essayStore.hasHashInStorage(lastHash)) {
-          console.log('init: same context, same hash');
-          await this.loadDataFromStorage();
-        } else if (await essayStore.hasUnsentSavingsInStorage()
-          || changesStore.countChanges > 0) {
-          console.log('init: same context, hashes differ, open savings');
-          this.showReloadConfirmation = true;
-        } else {
-          console.log('init: same context, hashes differ, no open savings');
-          await this.loadDataFromBackend();
-        }
       } else {
         // no savings exist on the server
         // check if data is already entered but not sent
 
-        if (await essayStore.hasUnsentSavingsInStorage()
-          || changesStore.countChanges > 0) {
-          console.log('init: same context, no server hash, open savings');
+        if (changesStore.countChanges > 0) {
+          console.log('init: same context, open savings');
           await this.loadDataFromStorage();
         } else {
-          console.log('init: same context, no server hash, no open savings');
+          console.log('init: same context, no open savings');
           await this.loadDataFromBackend();
         }
       }
@@ -294,33 +259,21 @@ export const useApiStore = defineStore('api', {
       console.log("loadDataFromStorage...");
       this.updateConfig();
 
-      const settingsStore = useSettingsStore();
-      const preferencesStore = usePreferencesStore();
-      const tasksStore = useTasksStore();
-      const alertStore = useAlertStore();
-      const resourcesStore = useResourcesStore();
-      const essayStore = useEssayStore();
-      const notesStore = useNotesStore();
-      const layoutStore = useLayoutStore();
-      const changesStore = useChangesStore();
-      const annotationsStore = useAnnotationsStore();
-
-      await settingsStore.loadFromStorage();
-      await preferencesStore.loadFromStorage();
-      await tasksStore.loadFromStorage();
-      await alertStore.loadFromStorage();
-      await resourcesStore.loadFromStorage();
-      await essayStore.loadFromStorage();
-      await notesStore.loadFromStorage();
-      await notesStore.prepareNotes(settingsStore.notice_boards);
-      await layoutStore.loadFromStorage();
-      await changesStore.loadFromStorage();
-      await annotationsStore.loadFromStorage();
-
+      await stores.settings().loadFromStorage();
+      await stores.preferences().loadFromStorage();
+      await stores.tasks().loadFromStorage();
+      await stores.alert().loadFromStorage();
+      await stores.resources().loadFromStorage();
+      await stores.essay().loadFromStorage();
+      await stores.notes().loadFromStorage();
+      await stores.notes().prepareNotes(stores.settings().notice_boards);
+      await stores.layout().loadFromStorage();
+      await stores.changes().loadFromStorage();
+      await stores.annotations().loadFromStorage();
 
       // directy check for updates of task settings to avoid delay
       await this.loadUpdateFromBackend();
-      await layoutStore.initialize();
+      await stores.layout().initialize();
       this.initialized = true;
     },
 
@@ -345,41 +298,25 @@ export const useApiStore = defineStore('api', {
         return;
       }
 
-      const configStore = useConfigStore();
-      const writerStore = useWriterStore();
-      const alertStore = useAlertStore();
+      await stores.config().loadFromBackend(response.data['Assessment']['Config']);
+      await stores.writer().loadFromBackend(response.data['Assessment']['Writer']);
+      await stores.alert().loadFromBackend(response.data['Assessment']['Alerts']);
 
-      const tasksStore = useTasksStore();
-      const resourcesStore = useResourcesStore();
-      const annotationsStore = useAnnotationsStore();
+      await stores.tasks().loadFromBackend(response.data['Task']['Tasks']);
+      await stores.resources().loadFromBackend(response.data['Task']['Resources']);
+      await stores.annotations().loadFromBackend(response.data['Task']['Annotations']);
 
-      const settingsStore = useSettingsStore();
-      const preferencesStore = usePreferencesStore();
-      const essayStore = useEssayStore();
-      const notesStore = useNotesStore();
+      await stores.settings().loadFromBackend(response.data['EssayTask']['WritingSettings']);
+      await stores.preferences().loadFromBackend(response.data['EssayTask']['WriterPrefs']);
+      await stores.essay().loadFromBackend(response.data['EssayTask']['Essays']);
+      await stores.notes().loadFromBackend(response.data['EssayTask']['WriterNotices']);
+      await stores.notes().prepareNotes(stores.settings().notice_boards);
 
-      const changesStore = useChangesStore();
-      const layoutStore = useLayoutStore();
-
-      await configStore.loadFromBackend(response.data['Assessment']['Config']);
-      await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
-      await alertStore.loadFromBackend(response.data['Assessment']['Alerts']);
-
-      await tasksStore.loadFromBackend(response.data['Task']['Tasks']);
-      await resourcesStore.loadFromBackend(response.data['Task']['Resources']);
-      await annotationsStore.loadFromBackend(response.data['Task']['Annotations']);
-
-      await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
-      await preferencesStore.loadFromBackend(response.data['EssayTask']['WriterPrefs']);
-      await essayStore.loadFromBackend(response.data['EssayTask']['Essays']);
-      await notesStore.loadFromBackend(response.data['EssayTask']['WriterNotices']);
-      await notesStore.prepareNotes(settingsStore.notice_boards);
-
-      await changesStore.clearStorage();
-      await layoutStore.initialize();
+      await stores.changes().clearStorage();
+      await stores.layout().initialize();
 
       // send the time when the working on the task is started
-      if (!writerStore.working_start ?? false) {
+      if (!stores.writer().working_start ?? false) {
         await this.sendStart();
       }
       this.initialized = true;
@@ -404,13 +341,9 @@ export const useApiStore = defineStore('api', {
         this.setTimeOffset(response);
         this.refreshToken(response);
 
-        const writerStore = useWriterStore();
-        const alertStore = useAlertStore();
-        const settingsStore = useSettingsStore();
-
-        // await writerStore.loadFromBackend(response.data['Assessment']['Writer']);
-        // await alertStore.loadFromBackend(response.data['Assessment']['Alerts']);
-        // await settingsStore.loadFromBackend(response.data['EssayTask']['WritingSettings']);
+        // await stores.writer().loadFromBackend(response.data['Assessment']['Writer']);
+        // await stores.alert().loadFromBackend(response.data['Assessment']['Alerts']);
+        // await stores.settings().loadFromBackend(response.data['EssayTask']['WritingSettings']);
 
         this.lastChangesTry = 0;
         return true;
@@ -452,10 +385,6 @@ export const useApiStore = defineStore('api', {
      * @return SendingResult|null
      */
     async saveChangesToBackend(wait = false) {
-      const annotationsStore = useAnnotationsStore();
-      const changesStore = useChangesStore();
-      const notesStore = useNotesStore();
-      const preferencesStore = usePreferencesStore();
 
       // wait up to seconds for a running request to finish before giving up
       if (wait) {
@@ -471,17 +400,18 @@ export const useApiStore = defineStore('api', {
         return null;
       }
 
+      const changesStore = stores.changes();
       if (changesStore.countChanges > 0) {
         this.lastChangesTry = Date.now();
 
         try {
           const data = {
             'Task': {
-              'Annotations': await annotationsStore.getChangedData(this.lastChangesTry)
+              'Annotations': await stores.annotations().getChangedData(this.lastChangesTry)
             },
             'EssayTask': {
-              'WriterPrefs': await preferencesStore.getChangedData(this.lastChangesTry),
-              'Notes': await notesStore.getChangedData(this.lastChangesTry),
+              'WriterPrefs': await stores.preferences().getChangedData(this.lastChangesTry),
+              'Notes': await stores.notes().getChangedData(this.lastChangesTry),
             }
           };
 
@@ -522,19 +452,16 @@ export const useApiStore = defineStore('api', {
 
     /**
      * Save the final authorization to the backend
-     * @param WritingStep[] steps
-     * @param string content
-     * @param string hash
      * @param bool authorized
      */
-    async saveFinalContentToBackend(steps, content, hash, authorized) {
+    async saveFinalContentToBackend(authorized) {
       let response = {};
-      let data = {
-        steps: steps.map(step => step.getData()),
-        content: content,
-        hash: hash,
-        authorized: authorized
-      }
+      const data = {
+        'EssayTask': {
+          'Essays': [],
+          'Notes': [],
+        }
+      };
       try {
         response = await axios.put('/final', data, this.getRequestConfig(this.dataToken));
         this.refreshToken(response);
@@ -616,41 +543,16 @@ export const useApiStore = defineStore('api', {
      */
     async finalize(authorize) {
 
-      const settingsStore = useSettingsStore();
-      const tasksStore = useTasksStore();
-      const resourcesStore = useResourcesStore();
-      const essayStore = useEssayStore();
-      const notesStore = useNotesStore();
-      const layoutStore = useLayoutStore();
-      const alertStore = useAlertStore();
-      const changesStore = useChangesStore();
+      if (authorize || stores.changes().hasWritingChanges) {
+        if (!await this.saveFinalContentToBackend(authorize)) {
+          this.review = true
+          this.showFinalizeFailure = true
+          this.showAuthorizeFailure = authorize
+          return;
+        }
+      }
 
-      // todo: migrate to task and changes
-
-      // if (authorize || essayStore.openSendings > 0) {
-      //   if (!await this.saveFinalContentToBackend(
-      //     essayStore.unsentHistory,
-      //     essayStore.storedContent,
-      //     essayStore.storedHash,
-      //     authorize,
-      //   )) {
-      //     this.review = true
-      //     this.showFinalizeFailure = true
-      //     this.showAuthorizeFailure = authorize
-      //     return;
-      //   }
-      // }
-
-      await settingsStore.clearStorage();
-      await tasksStore.clearStorage();
-      await resourcesStore.clearStorage();
-      await essayStore.clearStorage();
-      await notesStore.clearStorage();
-      await layoutStore.clearStorage();
-      await alertStore.clearStorage();
-      await changesStore.clearStorage();
-      localStorage.clear();
-
+      await clearAllStores();
       window.location = this.returnUrl;
     },
 
@@ -661,21 +563,9 @@ export const useApiStore = defineStore('api', {
      * Instead the review screen is shown again and allows to auhorize
      */
     async retry() {
-
-      // todo: migtate to task and changes
-      // const essayStore = useEssayStore();
-      // if (await this.saveFinalContentToBackend(
-      //
-      //   essayStore.unsentHistory,
-      //   essayStore.storedContent,
-      //   essayStore.storedHash,
-      //   false,
-      // )) {
-      //   await essayStore.setAllSavingsSent();
-      // } else {
-      //   this.showFinalizeFailure = true
-      // }
-
+      if (!await this.saveFinalContentToBackend(false)) {
+        this.showFinalizeFailure = true
+      }
       this.review = true;
     },
 

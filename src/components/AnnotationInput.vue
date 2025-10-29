@@ -2,13 +2,13 @@
 import { useApiStore } from '@/store/api';
 import { useAnnotationsStore } from "@/store/annotations";
 import { useLayoutStore } from '@/store/layout';
-import {useClipbardStore} from "@/store/clipboard";
+import {useClipboardStore} from "@/store/clipboard";
 import {nextTick, onMounted, ref, watch} from 'vue';
 
 const apiStore = useApiStore();
 const annotationsStore = useAnnotationsStore();
 const layoutStore = useLayoutStore();
-const clipboardStore = useClipbardStore();
+const clipboardStore = useClipboardStore();
 
 const props = defineProps(['annotation']);
 const annotation = props.annotation;

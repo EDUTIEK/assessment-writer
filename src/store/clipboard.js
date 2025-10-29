@@ -16,7 +16,7 @@ function normalize(html) {
 /**
  * Clipboard Store
  */
-export const useClipbardStore = defineStore('clipboard', {
+export const useClipboardStore = defineStore('clipboard', {
   state: () => {
     return {
       content: '',
@@ -79,6 +79,10 @@ export const useClipbardStore = defineStore('clipboard', {
   },
 
   actions: {
+
+    async clearStorage() {
+      this.$reset();
+    },
 
     /**
      * Set the allowed clipboard content

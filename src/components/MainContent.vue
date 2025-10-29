@@ -5,12 +5,12 @@ import Resources from "@/components/Resources.vue";
 import EditSelect from "@/components/EditSelect.vue";
 import { useLayoutStore } from "../store/layout";
 import { useResourcesStore } from "../store/resources";
-import { useClipbardStore } from "@/store/clipboard";
+import { useClipboardStore } from "@/store/clipboard";
 import {nextTick, onMounted} from "vue";
 
 const layoutStore = useLayoutStore();
 const resourcesStore = useResourcesStore();
-const clipboardStore = useClipbardStore();
+const clipboardStore = useClipboardStore();
 
 // enable keyboard hotkeys
 document.addEventListener('keydown', layoutStore.handleKeyDown);
