@@ -39,17 +39,13 @@ function sleep(ms) {
 
 async function closeWriter() {
   await essayStore.checkUpdates(true);
-  await sleep(500);
-  if (changesStore.hasWritingChanges) {
-    apiStore.review = true;
-  } else {
-    window.location = apiStore.returnUrl;
-  }
+  await apiStore.saveChangesToBackend(true);
+  window.location = apiStore.returnUrl;
 }
 
 async function openReview() {
   await essayStore.checkUpdates(true);
-  await sleep(500);
+  await nextTick();
   apiStore.review = true;
 }
 
@@ -65,7 +61,7 @@ async function openReview() {
     <alerts v-if="alertStore.hasAlerts"></alerts>
     <timer v-if="writerStore.hasWritingEnd"></timer>
 
-    <v-btn class="app-header-item" v-show="!apiStore.review" @click="closeWriter()">
+    <v-btn class="app-header-item" v-show="!apiStore.review" @click="closeWriter">
       <v-icon left icon="mdi-pause"></v-icon>
       <span>{{ $t("appBarInterrupt") }}</span>
     </v-btn>

@@ -139,12 +139,12 @@ export const useChangesStore = defineStore('changes', {
 
       try {
         for (const type in this.changes) {
-          const keys = storage.getItem(type) ?? [];
+          const keys = await storage.getItem(type) ?? [];
           for (const key of keys) {
             const stored = await storage.getItem(Change.buildChangeKey(type, key));
             const parsed = JSON.parse(stored);
             if (typeof parsed === 'object' && parsed !== null) {
-              state.changes[type][key] = new Change(parsed);
+              this.changes[type][key] = new Change(parsed);
             }
           }
         }
@@ -216,7 +216,7 @@ export const useChangesStore = defineStore('changes', {
         const new_key = response.getNewKey();
         const change = this.changes[type][old_key];
 
-        if (change) {
+        if (change && response.done) {
           if (change.last_change <= maxDeleteTime) {
 
             // change that has not been updated since the sending

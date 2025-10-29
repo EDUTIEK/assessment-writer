@@ -1,22 +1,17 @@
 <script setup>
 
-import {useApiStore} from "@/store/api";
-import {useLayoutStore} from "@/store/layout";
-import {useEssayStore} from "@/store/essay";
-import {useTasksStore} from "@/store/tasks";
-import {useWriterStore} from "@/store/writer";
-import {useChangesStore} from "@/store/changes";
+import {stores} from "@/store";
 import {ref} from "vue";
 import FileHandling from "@/lib/FileHandling";
 import SendingResult from "@/data/SendingResult";
 import Change from '@/data/Change';
 
-const apiStore = useApiStore();
-const layoutStore = useLayoutStore();
-const essayStore = useEssayStore();
-const tasksStore = useTasksStore();
-const writerStore = useWriterStore();
-const changesStore = useChangesStore();
+const apiStore = stores.api();
+const layoutStore = stores.layout();
+const essayStore = stores.essay();
+const tasksStore = stores.tasks();
+const writerStore = stores.writer();
+const changesStore = stores.changes();
 const fileHandling = new FileHandling();
 
 const showSending = ref(false);
@@ -45,22 +40,13 @@ async function sendUpdate() {
   showFailure.value = false;
   showSending.value = true;
 
-  const result1 = await essayStore.sendUpdate(true);
-  if (result1 && !result1.success) {
-    sendingResult.value = result1;
+  const result = await apiStore.saveChangesToBackend(true);
+  if (result && !result.success) {
+    sendingResult.value = result;
     showSending.value = false;
     showFailure.value = true;
     return;
   }
-
-  const result2 = await apiStore.saveChangesToBackend(true);
-  if (result2 && !result2.success) {
-    sendingResult.value = result2;
-    showSending.value = false;
-    showFailure.value = true;
-    return;
-  }
-
   showSending.value = false;
 }
 

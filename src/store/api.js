@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia';
+import {clearAllStores, stores} from "@/store";
 import axios from 'axios'
 import Cookies from 'js-cookie';
-import {clearAllStores, stores} from "@/store";
 import md5 from 'md5';
 import Change from "@/data/Change";
 import SendingResult from "@/data/SendingResult";
@@ -122,7 +122,7 @@ export const useApiStore = defineStore('api', {
        */
       const fn = function (resource) {
         const config = this.getRequestConfig(this.fileToken);
-        return config.baseURL + '/writer/file/resource/' + resource.id + '?' + config.params.toString();
+        return config.baseURL + '/writer/file/task/resource/' + resource.id + '?' + config.params.toString();
       }
       return fn;
     },
@@ -159,7 +159,6 @@ export const useApiStore = defineStore('api', {
       return fn;
     }
   },
-
 
   actions: {
 
@@ -315,10 +314,6 @@ export const useApiStore = defineStore('api', {
       await stores.changes().clearStorage();
       await stores.layout().initialize();
 
-      // send the time when the working on the task is started
-      if (!stores.writer().working_start ?? false) {
-        await this.sendStart();
-      }
       this.initialized = true;
     },
 
@@ -356,28 +351,6 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
-     * Send the time when the editing has started
-     */
-    async sendStart() {
-
-      let response = {};
-      let data = {
-        started: this.getServerTime(Date.now())
-      }
-      try {
-        response = await axios.put('/writer/start', data, this.getRequestConfig(this.dataToken));
-        this.setTimeOffset(response);
-        this.refreshToken(response);
-        return true;
-      }
-      catch (error) {
-        console.error(error);
-        this.showInitFailure = true;
-        return false;
-      }
-    },
-
-    /**
      * Periodically send changes to the backend
      * Timer is set in initialisation
      *
@@ -386,7 +359,7 @@ export const useApiStore = defineStore('api', {
      */
     async saveChangesToBackend(wait = false) {
 
-      // wait up to seconds for a running request to finish before giving up
+      // wait up to five second for a running request to finish before giving up
       if (wait) {
         let tries = 0;
         while (tries < 5 && this.lastChangesTry > 0) {
@@ -412,6 +385,7 @@ export const useApiStore = defineStore('api', {
             'EssayTask': {
               'WriterPrefs': await stores.preferences().getChangedData(this.lastChangesTry),
               'Notes': await stores.notes().getChangedData(this.lastChangesTry),
+              'Steps': await stores.steps().getChangedData(this.lastChangesTry),
             }
           };
 

@@ -96,7 +96,7 @@ export const useEssayStore = defineStore('essay', {
           const stored = await storage.getItem(key);
           if (stored) {
             if (typeof stored === 'object' && stored !== null) {
-              const essay = new essay(stored);
+              const essay = new Essay(stored);
               this.essays[key] = essay;
               this.editEssays[key] = essay.getClone();
             }
