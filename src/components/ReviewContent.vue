@@ -1,37 +1,43 @@
 <script setup>
-import { useApiStore } from '@/store/api';
-import { useConfigStore } from '@/store/config';
-import { useWriterStore } from '@/store/writer';
-import { useEssayStore } from '@/store/essay';
-import { useNotesStore } from '@/store/notes';
-import { useSettingsStore } from '@/store/settings';
-import { usePreferencesStore } from "@/store/preferences";
-import { useChangesStore } from '@/store/changes';
+import {stores} from "@/store";
+import Task from "@/data/Task";
+import i18n from "@/plugins/i18n";
 
-const apiStore = useApiStore();
-const configStore = useConfigStore();
-const essayStore = useEssayStore();
-const notesStore = useNotesStore();
-const writerStore = useWriterStore();
-const settingsStore = useSettingsStore();
-const preferencesStore = usePreferencesStore();
-const changesStore = useChangesStore();
+const apiStore = stores.api();
+const configStore = stores.config();
+const essayStore = stores.essay();
+const notesStore = stores.tasks();
+const writerStore = stores.writer();
+const settingsStore = stores.settings();
+const preferencesStore = stores.preferences();
+const changesStore = stores.changes();
+const tasksStore = stores.tasks();
+
+const { t } = i18n.global;
+
+function headline(addition = '') {
+
+  const head = (tasksStore.taskIds > 0) ? t('allEssay') :  tasksStore.currentTask.title;
+  return addition ? (head +  ' - ' + addition) : head;
+}
 
 </script>
 
 <template>
   <v-main fill-height>
-      <div class="column" v-show="changesStore.hasWritingChanges">
+      <div class="column" v-if="changesStore.hasWritingChanges">
         <div class="col-header bg-grey-lighten-4">
-          <h2 class="text-h6" style="color:#f00000;">{{ $t('reviewContentNotYetSent') }}</h2>
+          <h2 class="text-h6" style="color:#f00000;">{{ headline($t('reviewContentNotYetSent')) }}</h2>
           <p>{{ $t('reviewContentTryAgainLater') }}</p>
         </div>
 
         <div class="col-content">
           <div
+              v-for="essay in essayStore.essays"
+              v-show="tasksStore.currentKey == Task.buildKey(essay.task_id)"
               :class="'long-essay-content ' + settingsStore.contentClass"
               :style="'font-size:' + (preferencesStore.editor_zoom) + 'rem;'"
-              v-html="essayStore.storedContent"
+              v-html="essay.content"
           ></div>
         </div>
 
@@ -45,27 +51,21 @@ const changesStore = useChangesStore();
             <v-icon icon="mdi-file-edit-outline"></v-icon>
             <span>{{ $t('reviewContentContinueEditing') }}</span>
           </v-btn>
-          <!--
-          <v-btn class="ma-2" :href="apiStore.returnUrl">
-            <v-icon left icon="mdi-logout-variant"></v-icon>
-            <span>Ohne Übertragung beenden</span>
-          </v-btn>
-          -->
         </div>
       </div>
 
-      <div class="column" v-show="!changesStore.hasWritingChanges">
+      <div class="column" v-if="!changesStore.hasWritingChanges">
         <div class="col-header bg-grey-lighten-4" v-show="writerStore.isExcluded">
-          <h2 class="text-h6">{{ $t('reviewContentExcluded')}}</h2>
+          <h2 class="text-h6">{{ headline($t('reviewContentExcluded'))}}</h2>
           <p>{{ $t('reviewContentEditingPrevented') }}</p>
         </div>
         <div class="col-header bg-grey-lighten-4" v-show="writerStore.writingEndReached && !writerStore.isExcluded">
-          <h2 class="text-h6">{{ $t('reviewContentTimeOver') }}</h2>
+          <h2 class="text-h6">{{ headline($t('reviewContentTimeOver')) }}</h2>
           <p>{{ $t('reviewContentEditingPrevented') }} {{$t('reviewContentPleaseCheckText') }} {{ $t('reviewContentYouMayScroll') }}
             <span v-if="notesStore.hasWrittenNotes">{{ $t('reviewContentNotesWillBePurged')}}</span></p>
         </div>
         <div class="col-header bg-grey-lighten-4" v-show="!writerStore.writingEndReached && !writerStore.isExcluded">
-          <h2 class="text-h6">{{ $t('allEssay') }}</h2>
+          <h2 class="text-h6">{{ headline() }}</h2>
           <p>{{$t('reviewContentPleaseCheckText') }} {{ $t('reviewContentYouMayScroll') }}
             <span v-if="notesStore.hasWrittenNotes">{{ $t('reviewContentNotesWillBePurged')}}</span>
             {{ $t('reviewContentAuthorizationFinishes') }}</p>
@@ -73,9 +73,11 @@ const changesStore = useChangesStore();
 
         <div class="col-content">
           <div
+              v-for="essay in essayStore.essays"
+              v-show="tasksStore.currentKey == Task.buildKey(essay.task_id)"
               :class="'long-essay-content ' + settingsStore.contentClass"
-              :style="'font-size:' + (preferencesStore.editor_zoom * 16) + 'px;'"
-              v-html="essayStore.storedContent"
+              :style="'font-size:' + (preferencesStore.editor_zoom) + 'rem;'"
+              v-html="essay.content"
           ></div>
         </div>
 
@@ -83,7 +85,7 @@ const changesStore = useChangesStore();
           <v-btn class="ma-2 primary" @click="apiStore.finalize(true)" :color="configStore.primaryColorCss"
                  v-show="!writerStore.isExcluded">
             <v-icon :color="configStore.primaryTextColorCss" icon="mdi-file-send-outline"></v-icon>
-            <span :style="configStore.primaryTextColorFullCss">{{ $t('reviewContentAuthorize') }}</span>
+            <span :style="configStore.primaryTextColorFullCss">{{ $t('reviewContentAuthorize', tasksStore.countTasks) }}</span>
           </v-btn>
           <v-btn class="ma-2" @click="apiStore.finalize(false)"
                  v-show="writerStore.writingEndReached || writerStore.isExcluded">
@@ -98,7 +100,7 @@ const changesStore = useChangesStore();
         </div>
       </div>
 
-    <v-dialog persistent v-model="apiStore.showFinalizeFailure">
+    <v-dialog max-width="1000" persistent v-model="apiStore.showFinalizeFailure">
       <v-card>
         <v-card-text>
           <p>{{ $t('reviewContentNetworkProblem') }}</p>
