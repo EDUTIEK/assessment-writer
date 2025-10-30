@@ -95,7 +95,7 @@
     "helpToolbarNavigate": "In Symbolleiste zwischen Schaltflächen wechseln",
     "instructionsZoomOut": "Aufgabenstellung Text verkleinern",
     "instructionsZoomIn": "Aufgabenstellung Text vergrößern",
-    "mainContentCopyPrevented": "Sie können nur selbst geschriebenen Text oder Teile aus der Aufgabenstellung kopieren und einfügen.",
+    "mainContentCopyPrevented": "Sie können nur selbst geschriebenen Text oder Teile aus der Aufgabenstellung (außer PDF) einfügen.",
     "mainContentExpand": "Erweitern",
     "mainContentExpandLeftColumn": "Linke Spalte erweitern",
     "mainContentExpandRightColumn": "Rechte Spalte erweitern",
