@@ -11,7 +11,7 @@ function startState() {
     lastSave: 0,            // timestamp (ms) of the last saving in the storage
     lastSendingSuccess: 0   // timestamp (ms) of the last successful sending to the backend
   };
-  for (const type of Change.ALLOWED_TYPES) {
+  for (const type of Change.STORED_TYPES) {
     state.changes[type] = {};   // changes of objects of the type that have to be sent to the backend: key => Change
   }
   return state;
@@ -65,7 +65,7 @@ export const useChangesStore = defineStore('changes', {
      */
     countChanges(state) {
       let count = 0;
-      for (const type of Change.ALLOWED_TYPES) {
+      for (const type of Change.STORED_TYPES) {
         count += Object.keys(state.changes[type]).length;
       }
       return count;
@@ -77,7 +77,7 @@ export const useChangesStore = defineStore('changes', {
        * Get the number of changes of a type
        * @param {array} types - types to count
        */
-      const fn = function (types = Change.ALLOWED_TYPES) {
+      const fn = function (types = Change.STORED_TYPES) {
         let count = 0;
         for (const type of types) {
           count += Object.keys(state.changes[type]).length;
@@ -97,7 +97,7 @@ export const useChangesStore = defineStore('changes', {
        * @see setChangesSent
        */
       const fn = function (type, maxTime = 0) {
-        if (!Change.ALLOWED_TYPES.includes(type)) {
+        if (!Change.STORED_TYPES.includes(type)) {
           return [];
         }
         const changes = [];

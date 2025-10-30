@@ -39,10 +39,11 @@ export const stores = {
  * Clear all data of the stores
  */
 export async function clearAllStores() {
-    for (const getStore of stores) {
-        await getStore().clearStorage();
+    for (const key of Object.values(stores)) {
+        console.log(key);
+        const store = key();
+        store.clearStorage();
     }
-    localStorage.clear();
 }
 
 

@@ -162,6 +162,10 @@ export const useApiStore = defineStore('api', {
 
   actions: {
 
+    async clearStorage() {
+      localStorage.clear();
+    },
+
     /**
      * Init the state
      * Take the state from the cookies or local store
@@ -246,7 +250,7 @@ export const useApiStore = defineStore('api', {
      */
     async timedSync() {
       await this.saveChangesToBackend();
-      //await this.loadUpdateFromBackend();
+      await this.loadUpdateFromBackend();
     },
 
 
@@ -283,6 +287,8 @@ export const useApiStore = defineStore('api', {
     async loadDataFromBackend() {
 
       console.log("loadDataFromBackend...");
+
+      await clearAllStores();
       this.updateConfig();
 
       let response = {};
@@ -311,7 +317,6 @@ export const useApiStore = defineStore('api', {
       await stores.notes().loadFromBackend(response.data['EssayTask']['WriterNotices']);
       await stores.notes().prepareNotes(stores.settings().notice_boards);
 
-      await stores.changes().clearStorage();
       await stores.layout().initialize();
 
       this.initialized = true;
@@ -336,9 +341,10 @@ export const useApiStore = defineStore('api', {
         this.setTimeOffset(response);
         this.refreshToken(response);
 
-        // await stores.writer().loadFromBackend(response.data['Assessment']['Writer']);
-        // await stores.alert().loadFromBackend(response.data['Assessment']['Alerts']);
-        // await stores.settings().loadFromBackend(response.data['EssayTask']['WritingSettings']);
+        await stores.config().loadFromBackend(response.data['Assessment']['Config']);
+        await stores.writer().loadFromBackend(response.data['Assessment']['Writer']);
+        await stores.alert().loadFromBackend(response.data['Assessment']['Alerts']);
+        await stores.settings().loadFromBackend(response.data['EssayTask']['WritingSettings']);
 
         this.lastChangesTry = 0;
         return true;
@@ -423,22 +429,38 @@ export const useApiStore = defineStore('api', {
       return null;
     },
 
-
     /**
      * Save the final authorization to the backend
-     * @param bool authorized
+     * @param bool set_authorized
      */
-    async saveFinalContentToBackend(authorized) {
+    async saveFinalContentToBackend(set_authorized) {
       let response = {};
-      const data = {
+
+       const data = {
         'EssayTask': {
-          'Essays': [],
-          'Notes': [],
-        }
-      };
+          'Steps': await stores.steps().getChangedData(0),
+          'Essays': await stores.essay().getFinalData(),
+        },
+        'Assessment': {
+          // queue as last because authorization may block other updates
+          'Writer': await stores.writer().getStatusToSend(set_authorized)
+        },
+       };
       try {
-        response = await axios.put('/final', data, this.getRequestConfig(this.dataToken));
+        response = await axios.put('/writer/final', data, this.getRequestConfig(this.dataToken));
         this.refreshToken(response);
+
+        if (response.data['EssayTask']) {
+          await stores.changes().setChangesSent(Change.TYPE_STEPS,
+              response.data['EssayTask']['Steps'] ?? [], Date.now());
+        }
+        if (response.data['Assessment']) {
+          await stores.writer().setStatusResponses(response.data['Assessment']['Writer'] ?? [])
+        }
+
+        if (set_authorized && !stores.writer().is_authorized) {
+          return false;
+        }
         return true;
       }
       catch (error) {
@@ -463,7 +485,6 @@ export const useApiStore = defineStore('api', {
       Cookies.remove('xlasAssId');
       Cookies.remove('xlasContextId');
       Cookies.remove('xlasToken');
-      Cookies.remove('xlasHash');
 
       localStorage.setItem('xlasWriterBackendUrl', this.backendUrl);
       localStorage.setItem('xlasWriterReturnUrl', this.returnUrl);
@@ -532,7 +553,7 @@ export const useApiStore = defineStore('api', {
 
     /**
      * Retry the final transmission
-     * This is called from the review screen
+     * This is called from the final review screen
      * A retry should not authorize and close the writer
      * Instead the review screen is shown again and allows to auhorize
      */

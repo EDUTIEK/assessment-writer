@@ -8,12 +8,20 @@ export default class Change {
 
   static ALLOWED_ACTIONS = [Change.ACTION_SAVE, Change.ACTION_DELETE];
 
+  // saved in the storage
   static TYPE_ANNOTATIONS = 'anno';
   static TYPE_NOTES = 'note';
   static TYPE_PREFERENCES = 'pref';
   static TYPE_STEPS = 'step';
 
-  static ALLOWED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES, Change.TYPE_STEPS];
+  // only for final content
+  static TYPE_ESSAY = 'essay';
+  static TYPE_WRITER = 'writer';
+
+  static ALLOWED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES, Change.TYPE_STEPS,
+    Change.TYPE_ESSAY, Change.TYPE_WRITER];
+
+  static STORED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES, Change.TYPE_STEPS];
   static WRITING_TYPES = [Change.TYPE_STEPS];
   static OTHER_TYPES =  [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES];
 

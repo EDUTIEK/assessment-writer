@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia';
 import { getStorage } from "@/lib/Storage";
 import { useApiStore } from "./api";
+import Change from "@/data/Change";
+import ChangeResponse from "@/data/ChangeReponse";
 
 const storage = getStorage('writer');
 
 const startState = {
   // saved in storage
-  id: null,
   writer_name: null,      // name of the writer - shown in the app bar
   working_start: null,    // working start (sec in server time) - from this time the instructions were visible
   working_deadline: null, // writing deadline (sec in server time) - accept no writing step after this time
@@ -70,14 +71,13 @@ export const useWriterStore = defineStore('writer', {
     async loadFromBackend(data = {}) {
       try {
         this.$patch({
-          id: data.id ?? null,
           writer_name: data.writer_name ?? null,
           working_start: data.working_start ?? null,
           working_deadline: data.working_deadline ?? null,
           is_authorized: data.is_authorized ?? false,
           is_excluded: data.is_excluded ?? false,
         });
-        await storage.setItem('preferences', Object.assign({}, this.$state));
+        await storage.setItem('writer', Object.assign({}, this.$state));
       }
       catch (err) {
         console.log(err);
@@ -104,6 +104,43 @@ export const useWriterStore = defineStore('writer', {
       if (this.writingEndReached || this.isExcluded || this.isAuthorized) {
         apiStore.review = true;
       }
+    },
+
+
+    /**
+     * Get the writing status to be sent
+     * The data will be wrapped for sending as changes
+     * @param {bool} authorized
+     * @return {array} Change objects
+     */
+    async getStatusToSend(authorized) {
+      const apiStore = useApiStore();
+
+      const change = new Change({
+        action: Change.ACTION_SAVE,
+        type: Change.TYPE_WRITER,
+        key: 'W' + this.id,
+      });
+
+      return [apiStore.getChangeDataToSend(change, {
+        is_authorized: authorized
+      })];
+    },
+
+    /**
+     * Change the authorization status
+     * based on the resonse sending a status change request
+     * @param responses
+     */
+    async setStatusResponses(responses = []) {
+      for (const response_data of responses) {
+        const response = new ChangeResponse(response_data);
+        if (response.done && response.result?.is_authorized)  {
+          this.is_authorized = true;
+          await storage.setItem('writer', Object.assign({}, this.$state));
+        }
+      }
     }
+
   }
 });

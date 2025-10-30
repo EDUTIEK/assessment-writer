@@ -8,6 +8,8 @@ import { useWriterStore } from "@/store/writer";
 import {useStepsStore} from "@/store/steps";
 import WritingStep from "@/data/WritingStep";
 import Essay from "@/data/Essay";
+import {useChangesStore} from "@/store/changes";
+import Change from "@/data/Change";
 
 const storage = getStorage('essay');
 
@@ -279,6 +281,27 @@ export const useEssayStore = defineStore('essay', {
       }
 
       lockUpdate = 0;
+    },
+
+
+    /**
+     * Get the final data of essays to be sent
+     * The data will be wrapped in change objects
+     * @return {array} Change objects
+     */
+    async getFinalData() {
+      const apiStore = useApiStore();
+      const changes = [];
+
+      for (const essay of Object.values(this.essays)) {
+        const change = new Change({
+          action: Change.ACTION_SAVE,
+          type: Change.TYPE_ESSAY,
+          key: essay.getKey(),
+        });
+        changes.push(apiStore.getChangeDataToSend(change, essay.getData()));
+      }
+      return changes;
     }
   }
 });
