@@ -16,7 +16,6 @@ const checkInterval = 200;      // time (ms) to wait for a new update check (e.g
 const startState = {
 
   // saved in storage
-  keys: [],                   // list of string keys, indexed by notes_no
   notes: {},                  // list of all note objects, indexed by key
 
   // not saved in storage
@@ -83,16 +82,11 @@ export const useNotesStore = defineStore('notes', {
         this.$reset();
 
         const keys = await storage.getItem('keys');
-        if (keys) {
-          this.keys = JSON.parse(keys);
-        }
-
         for (const key of this.keys) {
           const stored = await storage.getItem(key);
           if (stored) {
-            const parsed = JSON.parse(stored);
-            if (typeof parsed === 'object' && parsed !== null) {
-              const note = new Note(parsed);
+            if (typeof stored === 'object' && stored !== null) {
+              const note = new Note(stored);
               this.notes[key] = note;
               this.editNotes[key] = note.getClone();
             }
@@ -127,11 +121,9 @@ export const useNotesStore = defineStore('notes', {
           const note = new Note(note_data);
           this.notes[note.getKey()] = note;
           this.editNotes[note.getKey()] = note.getClone();
-
-          this.keys.push(note.getKey());
-          await storage.setItem(note.getKey(), JSON.stringify(note.getData()));
+          await storage.setItem(note.getKey(), note.getData());
         }
-        await storage.setItem('keys', JSON.stringify(this.keys));
+        await storage.setItem('keys', Object.keys(this.notes));
         this.prepareNotes();
         this.handleTaskChange();
       }
@@ -155,22 +147,19 @@ export const useNotesStore = defineStore('notes', {
       const tasksStore = stores.tasks();
 
       // ensure all notice boards exist
-      const keys = [];
       for (const task_id of tasksStore.taskIds) {
         for (let no = 0; no < settingsStore.notice_boards; no++) {
           const key = Note.buildKey(no, task_id);
-          keys.push(key);
           if (!(key in this.notes)) {
             const note = new Note({ task_id: task_id, note_no: no });
             this.notes[key] = note;
             this.editNotes[key] = note.getClone();
-            await storage.setItem(key, JSON.stringify(note.getData()));
+            await storage.setItem(key, note.getData());
           }
         }
       }
 
-      this.keys = keys;
-      await storage.setItem('keys', JSON.stringify(this.keys));
+      await storage.setItem('keys', Object.keys(this.notes));
     },
 
     /**
@@ -239,7 +228,7 @@ export const useNotesStore = defineStore('notes', {
           this.editNotes[key].setData(clonedNote.getData());
           this.notes[key] = clonedNote;
 
-          await storage.setItem(key, JSON.stringify(clonedNote.getData()));
+          await storage.setItem(key, clonedNote.getData());
           await changesStore.setChange(new Change({
             type: Change.TYPE_NOTES,
             action: Change.ACTION_SAVE,
@@ -270,7 +259,7 @@ export const useNotesStore = defineStore('notes', {
       for (const change of changesStore.getChangesFor(Change.TYPE_NOTES, sendingTime)) {
         const data = await storage.getItem(change.key);
         if (data) {
-          changes.push(apiStore.getChangeDataToSend(change, JSON.parse(data)));
+          changes.push(apiStore.getChangeDataToSend(change, data));
         } else {
           changes.push(apiStore.getChangeDataToSend(change));
         }
