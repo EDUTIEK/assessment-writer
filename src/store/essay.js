@@ -294,7 +294,10 @@ export const useEssayStore = defineStore('essay', {
           type: Change.TYPE_ESSAY,
           key: essay.getKey(),
         });
-        changes.push(apiStore.getChangeDataToSend(change, essay.getData()));
+
+        const data = essay.getData();
+        data.last_change = apiStore.getServerTime(data.last_change);
+        changes.push(apiStore.getChangeDataToSend(change, data));
       }
       return changes;
     }

@@ -20,8 +20,10 @@ apiStore.init();
     <startup-content v-if="!apiStore.initialized"/>
     <app-bar v-if="apiStore.initialized"/>
     <nav-bar v-if="apiStore.initialized && !apiStore.review"/>
-    <main-content v-if="apiStore.initialized && !apiStore.review"/>
-    <review-content v-if="apiStore.initialized && apiStore.review"/>
+
+    <!-- use v-show to prevent a reload of resources after switching from review to main -->
+    <main-content v-if="apiStore.initialized" v-show="!apiStore.review"/>
+    <review-content v-if="apiStore.initialized" v-show="apiStore.review"/>
   </v-app>
 </template>
 
