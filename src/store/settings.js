@@ -1,6 +1,10 @@
-import { defineStore } from 'pinia';
-import { getStorage } from "@/lib/Storage";
+/**
+ * Settings Store
+ * Handles the editor settings of the assessment
+ */
 import i18n from "@/plugins/i18n";
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
 
 import contentLocalCss from '@/styles/content.css?inline';
 import headlinesSingleCss from '@/styles/headlines-single.css?inline';
@@ -20,10 +24,6 @@ const startState = {
   allow_spellcheck: false         // flag (bool) if spellcheck by browser is allowed
 }
 
-/**
- * Settings Store
- * Handles the editor settings of the assessment
- */
 export const useSettingsStore = defineStore('settings', {
   state: () => {
     return startState;

@@ -1,27 +1,23 @@
 <script setup>
-import { ref, watch } from "vue";
-import { useLayoutStore } from "@/store/layout";
-import { useEssayStore } from '@/store/essay';
-import { useNotesStore } from '@/store/notes';
-import { useSettingsStore } from "@/store/settings";
-import { usePreferencesStore } from "@/store/preferences";
-import {useAnnotationsStore} from "@/store/annotations";
-import {useTasksStore} from "@/store/tasks";
-import {useResourcesStore} from "@/store/resources";
-import Task from "@/data/Task";
-import EditNote from "@/components/EditNote.vue";
-import EditEssay from "@/components/EditEssay.vue";
+/**
+ * Selector and container for editig contents (annotations, essay, notes)
+ * Shown in the right column of the page
+ */
 import Annotations from "@/components/Annotations.vue";
+import EditEssay from "@/components/EditEssay.vue";
+import EditNote from "@/components/EditNote.vue";
+import Task from "@/data/Task";
+import {stores} from "@/store";
+import { ref, watch } from "vue";
 
-
-const layoutStore = useLayoutStore();
-const essayStore = useEssayStore();
-const notesStore = useNotesStore();
-const settingsStore = useSettingsStore();
-const preferencesStore = usePreferencesStore();
-const annotationsStore = useAnnotationsStore();
-const resourcesStore = useResourcesStore();
-const tasksStore = useTasksStore();
+const layoutStore = stores.layout();
+const essayStore = stores.essay();
+const notesStore = stores.notes();
+const settingsStore = stores.settings();
+const preferencesStore = stores.preferences();
+const annotationsStore = stores.annotations();
+const resourcesStore = stores.resources();
+const tasksStore = stores.tasks();
 
 const selectedEditor = ref('essay');
 updateSelectedEditor();

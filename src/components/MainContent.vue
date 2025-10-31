@@ -1,16 +1,19 @@
 <script setup>
-import Instructions from "@/components/Instructions.vue";
-import ResourcePdf from '@/components/ResourcePdf.vue';
-import Resources from "@/components/Resources.vue";
+/**
+ * Main content area of the app (AppBar and NavBar are separate components)
+ * The content is divided in two columns
+ * The layoutStore state determins which content is shown in which column
+ */
 import EditSelect from "@/components/EditSelect.vue";
-import { useLayoutStore } from "../store/layout";
-import { useResourcesStore } from "../store/resources";
-import { useClipboardStore } from "@/store/clipboard";
+import Instructions from "@/components/Instructions.vue";
+import Resources from "@/components/Resources.vue";
+import ResourcePdf from '@/components/ResourcePdf.vue';
+import {stores} from "@/store";
 import {nextTick, onMounted} from "vue";
 
-const layoutStore = useLayoutStore();
-const resourcesStore = useResourcesStore();
-const clipboardStore = useClipboardStore();
+const layoutStore = stores.layout();
+const resourcesStore = stores.resources();
+const clipboardStore = stores.clipboard();
 
 // enable keyboard hotkeys
 document.addEventListener('keydown', layoutStore.handleKeyDown);

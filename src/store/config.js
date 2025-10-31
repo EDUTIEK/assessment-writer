@@ -1,12 +1,10 @@
-import { defineStore } from 'pinia';
-import { getStorage } from "@/lib/Storage";
+/**
+ * Config Store
+ * handles the editor config of the assessment
+ */
+import {getStorage} from "@/lib/Storage";
 import i18n from "@/plugins/i18n";
-
-import contentLocalCss from '@/styles/content.css?inline';
-import headlinesSingleCss from '@/styles/headlines-single.css?inline';
-import headlinesThreeCss from '@/styles/headlines-three.css?inline';
-import headlinesNumericCss from '@/styles/headlines-numeric.css?inline';
-import headlinesEdutiekCss from '@/styles/headlines-edutiek.css?inline';
+import {defineStore} from 'pinia';
 
 const storage = getStorage('config');
 
@@ -18,10 +16,6 @@ const startState = {
   primary_text_color: null,       // color for the text of primary actions
 }
 
-/**
- * Config Store
- * Handles the editor config of the assessment
- */
 export const useConfigStore = defineStore('config', {
   state: () => {
     return startState;

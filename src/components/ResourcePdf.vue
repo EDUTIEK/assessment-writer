@@ -1,16 +1,18 @@
 <script setup>
-import {useLayoutStore} from '@/store/layout';
-import {useTasksStore} from "@/store/tasks";
-import {useResourcesStore} from '@/store/resources';
-import {useAnnotationsStore} from '@/store/annotations';
+/**
+ * Display of a PDF resource with PDFjs
+ * Marks can be set for test and free hand
+ *
+ */
 import Annotation from "@/data/Annotation";
+import {stores} from "@/store";
 import createPDFJsApi from 'annotate-pdf/pdfjs-api';
 import {nextTick, onMounted, ref, watch} from 'vue';
 
-const layoutStore = useLayoutStore();
-const tasksStore = useTasksStore();
-const resourcesStore = useResourcesStore();
-const annotationsStore = useAnnotationsStore();
+const layoutStore = stores.layout();
+const tasksStore = stores.tasks();
+const resourcesStore = stores.resources();
+const annotationsStore = stores.annotations();
 
 const props = defineProps(['resource']);
 const resource = props.resource;

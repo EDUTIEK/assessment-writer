@@ -1,8 +1,12 @@
-import { defineStore } from 'pinia';
-import { getStorage } from "@/lib/Storage";
-import { useChangesStore } from "@/store/changes";
-import { useApiStore } from '@/store/api';
+/**
+ * Preferences Store
+ * Stores local setings done by the corrector
+ * These settings are not yet sent to the backend
+ */
 import Change from '@/data/Change';
+import {getStorage} from "@/lib/Storage";
+import {stores} from "@/store";
+import {defineStore} from 'pinia';
 
 const storage = getStorage('preferences');
 
@@ -14,11 +18,6 @@ const startState = {
     word_count_characters: false         // word counter show characters
 }
 
-/**
- * Preferences Store
- * Stores local setings done by the corrector
- * These settings are not yet sent to the backend
- */
 export const usePreferencesStore = defineStore('preferences', {
   state: () => {
     return startState;
@@ -85,8 +84,8 @@ export const usePreferencesStore = defineStore('preferences', {
      * Update the preferences in the storage and mark them as changed
      */
     async update() {
-      const changesStore = useChangesStore();
-      const apiStore = useApiStore();
+      const changesStore = stores.changes();
+      const apiStore = stores.api();
 
       await this.saveToStorage();
       await changesStore.setChange(new Change({
@@ -103,8 +102,8 @@ export const usePreferencesStore = defineStore('preferences', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_PREFERENCES, sendingTime)) {
         // preferences exist only once, will be the same for all changes

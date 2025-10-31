@@ -1,10 +1,13 @@
 <script setup>
-
-import {stores} from "@/store";
-import {ref} from "vue";
-import FileHandling from "@/lib/FileHandling";
+/**
+ * Show the sending status (cloud symbol) in the navigation bar
+ * Show a dialog with detailed status and functions to resend and export data
+ */
 import SendingResult from "@/data/SendingResult";
 import Change from '@/data/Change';
+import FileHandling from "@/lib/FileHandling";
+import {stores} from "@/store";
+import {ref} from "vue";
 
 const apiStore = stores.api();
 const layoutStore = stores.layout();
@@ -12,7 +15,6 @@ const essayStore = stores.essay();
 const tasksStore = stores.tasks();
 const writerStore = stores.writer();
 const changesStore = stores.changes();
-const fileHandling = new FileHandling();
 
 const showSending = ref(false);
 const showFailure = ref(false);
@@ -51,6 +53,8 @@ async function sendUpdate() {
 }
 
 async function downloadEssay() {
+  const fileHandling = new FileHandling();
+  // todo: refactor to multiple essay
   const blob = new Blob([essayStore.currentContent], { type: 'text/html' });
   await fileHandling.saveFile(blob, writerStore.writer_name + '.html');
 }

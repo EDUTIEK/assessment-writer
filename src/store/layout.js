@@ -1,17 +1,15 @@
-import { defineStore } from 'pinia';
-import { getStorage } from "@/lib/Storage";
-import localForage from "localforage";
-import { useResourcesStore } from "@/store/resources";
-import { useTasksStore } from '@/store/tasks';
-import Resource from "@/data/Resource";
-import Annotation from "@/data/Annotation";
-
-const storage = getStorage('layout');
-
 /**
  * Layout Store
  * Handles visibility of user interface components
  */
+import Annotation from "@/data/Annotation";
+import Resource from "@/data/Resource";
+import {getStorage} from "@/lib/Storage";
+import {stores} from "@/store";
+import {defineStore} from 'pinia';
+
+const storage = getStorage('layout');
+
 export const useLayoutStore = defineStore('layout', {
   state: () => {
     return {
@@ -54,7 +52,7 @@ export const useLayoutStore = defineStore('layout', {
 
     isResourceShown(state) {
 
-      const resourcesStore = useResourcesStore();
+      const resourcesStore = stores.resources();
       /**
        * Check if a resource is visible
        * @returns {bool}
@@ -70,7 +68,7 @@ export const useLayoutStore = defineStore('layout', {
      * @returns {null|integer}
      */
     selectedResourceId(state) {
-      const resourcesStore = useResourcesStore();
+      const resourcesStore = stores.resources();
       if (state.isInstructionsSelected) {
           return Annotation.RESOURCE_ID_INSTRUCTIONS;
       }
@@ -89,8 +87,8 @@ export const useLayoutStore = defineStore('layout', {
     async initialize() {
       await this.clearStorage();
 
-      const resourcesStore = useResourcesStore();
-      const tasksStore = useTasksStore();
+      const resourcesStore = stores.resources();
+      const tasksStore = stores.tasks();
 
       this.leftContent = tasksStore.hasInstructions ? 'instructions' :
         resourcesStore.hasInstruction ? 'instructionsPdf' :
@@ -119,7 +117,7 @@ export const useLayoutStore = defineStore('layout', {
         if (data) {
           this.expandedColumn = data.expandedColumn;
           // resources may not be ready PDF is not shown instantly
-          // so show show the instructions as default left content
+          // so show the instructions as default left content
           // this.leftContent = data.leftContent;
 
           // editor sould not start with notes
@@ -166,7 +164,7 @@ export const useLayoutStore = defineStore('layout', {
     },
 
     showResourceForId(resource_id) {
-      const resourcesStore = useResourcesStore();
+      const resourcesStore = stores.resources();
       const resource = resourcesStore.getResourceById(resource_id);
       if (resource) {
         if (resource.type == Resource.TYPE_INSTRUCTION) {

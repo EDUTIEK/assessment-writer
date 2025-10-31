@@ -1,7 +1,10 @@
-import { defineStore } from 'pinia';
-import { getStorage } from "@/lib/Storage";
+/**
+ * Alert Store
+ * handles alert messages coming from the exam supervision
+ */
 import Alert from "@/data/Alert";
-import Task from "@/data/Task";
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
 
 const storage = getStorage('alerts');
 const startState = {
@@ -13,9 +16,6 @@ const startState = {
   showAllAlerts: false
 }
 
-/**
- * Resources Store
- */
 export const useAlertStore = defineStore('alerts', {
   state: () => {
     return startState;

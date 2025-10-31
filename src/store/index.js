@@ -15,7 +15,7 @@ import { useTasksStore } from "@/store/tasks";
 import { useWriterStore } from "@/store/writer";
 
 /**
- * Service locator for stores
+ * Service locator for pinia stores
  */
 export const stores = {
     alert: () => useAlertStore(),
@@ -40,12 +40,7 @@ export const stores = {
  */
 export async function clearAllStores() {
     for (const key of Object.values(stores)) {
-        console.log(key);
         const store = key();
         store.clearStorage();
     }
 }
-
-
-
-

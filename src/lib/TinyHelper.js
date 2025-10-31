@@ -1,9 +1,10 @@
-import tinymce from "tinymce";
-import {useSettingsStore} from "@/store/settings";
-import {useClipboardStore} from "@/store/clipboard";
-import {usePreferencesStore} from "@/store/preferences";
-import {nextTick, ref, watch} from 'vue';
+/**
+ * Helper for use of TinyMCE in components
+ */
+import {stores} from "@/store";
 import i18n from "@/plugins/i18n";
+import tinymce from "tinymce";
+import {nextTick, ref, watch} from 'vue';
 
 let settingsStore;
 let clipboardStore;
@@ -24,9 +25,9 @@ export default class TinyHelper {
     constructor(editor_id) {
         this.editor_id = editor_id;
 
-        settingsStore = useSettingsStore();
-        clipboardStore = useClipboardStore();
-        preferencesStore = usePreferencesStore();
+        settingsStore = stores.settings();
+        clipboardStore = stores.clipboard();
+        preferencesStore = stores.preferences();
     }
 
     getInit() {
@@ -45,7 +46,7 @@ export default class TinyHelper {
             // style_formats: settingsStore.tinyStyles,
             custom_undo_redo_levels: 10,
             text_patterns: false,
-            skin: 'default',
+            skin_url: 'default',
             content_css: 'default',
             content_style: settingsStore.tinyContentStyle,
             browser_spellcheck: settingsStore.allow_spellcheck,

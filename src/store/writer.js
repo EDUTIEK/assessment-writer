@@ -1,8 +1,12 @@
-import { defineStore } from 'pinia';
-import { getStorage } from "@/lib/Storage";
-import { useApiStore } from "./api";
+/**
+ * Writer Store
+ * handles settings of the active writer
+ */
 import Change from "@/data/Change";
 import ChangeResponse from "@/data/ChangeReponse";
+import {stores} from "@/store";
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
 
 const storage = getStorage('writer');
 
@@ -18,10 +22,6 @@ const startState = {
   remaining_time: null     // remaining writing time in seconds (updated per interval)
 }
 
-/**
- * Writer Store
- * Handles settings of the active writer
- */
 export const useWriterStore = defineStore('writer', {
   state: () => {
     return startState;
@@ -64,7 +64,7 @@ export const useWriterStore = defineStore('writer', {
       }
 
       this.updateRemainingTime();
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       apiStore.setInterval('writerStore.updateRemainingTime', this.updateRemainingTime, 1000);
     },
 
@@ -84,7 +84,7 @@ export const useWriterStore = defineStore('writer', {
       }
 
       this.updateRemainingTime();
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       apiStore.setInterval('writerStore.updateRemainingTime', this.updateRemainingTime, 1000);
 
     },
@@ -93,7 +93,7 @@ export const useWriterStore = defineStore('writer', {
      * Update the remaining writing time (called by interval)
      */
     updateRemainingTime() {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
 
       if (this.working_deadline) {
         this.remaining_time = Math.max(0, this.working_deadline - apiStore.getServerTime(Date.now()));
@@ -114,7 +114,7 @@ export const useWriterStore = defineStore('writer', {
      * @return {array} Change objects
      */
     async getStatusToSend(authorized) {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
 
       const change = new Change({
         action: Change.ACTION_SAVE,

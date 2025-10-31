@@ -24,6 +24,7 @@ declare module 'vue' {
     ReviewContent: typeof import('./src/components/ReviewContent.vue')['default']
     SendingStatus: typeof import('./src/components/SendingStatus.vue')['default']
     StartupContent: typeof import('./src/components/StartupContent.vue')['default']
+    StartupPage: typeof import('./src/components/StartupPage.vue')['default']
     Tasks: typeof import('./src/components/Tasks.vue')['default']
     Timer: typeof import('./src/components/Timer.vue')['default']
   }

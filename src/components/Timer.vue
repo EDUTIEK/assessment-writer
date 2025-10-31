@@ -1,9 +1,12 @@
 <script setup>
-import { useWriterStore } from "../store/writer";
-import { useLayoutStore } from "../store/layout";
+/**
+ * Counter of remaining working time shown in the app bar
+ * can be hidden
+ */
+import {stores} from "@/store";
 
-const writerStore = useWriterStore();
-const layoutStore = useLayoutStore();
+const writerStore = stores.writer();
+const layoutStore = stores.layout();
 
 /**
  *

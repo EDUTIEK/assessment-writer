@@ -1,18 +1,19 @@
 <script setup>
-import { useTasksStore } from '@/store/tasks';
-import { useLayoutStore } from '@/store/layout';
-import { usePreferencesStore } from "@/store/preferences";
-import { useClipboardStore } from "@/store/clipboard";
-import {useAnnotationsStore} from "@/store/annotations";
-import TextMarker from '@/lib/TextMarker';
-import { ref, onMounted, nextTick, watch } from 'vue';
+/**
+ * HTML Instructions shown on the left side
+ * - can be marked with annotations
+ * - the html must be prepares with specific <w-p> elements surrounding single wirds
+ */
 import Annotation from "@/data/Annotation";
+import TextMarker from '@/lib/TextMarker';
+import {stores} from "@/store";
+import { ref, onMounted, nextTick, watch } from 'vue';
 
-const tasksStore = useTasksStore();
-const layoutStore = useLayoutStore();
-const preferencesStore = usePreferencesStore();
-const clipboardStore = useClipboardStore();
-const annotationsStore = useAnnotationsStore();
+const tasksStore = stores.tasks();
+const layoutStore = stores.layout();
+const preferencesStore = stores.preferences();
+const clipboardStore = stores.clipboard();
+const annotationsStore = stores.annotations();
 
 const markingActive = ref(0);
 

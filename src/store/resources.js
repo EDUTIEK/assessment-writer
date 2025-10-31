@@ -1,10 +1,12 @@
-import { defineStore } from 'pinia';
-import { getStorage } from "@/lib/Storage";
-import { useApiStore } from "./api";
-import { useTasksStore } from "./tasks";
-import axios from 'axios';
+/**
+ * Resources Store
+ * stores the definition of exam resources (PDFs, media)
+ */
 import Resource from "@/data/Resource";
-import Alert from "@/data/Alert";
+import {getStorage} from "@/lib/Storage";
+import {stores} from "@/store";
+import {defineStore} from 'pinia';
+import axios from 'axios';
 
 const storage = getStorage('resources');
 const startState = {
@@ -14,9 +16,6 @@ const startState = {
   activeKey: ''
 };
 
-/**
- * Resources Store
- */
 export const useResourcesStore = defineStore('resources', {
   state: () => {
     return startState;
@@ -25,7 +24,7 @@ export const useResourcesStore = defineStore('resources', {
   getters: {
 
     currentResources(state) {
-      const taskStore = useTasksStore();
+      const taskStore = stores.tasks();
       return Object.values(state.resources).filter(element =>
           element.task_id === taskStore.currentTask?.task_id || element.task_id === null)
           .sort(Resource.order);
@@ -104,7 +103,7 @@ export const useResourcesStore = defineStore('resources', {
     },
 
     async loadFromBackend(data = []) {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
 
       try {
         await storage.clear();

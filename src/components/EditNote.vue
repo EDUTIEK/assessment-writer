@@ -1,46 +1,34 @@
 <script setup>
-/*
-* Import TinyMCE
-* @see https://www.tiny.cloud/docs/tinymce/latest/vite-es6-npm/
-*/
+/**
+ * Editing of a writing notice with TinyMCE
+ * @see https://www.tiny.cloud/docs/tinymce/latest/vite-es6-npm/
+ */
 import tinymce from 'tinymce';
-
-/* Default icons are required. After that, import custom icons if applicable */
 import 'tinymce/icons/default/icons.min.js';
-
-/* Required TinyMCE components */
 import 'tinymce/themes/silver/theme.min.js';
 import 'tinymce/models/dom/model.min.js';
 
-/* Import a skin (can be a custom skin instead of the default) */
 import 'tinymce/skins/ui/oxide/skin.js';
+import 'tinymce/skins/ui/oxide/content.js';
+import 'tinymce/skins/content/default/content.js';
 
-/* Import plugins */
 import '@/plugins/tiny_de.js';
 import 'tinymce/plugins/lists';
 import 'tinymce/plugins/charmap';
 import 'tinymce/plugins/wordcount';
+import 'tinymce/plugins/table';
+import 'tinymce/plugins/pagebreak';
 
-/* content UI CSS is required */
-import 'tinymce/skins/ui/oxide/content.js';
-
-/* The default content CSS can be changed or replaced with appropriate CSS for the editor content. */
-import 'tinymce/skins/content/default/content.js';
-
-// Import tiny vue integration
 import Editor from '@tinymce/tinymce-vue'
 import TinyHelper from '@/lib/TinyHelper';
 
-import { useNotesStore } from '@/store/notes';
-import { useSettingsStore } from "@/store/settings";
-import { usePreferencesStore } from "@/store/preferences";
-import { useLayoutStore } from "@/store/layout";
+import {stores} from "@/store";
 import {nextTick, watch} from 'vue';
 
-const notesStore = useNotesStore();
-const settingsStore = useSettingsStore();
-const preferencesStore = usePreferencesStore();
-const layoutStore = useLayoutStore();
+const notesStore = stores.notes();
+const settingsStore = stores.settings();
+const preferencesStore = stores.preferences();
+const layoutStore = stores.layout();
 
 const props = defineProps(['noteKey', 'noteLabel']);
 const helper = new TinyHelper('app-note-' + props.noteKey);

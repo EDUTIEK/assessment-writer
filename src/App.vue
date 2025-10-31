@@ -6,11 +6,11 @@
 import AppBar from "@/components/AppBar.vue";
 import NavBar from "@/components/NavBar.vue";
 import MainContent from "@/components/MainContent.vue";
-import StartupContent from "@/components/StartupContent.vue";
+import StartupPage from "@/components/StartupPage.vue";
 import ReviewContent from "@/components/ReviewContent.vue";
-import { useApiStore } from '@/store/api';
+import { stores } from '@/store';
 
-const apiStore = useApiStore();
+const apiStore = stores.api();
 apiStore.init();
 
 </script>

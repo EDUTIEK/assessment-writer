@@ -1,12 +1,11 @@
 <script setup>
-
 /**
- * Application bar
+ * Main application bar on top of the screen
  */
-import Tasks from "@/components/Tasks.vue";
-import Timer from "@/components/Timer.vue";
 import Alerts from "@/components/Alerts.vue";
 import Help from "@/components/Help.vue";
+import Tasks from "@/components/Tasks.vue";
+import Timer from "@/components/Timer.vue";
 import {stores} from "@/store";
 import {nextTick, watch} from 'vue';
 

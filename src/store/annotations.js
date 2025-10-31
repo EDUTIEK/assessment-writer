@@ -1,14 +1,12 @@
-import { defineStore } from "pinia";
-import { getStorage } from "@/lib/Storage";
-import {useApiStore} from "@/store/api";
-import {useResourcesStore} from "@/store/resources";
-import {useLayoutStore} from "@/store/layout";
-import { useChangesStore } from "@/store/changes";
-import { useTasksStore} from "@/store/tasks";
+/**
+ * Annotations Store
+ * handles annotations done to marking in instructions and rsources
+ */
 import Annotation from "@/data/Annotation";
 import Change from '@/data/Change';
-import resource from "@/data/Resource";
-import Resource from "@/data/Resource";
+import {getStorage} from "@/lib/Storage";
+import {stores} from "@/store";
+import {defineStore} from "pinia";
 
 const storage = getStorage('annotations');
 const startState = {
@@ -24,9 +22,6 @@ const startState = {
   firstVisibleKey: '',            // key of the first visible comment in the scrolled text
 }
 
-/**
- * Annotations Store
- */
 export const useAnnotationsStore = defineStore('annotations', {
   state: () => {
     return startState;
@@ -38,8 +33,8 @@ export const useAnnotationsStore = defineStore('annotations', {
   getters: {
 
     activeAnnotations(state) {
-      const layoutStore = useLayoutStore();
-      const taskStore = useTasksStore();
+      const layoutStore = stores.layout();
+      const taskStore = stores.tasks();
       const selectedResourceId = layoutStore.selectedResourceId;
       if (selectedResourceId !== null) {
         return Object.values(state.annotations)
@@ -168,8 +163,8 @@ export const useAnnotationsStore = defineStore('annotations', {
      * @public
      */
     async createAnnotation(annotation) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
 
       // first do state changes (trigger watchers)
       this.annotations[annotation.getKey()] = annotation;
@@ -190,8 +185,8 @@ export const useAnnotationsStore = defineStore('annotations', {
      * @public
      */
     async updateAnnotation(annotation, sort = false) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
 
       if (Object.keys(this.annotations).includes(annotation.getKey())
       ) {
@@ -222,7 +217,7 @@ export const useAnnotationsStore = defineStore('annotations', {
         await storage.setItem('keys', Object.keys(this.annotations));
         this.deletedKey = removeKey;
 
-        const changesStore = useChangesStore();
+        const changesStore = stores.changes();
         await changesStore.setChange(annotation.getChange(Change.ACTION_DELETE));
         await this.labelAnnotations();
         this.setMarkerChange();
@@ -323,8 +318,8 @@ export const useAnnotationsStore = defineStore('annotations', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_ANNOTATIONS, sendingTime)) {
         const payload = await storage.getItem(change.key) ?? null;

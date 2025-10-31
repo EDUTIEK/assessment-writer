@@ -1,7 +1,14 @@
 <script setup>
-import {stores} from "@/store";
+/**
+ * Review the written texts before authorization
+ * - shown below the app bar
+ *  - an be manually opend
+ *  - is automatically shown when writing tile is over
+ *  - allows to send the final authorization
+ */
 import Task from "@/data/Task";
 import i18n from "@/plugins/i18n";
+import {stores} from "@/store";
 
 const apiStore = stores.api();
 const configStore = stores.config();

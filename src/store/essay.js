@@ -1,15 +1,15 @@
-import { defineStore } from 'pinia';
-import { getStorage } from "@/lib/Storage";
+/**
+ * Essay store
+ * stores the written text of the user
+ */
+import Change from "@/data/Change";
+import Essay from "@/data/Essay";
+import WritingStep from "@/data/WritingStep";
+import {stores} from "@/store";
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
 import DiffMatchPatch from 'diff-match-patch';
 import md5 from 'md5';
-import { useApiStore } from "@/store/api";
-import { useTasksStore } from "@/store/tasks";
-import { useWriterStore } from "@/store/writer";
-import {useStepsStore} from "@/store/steps";
-import WritingStep from "@/data/WritingStep";
-import Essay from "@/data/Essay";
-import {useChangesStore} from "@/store/changes";
-import Change from "@/data/Change";
 
 const storage = getStorage('essay');
 
@@ -32,10 +32,6 @@ const startState = {
 
 let lockUpdate = 0;             // prevent updates during a processing
 
-/**
- * Essay store
- * Handles the written text of the user
- */
 export const useEssayStore = defineStore('essay', {
 
   state: () => {
@@ -110,7 +106,7 @@ export const useEssayStore = defineStore('essay', {
       }
 
       lockUpdate = 0;
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       apiStore.setInterval('essayStore.checkUpdates', this.checkUpdates, checkInterval);
     },
     /**
@@ -137,7 +133,7 @@ export const useEssayStore = defineStore('essay', {
       }
 
       lockUpdate = 0;
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       apiStore.setInterval('essayStore.checkUpdates', this.checkUpdates, checkInterval);
     },
 
@@ -153,7 +149,7 @@ export const useEssayStore = defineStore('essay', {
 
       // reset the interval
       // this should start the interval again if it stopped accidentally
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       apiStore.setInterval('essayStore.checkUpdates', this.checkUpdates, checkInterval);
     },
 
@@ -166,9 +162,9 @@ export const useEssayStore = defineStore('essay', {
      */
     async updateContent(key, forced = false) {
 
-      const apiStore = useApiStore();
-      const writerStore = useWriterStore();
-      const stepsStore = useStepsStore();
+      const apiStore = stores.api();
+      const writerStore = stores.writer();
+      const stepsStore = stores.steps();
 
       const essay = this.essays[key];
       if (!essay) {
@@ -283,14 +279,13 @@ export const useEssayStore = defineStore('essay', {
       lockUpdate = 0;
     },
 
-
     /**
      * Get the final data of essays to be sent
      * The data will be wrapped in change objects
      * @return {array} Change objects
      */
     async getFinalData() {
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       const changes = [];
 
       for (const essay of Object.values(this.essays)) {

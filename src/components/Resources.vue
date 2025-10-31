@@ -1,14 +1,18 @@
 <script setup>
-import {useLayoutStore} from '@/store/layout';
-import {useResourcesStore} from '@/store/resources';
-import {useTasksStore} from "@/store/tasks";
+/**
+ * Container for resources shown in the left column of the main content
+ * Resources of different types are shown here
+ * Their visibility is controlled by the layoutStore
+ * todo: add resource components for media (audio, video, html)
+ */
 import ResourcePdf from "@/components/ResourcePdf.vue";
 import ResourceUrl from "@/components/ResourceUrl.vue";
+import {stores} from "@/store";
 import {nextTick, watch} from "vue";
 
-const layoutStore = useLayoutStore();
-const resourcesStore = useResourcesStore();
-const tasksStore = useTasksStore();
+const layoutStore = stores.layout();
+const resourcesStore = stores.resources();
+const tasksStore = stores.tasks();
 
 async function setActiveResource() {
   await nextTick();
@@ -21,7 +25,6 @@ watch(() => tasksStore.currentKey, setActiveResource);
 <template>
   <div id="app-resources" tabindex="0" class="resources">
     <template v-for="resource in resourcesStore.resources" :key="resource.key">
-
 
       <resource-pdf v-if="resource.isPdf()"
                     v-show="layoutStore.isResourceShown(resource)"

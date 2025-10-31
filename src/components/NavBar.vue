@@ -1,18 +1,18 @@
 <script setup>
-import { useLayoutStore } from "@/store/layout";
-import { useResourcesStore } from "@/store/resources";
-import { useTasksStore } from '@/store/tasks';
-import { useSettingsStore } from "@/store/settings";
-import { useApiStore } from "@/store/api";
-import { nextTick, watch } from 'vue';
-import Resource from "@/data/Resource";
+/**
+ * Naviagation bar on the left side of the screen
+ * Items are the contents that could be shown in the columns of MainContent
+ */
 import SendingStatus from "@/components/SendingStatus.vue";
+import Resource from "@/data/Resource";
+import {stores} from "@/store";
+import { nextTick, watch } from 'vue';
 
-const layoutStore = useLayoutStore();
-const resourcesStore = useResourcesStore();
-const tasksStore = useTasksStore();
-const settingsStore = useSettingsStore();
-const apiStore = useApiStore();
+const layoutStore = stores.layout();
+const resourcesStore = stores.resources();
+const tasksStore = stores.tasks();
+const settingsStore = stores.settings();
+const apiStore = stores.api();
 
 async function handleFocusChange() {
   if (layoutStore.focusTarget == 'navigation') {

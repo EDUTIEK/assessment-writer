@@ -1,7 +1,14 @@
-import { defineStore } from 'pinia';
-import { getStorage } from "@/lib/Storage";
+/**
+ * Changes Store
+ *
+ * stores unsent change markers for all created, updated or deleted objects of certain types, e.g. WritingStep
+ * stored changes just give the type, keys and timestamp of the change
+ * the actual changed data will be added as a payload when the change is sent to the backend
+ */
 import Change from '@/data/Change';
 import ChangeResponse from "@/data/ChangeReponse";
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
 
 const storage = getStorage('changes');
 
@@ -17,13 +24,6 @@ function startState() {
   return state;
 }
 
-/**
- * Changes Store
- *
- * This stores unsent change markers for all created, updated or deleted objects of certain types, e.g. WritingStep
- * The stored changes just give the type, keys and timestamp of the change
- * The actual changed will be  added as a payload when the change is sent to the backend
- */
 export const useChangesStore = defineStore('changes', {
   state: () => {
     return startState();

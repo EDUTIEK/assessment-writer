@@ -1,8 +1,10 @@
-import { defineStore } from 'pinia';
-import { getStorage } from "@/lib/Storage";
-import { useApiStore } from "./api";
+/**
+ * Tasks Store
+ * handles the list of the writing task
+ */
 import Task from "@/data/Task";
-import Alert from "@/data/Alert";
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from 'pinia';
 
 const storage = getStorage('tasks');
 const startState = {
@@ -17,10 +19,6 @@ const startState = {
   nextKey: null,
 };
 
-/**
- * Task Store
- * Handles the list of the writing task
- */
 export const useTasksStore = defineStore('tasks', {
   state: () => {
     return startState;

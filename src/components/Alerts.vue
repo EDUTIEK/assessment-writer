@@ -1,7 +1,10 @@
 <script setup>
-import { useAlertStore } from '@/store/alerts';
+/**
+ * App bar button with dialog to show alert messages from the exam supervision
+ */
+import {stores} from "@/store";
 
-const alertStore = useAlertStore();
+const alertStore = stores.alert();
 </script>
 
 <template>

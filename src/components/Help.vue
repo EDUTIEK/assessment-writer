@@ -1,8 +1,10 @@
 <script setup>
+/**
+ * Help button and dialog in the app bar
+ */
+import {stores} from "@/store";
 
-import { useLayoutStore } from "../store/layout";
-
-const layoutStore = useLayoutStore();
+const layoutStore = stores.layout();
 
 </script>
 

@@ -1,8 +1,11 @@
 <script setup>
-import {useTasksStore} from "@/store/tasks";
+/**
+ * Selection of partial task shown in the app bar
+ */
+import {stores} from "@/store";
 import { nextTick, ref } from 'vue';
 
-const tasksStore = useTasksStore();
+const tasksStore = stores.tasks();
 
 const menuOpen = ref(false);
 const selectionShown = ref(false);

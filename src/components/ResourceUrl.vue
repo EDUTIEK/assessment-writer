@@ -1,10 +1,12 @@
 <script setup>
-import {useLayoutStore} from '@/store/layout';
-import {useResourcesStore} from '@/store/resources';
+/**
+ * Embedded external resource shown in an iframe
+ */
+import {stores} from "@/store";
 import {nextTick, onMounted, ref, watch} from 'vue';
 
-const layoutStore = useLayoutStore();
-const resourcesStore = useResourcesStore();
+const layoutStore = stores.layout();
+const resourcesStore = stores.resources();
 
 const props = defineProps(['resource']);
 const resource = props.resource
@@ -24,12 +26,6 @@ watch(() => layoutStore.focusChange, handleFocusChange);
 <template>
   <div id="app-resource-url-wrapper">
     <div class="appTextButtons">
-      <!--
-      <v-btn-group density="comfortable" variant="outlined" divided>
-        <v-btn title="Load Annotations" size="small" @click="loadAnnotations">Markierungen laden</v-btn>
-        <v-btn title="Save Annotations" size="small" @click="saveAnnotations">Markierungen speichern</v-btn>
-      </v-btn-group>
-      -->
     </div>
 
     <div tabindex="0" class="appResourceNode" ref="ResourceNode">

@@ -1,13 +1,12 @@
-import {defineStore} from "pinia";
-import {getStorage} from "@/lib/Storage";
-import {useApiStore} from "@/store/api";
-import {useSettingsStore} from "@/store/settings";
-import {useTasksStore} from "@/store/tasks";
-import {useWriterStore} from "@/store/writer";
-import {useChangesStore} from "@/store/changes";
-
-import WritingStep from "@/data/WritingStep";
+/**
+ * Steps Store
+ * handles single writing steps of an essay
+ */
 import Change from "@/data/Change";
+import WritingStep from "@/data/WritingStep";
+import {stores} from "@/store";
+import {getStorage} from "@/lib/Storage";
+import {defineStore} from "pinia";
 
 const storage = getStorage('steps');
 
@@ -20,9 +19,6 @@ const startState = {
   counts: {},                 // number of steps indexed by task_id
 }
 
-/**
- * Steps Store
- */
 export const useStepsStore = defineStore('steps', {
   state: () => {
     return startState;
@@ -112,7 +108,7 @@ export const useStepsStore = defineStore('steps', {
         await storage.setItem(step.getKey(), step.getData());
         await storage.setItem('keys', Object.keys(this.steps));
 
-        const changesStore = useChangesStore();
+        const changesStore = stores.changes();
         await changesStore.setChange(new Change({
           type: Change.TYPE_STEPS,
           action: Change.ACTION_SAVE,
@@ -128,8 +124,8 @@ export const useStepsStore = defineStore('steps', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_STEPS, sendingTime)) {
         const data = await storage.getItem(change.key);

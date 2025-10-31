@@ -1,14 +1,12 @@
-import { defineStore } from "pinia";
-import { getStorage } from "@/lib/Storage";
-import localForage from "localforage";
-import { useApiStore } from "@/store/api";
-import {useSettingsStore} from "@/store/settings";
-import { useTasksStore } from "@/store/tasks";
-import { useWriterStore } from "@/store/writer";
-import { useChangesStore } from "@/store/changes";
-
-import Note from "@/data/Note";
+/**
+ * Notes Store
+ * stores the writing notices
+ */
 import Change from "@/data/Change";
+import Note from "@/data/Note";
+import {getStorage} from "@/lib/Storage";
+import {stores} from "@/store";
+import {defineStore} from "pinia";
 
 const storage = getStorage('notes');
 
@@ -29,10 +27,6 @@ const startState = {
 
 let lockUpdate = 0;             // prevent updates during a processing
 
-
-/**
- * Notes Store
- */
 export const useNotesStore = defineStore('notes', {
   state: () => {
     return startState;
@@ -44,7 +38,7 @@ export const useNotesStore = defineStore('notes', {
   getters: {
 
     currentNotes(state) {
-      const tasksStore = useTasksStore();
+      const tasksStore = stores.tasks();
       const current_task_id =  tasksStore.currentTask?.task_id;
       return Object.values(state.notes).filter(note => note.task_id === current_task_id);
     },
@@ -140,7 +134,7 @@ export const useNotesStore = defineStore('notes', {
       }
 
       lockUpdate = 0;
-      const apiStore = useApiStore();
+      const apiStore = stores.api();
       apiStore.setInterval('notesStore.updateContent', this.updateContent, checkInterval);
     },
 
@@ -152,8 +146,8 @@ export const useNotesStore = defineStore('notes', {
      */
     async prepareNotes() {
 
-      const settingsStore = useSettingsStore();
-      const tasksStore = useTasksStore();
+      const settingsStore = stores.settings();
+      const tasksStore = stores.tasks();
 
       // ensure all notice boards exist
       const keys = [];
@@ -178,8 +172,8 @@ export const useNotesStore = defineStore('notes', {
      * Reelect the active note when the task changed
      */
     handleTaskChange() {
-      const settingsStore = useSettingsStore();
-      const tasksStore = useTasksStore();
+      const settingsStore = stores.settings();
+      const tasksStore = stores.tasks();
 
       if (settingsStore.notice_boards > 0) {
         this.activeKey = Note.buildKey(0, tasksStore.currentTask?.task_id);
@@ -207,7 +201,7 @@ export const useNotesStore = defineStore('notes', {
       }
 
       // don't accept changes after writing end
-      const writerStore = useWriterStore();
+      const writerStore = stores.writer();
       if (writerStore.writingEndReached) {
         return false;
       }
@@ -219,8 +213,8 @@ export const useNotesStore = defineStore('notes', {
           const storedNote = this.notes[key] ?? new Note();
 
           if (!clonedNote.isEqual(storedNote)) {
-            const apiStore = useApiStore();
-            const changesStore = useChangesStore();
+            const apiStore = stores.api();
+            const changesStore = stores.changes();
 
             clonedNote.last_change = apiStore.getServerTime(Date.now());
             this.editNotes[key].setData(clonedNote.getData());
@@ -232,20 +226,15 @@ export const useNotesStore = defineStore('notes', {
               action: Change.ACTION_SAVE,
               key: key
             }))
-
-            console.log(
-              "Save Change ",
-              "| Editor: ", fromEditor,
-              "| Duration:", Date.now() - currentTime, 'ms');
-
           }
-          // set this here
-          this.lastCheck = currentTime;
         }
         catch (error) {
           console.error(error);
         }
       }
+
+      // set this here
+      this.lastCheck = currentTime;
 
       lockUpdate = 0;
     },
@@ -258,8 +247,8 @@ export const useNotesStore = defineStore('notes', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = useApiStore();
-      const changesStore = useChangesStore();
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_NOTES, sendingTime)) {
         const data = await storage.getItem(change.key);

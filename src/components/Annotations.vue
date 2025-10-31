@@ -1,14 +1,15 @@
 <script setup>
-import { useAnnotationsStore } from "@/store/annotations";
+/**
+ * List of annotations shown on the right side of the screen
+ */
 import AnnotationInput from '@/components/AnnotationInput.vue';
-import { nextTick, watch } from 'vue';
-import {useLayoutStore} from "@/store/layout";
-import {useResourcesStore} from "@/store/resources";
 import Annotation from "@/data/Annotation";
+import {stores} from "@/store";
+import {nextTick, watch} from 'vue';
 
-const annotationsStore = useAnnotationsStore();
-const layoutStore = useLayoutStore();
-const resourcesStore = useResourcesStore();
+const annotationsStore = stores.annotations();
+const layoutStore = stores.layout();
+const resourcesStore = stores.resources();
 
 function annotationsPossible() {
   const id = layoutStore.selectedResourceId;

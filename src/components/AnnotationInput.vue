@@ -1,14 +1,14 @@
 <script setup>
-import { useApiStore } from '@/store/api';
-import { useAnnotationsStore } from "@/store/annotations";
-import { useLayoutStore } from '@/store/layout';
-import {useClipboardStore} from "@/store/clipboard";
-import {nextTick, onMounted, ref, watch} from 'vue';
+/**
+ * Single input row to enter an annotation for a mark in the instructions or resources
+ */
+import {stores} from "@/store";
+import {nextTick, onMounted} from 'vue';
 
-const apiStore = useApiStore();
-const annotationsStore = useAnnotationsStore();
-const layoutStore = useLayoutStore();
-const clipboardStore = useClipboardStore();
+const apiStore = stores.api();
+const annotationsStore = stores.annotations();
+const layoutStore = stores.layout();
+const clipboardStore = stores.clipboard();
 
 const props = defineProps(['annotation']);
 const annotation = props.annotation;

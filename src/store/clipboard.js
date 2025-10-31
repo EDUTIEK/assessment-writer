@@ -1,5 +1,10 @@
-import { defineStore } from 'pinia';
-import { useSettingsStore } from "@/store/settings"
+/**
+ * Clipboard store
+ * stores copied content from allowed resources
+ * checs if pasted content equals to the copied content
+ */
+import {stores} from "@/store";
+import {defineStore} from 'pinia';
 
 function textify(html) {
   const temp = document.createElement('div');
@@ -37,7 +42,7 @@ export const useClipboardStore = defineStore('clipboard', {
        */
       const fn = function (content) {
 
-        const settingsStore = useSettingsStore();
+        const settingsStore = stores.settings();
         if (settingsStore.copy_allowed) {
           return true;
         }

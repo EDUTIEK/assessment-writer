@@ -1,3 +1,7 @@
+/**
+ * File handling class
+ * Allows to save a file on the disk
+ */
 export default class FileHandling {
 
     async saveFile (blob, suggestedName)  {
