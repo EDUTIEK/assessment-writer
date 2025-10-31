@@ -15,9 +15,9 @@ const storage = getStorage('essay');
 
 const dmp = new DiffMatchPatch();
 
-const checkInterval = 1000;     // time (ms) to wait for a new update check (e.g. 0.2s to 1s)
-const saveInterval = 5000;      // maximum time (ms) to wait for a new save if content is changed
-const saveDistance = 10;        // maximum levenshtein distance to wait for a new save if content is changed
+const checkInterval = 200;      // time (ms) to wait for a new update check (e.g. 0.2s to 1s)
+const saveInterval = 1000;      // maximum time (ms) to wait for saving a writing step if content is changed
+const saveDistance = 10;        // maximum levenshtein distance to wait for or saving a writing step if content is changed
 const maxDistance = 1000;       // maximum cumulated levenshtein distance of patches before a new full save is done
 
 const startState = {
@@ -106,8 +106,7 @@ export const useEssayStore = defineStore('essay', {
       }
 
       lockUpdate = 0;
-      const apiStore = stores.api();
-      apiStore.setInterval('essayStore.checkUpdates', this.checkUpdates, checkInterval);
+      stores.api().setInterval('essayStore.checkUpdates', this.checkUpdates, checkInterval);
     },
     /**
      * Load the full state from external data and save it to the storage
@@ -133,8 +132,7 @@ export const useEssayStore = defineStore('essay', {
       }
 
       lockUpdate = 0;
-      const apiStore = stores.api();
-      apiStore.setInterval('essayStore.checkUpdates', this.checkUpdates, checkInterval);
+      stores.api().setInterval('essayStore.checkUpdates', this.checkUpdates, checkInterval);
     },
 
     /**
@@ -149,8 +147,7 @@ export const useEssayStore = defineStore('essay', {
 
       // reset the interval
       // this should start the interval again if it stopped accidentally
-      const apiStore = stores.api();
-      apiStore.setInterval('essayStore.checkUpdates', this.checkUpdates, checkInterval);
+      stores.api().setInterval('essayStore.checkUpdates', this.checkUpdates, checkInterval);
     },
 
     /**
@@ -230,7 +227,7 @@ export const useEssayStore = defineStore('essay', {
             });
           }
           // make a delta save if ...
-          else if (distance >= saveDistance                       // enough changed since lase save
+          else if (distance >= saveDistance                       // enough changed since last save
             || currentTime - this.lastSave > saveInterval         // enough time since last save
           ) {
             step = new WritingStep({
@@ -268,14 +265,13 @@ export const useEssayStore = defineStore('essay', {
               "| Duration:", Date.now() - currentTime, 'ms');
           }
         }
-
-        // set this here again if update was not necessary
-        essay.last_check = currentTime;
       }
       catch (error) {
         console.error(error);
       }
 
+      // set this here again if update was not necessary
+      essay.last_check = currentTime;
       lockUpdate = 0;
     },
 

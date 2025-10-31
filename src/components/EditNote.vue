@@ -51,13 +51,13 @@ function handleInit() {
 }
 
 function handleChange() {
-  notesStore.updateContent(true);
+  notesStore.updateContent(props.noteKey);
   helper.applyZoom();
   helper.applyWordCount();
 }
 
 function handleKeyUp() {
-  notesStore.updateContent(true);
+  notesStore.updateContent(props.noteKey);
   helper.applyWordCount();
 }
 

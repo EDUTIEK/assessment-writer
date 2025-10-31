@@ -77,6 +77,7 @@ export const useNotesStore = defineStore('notes', {
      * @public
      */
     async loadFromStorage() {
+      lockUpdate = 1;
 
       try {
         this.$reset();
@@ -103,6 +104,9 @@ export const useNotesStore = defineStore('notes', {
       catch (err) {
         console.log(err);
       }
+
+      lockUpdate = 0;
+      stores.api().setInterval('notesStore.checkUpdates', this.checkUpdates, checkInterval);
     },
 
     /**
@@ -113,6 +117,8 @@ export const useNotesStore = defineStore('notes', {
      * @public
      */
     async loadFromBackend(data = []) {
+      lockUpdate = 1;
+
       try {
         await storage.clear();
         this.$reset();
@@ -134,8 +140,7 @@ export const useNotesStore = defineStore('notes', {
       }
 
       lockUpdate = 0;
-      const apiStore = stores.api();
-      apiStore.setInterval('notesStore.updateContent', this.updateContent, checkInterval);
+      stores.api().setInterval('notesStore.checkUpdates', this.checkUpdates, checkInterval);
     },
 
 
@@ -181,11 +186,30 @@ export const useNotesStore = defineStore('notes', {
     },
 
     /**
+     * Check all notes if an update is needed
+     * @param forced - force the updates
+     */
+    async checkUpdates(forced = false) {
+
+      for (const key in this.notes) {
+        await this.updateContent(key, forced);
+      }
+
+      // reset the interval
+      // this should start the interval again if it stopped accidentally
+      stores.api().setInterval('notesStore.checkUpdates', this.checkUpdates, checkInterval);
+    },
+
+    /**
      * Update the stored content
      * Triggered from the editor component when the content is changed
      * Triggered every checkInterval
      */
-    async updateContent(fromEditor = false, force = false) {
+    async updateContent(key, force = false) {
+
+      const apiStore = stores.api();
+      const changesStore = stores.changes();
+      const writerStore = stores.writer();
 
       // avoid too many checks
       const currentTime = Date.now();
@@ -201,41 +225,34 @@ export const useNotesStore = defineStore('notes', {
       }
 
       // don't accept changes after writing end
-      const writerStore = stores.writer();
       if (writerStore.writingEndReached) {
         return false;
       }
 
-      for (const key in this.editNotes) {
-        try {
-          // ensure it is not changed because it is bound to tiny
-          const clonedNote = this.editNotes[key].getClone();
-          const storedNote = this.notes[key] ?? new Note();
+      try {
+        // ensure it is not changed because it is bound to tiny
+        const clonedNote = this.editNotes[key].getClone();
+        const storedNote = this.notes[key] ?? new Note();
 
-          if (!clonedNote.isEqual(storedNote)) {
-            const apiStore = stores.api();
-            const changesStore = stores.changes();
+        if (!clonedNote.isEqual(storedNote)) {
+          clonedNote.last_change = apiStore.getServerTime(Date.now());
+          this.editNotes[key].setData(clonedNote.getData());
+          this.notes[key] = clonedNote;
 
-            clonedNote.last_change = apiStore.getServerTime(Date.now());
-            this.editNotes[key].setData(clonedNote.getData());
-            this.notes[key] = clonedNote;
-
-            await storage.setItem(key, JSON.stringify(clonedNote.getData()));
-            await changesStore.setChange(new Change({
-              type: Change.TYPE_NOTES,
-              action: Change.ACTION_SAVE,
-              key: key
-            }))
-          }
+          await storage.setItem(key, JSON.stringify(clonedNote.getData()));
+          await changesStore.setChange(new Change({
+            type: Change.TYPE_NOTES,
+            action: Change.ACTION_SAVE,
+            key: key
+          }))
         }
-        catch (error) {
-          console.error(error);
-        }
+      }
+      catch (error) {
+        console.error(error);
       }
 
       // set this here
       this.lastCheck = currentTime;
-
       lockUpdate = 0;
     },
 
