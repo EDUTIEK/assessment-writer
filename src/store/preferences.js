@@ -24,15 +24,6 @@ export const usePreferencesStore = defineStore('preferences', {
   },
 
   getters: {
-
-    allData(state) {
-      return {
-        instructions_zoom: state.instructions_zoom,
-        editor_zoom: state.editor_zoom,
-        word_count_enabled: state.word_count_enabled,
-        word_count_characters: state.word_count_characters
-      }
-    },
   },
 
   actions: {
@@ -102,14 +93,13 @@ export const usePreferencesStore = defineStore('preferences', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = stores.api();
       const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_PREFERENCES, sendingTime)) {
         // preferences exist only once, will be the same for all changes
-        changes.push(apiStore.getChangeDataToSend(change, this.allData));
+        changes.push(changesStore.getChangeDataToSend(change, Object.assign({}, this.$state)));
+        break;
       }
-      ;
       return changes;
     },
 

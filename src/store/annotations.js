@@ -323,7 +323,7 @@ export const useAnnotationsStore = defineStore('annotations', {
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_ANNOTATIONS, sendingTime)) {
         const payload = await storage.getItem(change.key) ?? null;
-        changes.push(apiStore.getChangeDataToSend(change, payload));
+        changes.push(changesStore.getChangeDataToSend(change, payload));
       }
       return changes;
     }

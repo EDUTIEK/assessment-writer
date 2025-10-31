@@ -9,6 +9,7 @@ import Change from '@/data/Change';
 import ChangeResponse from "@/data/ChangeReponse";
 import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
+import {stores} from "@/store/index";
 
 const storage = getStorage('changes');
 
@@ -111,6 +112,25 @@ export const useChangesStore = defineStore('changes', {
       }
       return fn;
     },
+
+    getChangeDataToSend(state) {
+
+      /**
+       * Get the data of a change to be sent to the backend
+       * @param {Change} change
+       * @param {object|null} payload
+       */
+      const fn = function (change, payload = null) {
+        const data = change.getData();
+        if (payload) {
+          data.payload = payload;
+        }
+        // convert javascript time to unix time for the backend
+        data.last_change = stores.api().getServerTime(change.last_change);
+        return data;
+      }
+      return fn;
+    }
   },
 
   actions: {

@@ -253,16 +253,11 @@ export const useNotesStore = defineStore('notes', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = stores.api();
       const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_NOTES, sendingTime)) {
         const data = await storage.getItem(change.key);
-        if (data) {
-          changes.push(apiStore.getChangeDataToSend(change, data));
-        } else {
-          changes.push(apiStore.getChangeDataToSend(change));
-        }
+        changes.push(changesStore.getChangeDataToSend(change, data));
       }
       return changes;
     },

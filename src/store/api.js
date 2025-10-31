@@ -116,25 +116,6 @@ export const useApiStore = defineStore('api', {
       }
       return fn;
     },
-
-
-    getChangeDataToSend(state) {
-
-      /**
-       * Get the data of a change to be sent to the backend
-       * @param {Change} change
-       * @param {object|null} payload
-       */
-      const fn = function (change, payload = null) {
-        const data = change.getData();
-        if (payload) {
-          data.payload = payload;
-        }
-        data.last_change = state.getServerTime(change.last_change);
-        return data;
-      }
-      return fn;
-    }
   },
 
   actions: {

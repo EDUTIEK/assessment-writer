@@ -281,19 +281,16 @@ export const useEssayStore = defineStore('essay', {
      * @return {array} Change objects
      */
     async getFinalData() {
-      const apiStore = stores.api();
       const changes = [];
-
       for (const essay of Object.values(this.essays)) {
         const change = new Change({
           action: Change.ACTION_SAVE,
           type: Change.TYPE_ESSAY,
           key: essay.getKey(),
         });
-
         const data = essay.getData();
-        data.last_change = apiStore.getServerTime(data.last_change);
-        changes.push(apiStore.getChangeDataToSend(change, data));
+        data.last_change = stores.api().getServerTime(data.last_change);
+        changes.push(stores.changes().getChangeDataToSend(change, data));
       }
       return changes;
     }

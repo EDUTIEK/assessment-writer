@@ -129,11 +129,7 @@ export const useStepsStore = defineStore('steps', {
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_STEPS, sendingTime)) {
         const data = await storage.getItem(change.key);
-        if (data) {
-          changes.push(apiStore.getChangeDataToSend(change, data));
-        } else {
-          changes.push(apiStore.getChangeDataToSend(change));
-        }
+        changes.push(changesStore.getChangeDataToSend(change, data));
       }
       return changes;
     }

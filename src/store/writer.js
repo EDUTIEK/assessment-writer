@@ -114,17 +114,12 @@ export const useWriterStore = defineStore('writer', {
      * @return {array} Change objects
      */
     async getStatusToSend(authorized) {
-      const apiStore = stores.api();
-
       const change = new Change({
         action: Change.ACTION_SAVE,
         type: Change.TYPE_WRITER,
         key: 'W' + this.id,
       });
-
-      return [apiStore.getChangeDataToSend(change, {
-        is_authorized: authorized
-      })];
+      return [stores.changes().getChangeDataToSend(change, {is_authorized: authorized})];
     },
 
     /**
