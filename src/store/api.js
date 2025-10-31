@@ -11,7 +11,8 @@ import axios from 'axios'
 import Cookies from 'js-cookie';
 import md5 from 'md5';
 
-const syncInterval = 5000;      // time (ms) to wait for syncing with the backend
+const syncInterval = 1000;      // time (ms) to wait for syncing with the backend
+const updateInterval = 5000;    // time (ms) for next update from the backend (min. syncInterval)
 
 export const useApiStore = defineStore('api', {
 
@@ -38,6 +39,8 @@ export const useApiStore = defineStore('api', {
       showAuthorizeFailure: false,        // show a failure message for the final authorization
 
       lastChangesTry: 0,                  // timestamp of the last try to send changes
+      lastUpdateTry: 0,                   // timestamp of the last try to get an update from the server
+      lastUpdateDone: 0                   // timestamp of the last successful update from the server
     }
   },
 
@@ -288,11 +291,12 @@ export const useApiStore = defineStore('api', {
      */
     async loadUpdateFromBackend() {
 
-      // don't interfer with a running request
-      if (this.lastChangesTry > 0) {
-        return false;
+      // don't interfer with a running request and respect update interval
+      if (this.lastUpdateTry > 0 ||
+          (this.lastUpdateDone > Date.now() - updateInterval)) {
+        return;
       }
-      this.lastChangesTry = Date.now();
+      this.lastUpdateTry = Date.now();
 
       try {
         const response = await axios.get('/writer/update', this.getRequestConfig(this.dataToken));
@@ -304,13 +308,14 @@ export const useApiStore = defineStore('api', {
         await stores.alert().loadFromBackend(response.data['Assessment']['Alerts']);
         await stores.settings().loadFromBackend(response.data['EssayTask']['WritingSettings']);
 
-        this.lastChangesTry = 0;
-        return true;
+        this.lastUpdateTry = 0;
+        this.lastUpdateDone = Date.now();
+        return;
       }
       catch (error) {
         console.error(error);
-        this.lastChangesTry = 0;
-        return false;
+        this.lastUpdateTry = 0;
+        return;
       }
     },
 
