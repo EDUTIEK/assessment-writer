@@ -19,6 +19,12 @@ const changesStore = stores.changes();
 const showSending = ref(false);
 const showFailure = ref(false);
 const sendingResult = ref(new SendingResult());
+const label = ref({});
+
+label.value[Change.TYPE_STEPS] = 'sendingStatusWritingSteps';
+label.value[Change.TYPE_NOTES] = 'sendingStatusNotes';
+label.value[Change.TYPE_ANNOTATIONS] = 'sendingStatusAnnotations';
+label.value[Change.TYPE_PREFERENCES] = 'sendingStatusPreferences';
 
 /**
  * Format a timestamp as string like '2022-02-21 21:22'
@@ -102,20 +108,12 @@ async function downloadEssay() {
                 {{changesStore.lastSendingSuccess > 0 ? formatTimestamp(changesStore.lastSendingSuccess) : $t('sendingStatusNone')}}
               </v-col>
             </v-row>
-            <v-row>
+            <v-row v-for="type in Object.keys(label)">
               <v-col cols="6">
-                {{ $t('sendingStatusWritingSteps') }}
+                {{ $t(label[type]) }}
               </v-col>
               <v-col cols="6">
-                {{changesStore.hasWritingChanges ? $t('sendingStatusNumNotSent', changesStore.getChangesCount(Change.WRITING_TYPES)) : $t('sendingStatusAllSent') }}
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="6">
-                {{$t('sendingStatusOtherChanges') }}
-              </v-col>
-              <v-col cols="6">
-                {{changesStore.hasOtherChanges > 0 ? $t('sendingStatusNumNotSent', changesStore.getChangesCount(Change.OTHER_TYPES)) : $t('sendingStatusAllSent') }}
+                {{changesStore.hasWritingChanges ? $t('sendingStatusNumNotSent', changesStore.getChangesCount(type)) : $t('sendingStatusAllSent') }}
               </v-col>
             </v-row>
           </v-container>

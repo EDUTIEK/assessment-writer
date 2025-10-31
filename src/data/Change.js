@@ -21,7 +21,7 @@ export default class Change {
   static ALLOWED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES, Change.TYPE_STEPS,
     Change.TYPE_ESSAY, Change.TYPE_WRITER];
 
-  static STORED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES, Change.TYPE_STEPS];
+  static STORED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_PREFERENCES, Change.TYPE_STEPS, Change.TYPE_NOTES];
   static WRITING_TYPES = [Change.TYPE_STEPS];
   static OTHER_TYPES =  [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES];
 

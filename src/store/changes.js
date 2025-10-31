@@ -47,17 +47,6 @@ export const useChangesStore = defineStore('changes', {
       return false;
     },
 
-    /**
-     * Check if other changes than writingSteps
-     */
-    hasOtherChanges(state) {
-      for (const type of Change.OTHER_TYPES) {
-        if (Object.keys(state.changes[type]).length > 0) {
-          return true;
-        }
-      }
-      return false;
-    },
 
     /**
      * Count the number of changes
@@ -76,14 +65,10 @@ export const useChangesStore = defineStore('changes', {
 
       /**
        * Get the number of changes of a type
-       * @param {array} types - types to count
+       * @param {string} types - change types to count
        */
-      const fn = function (types = Change.STORED_TYPES) {
-        let count = 0;
-        for (const type of types) {
-          count += Object.keys(state.changes[type]).length;
-        }
-        return count;
+      const fn = function (type) {
+        return Object.keys(state.changes[type] ?? []).length;
       }
       return fn;
     } ,
