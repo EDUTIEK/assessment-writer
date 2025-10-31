@@ -8,6 +8,7 @@
 import {stores} from "@/store";
 
 const apiStore = stores.api();
+const layoutStore = stores.layout();
 </script>
 
 <template>
@@ -22,7 +23,7 @@ const apiStore = stores.api();
       </v-btn>
     </v-app-bar>
 
-    <v-dialog persistent v-model="apiStore.showInitFailure">
+    <v-dialog max-width="1000" persistent v-model="layoutStore.showInitFailure">
       <v-card>
         <v-card-text>
           <p>{{ $t('startupPageLoadError') }}</p>
@@ -36,30 +37,11 @@ const apiStore = stores.api();
       </v-card>
     </v-dialog>
 
-    <v-dialog persistent v-model="apiStore.showReplaceConfirmation">
+    <v-dialog max-width="1000" persistent v-model="layoutStore.showReplaceConfirmation">
       <v-card>
         <v-card-text>
           <p>{{ $t('startupPageOverwriteInfo') }}</p>
           <p>{{ $t('startupPageOverwriteQuestion') }}</p>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn @click="apiStore.loadDataFromBackend()">
-            <v-icon left icon="mdi-reload"></v-icon>
-            <span>{{ $t('allLoad') }}</span>
-          </v-btn>
-          <v-btn :href="apiStore.returnUrl">
-            <v-icon left icon="mdi-logout-variant"></v-icon>
-            <span>{{ $t('allCancel') }}</span>
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog persistent v-model="apiStore.showReloadConfirmation">
-      <v-card>
-        <v-card-text>
-          <p>{{ $t('startupPageReloadInfo')}}</p>
-          <p>{{ $t('startupPageReloadQuestion') }}</p>
         </v-card-text>
         <v-card-actions>
           <v-btn @click="apiStore.loadDataFromBackend()">

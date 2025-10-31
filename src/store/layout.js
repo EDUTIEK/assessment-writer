@@ -24,6 +24,10 @@ export const useLayoutStore = defineStore('layout', {
       // not saved in storage
       initialized: false,             // used to switch from startup screen to the editing view
       review: false,                  // used to switch to the review for a final submission
+
+      showInitFailure: false,             // show a message that the initialisation failed
+      showReplaceConfirmation: false,     // show a confirmation that the stored data should be replaced by another task or user
+
       focusTarget: '',                // target for setting the focus (header|navigation|left|right)
       focusChange: 0                  // indicator to set the focus to the target
     }

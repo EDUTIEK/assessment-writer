@@ -18,7 +18,7 @@ apiStore.init();
 
 <template>
   <v-app fill-height>
-    <startup-content v-if="!layoutStore.isInitialized"/>
+    <startup-page v-if="!layoutStore.isInitialized"/>
     <app-bar v-if="layoutStore.isInitialized"/>
     <nav-bar v-if="layoutStore.isInitialized && !layoutStore.isReview"/>
 

@@ -8,7 +8,9 @@
  */
 import Task from "@/data/Task";
 import i18n from "@/plugins/i18n";
-import {stores} from "@/store";
+import {clearAllStores, stores} from "@/store";
+import {useApiStore} from "@/store/api";
+import {ref} from "vue";
 
 const apiStore = stores.api();
 const configStore = stores.config();
@@ -23,12 +25,49 @@ const layoutStore = stores.layout();
 
 const { t } = i18n.global;
 
-function headline(addition = '') {
+const showFinalizeFailure = ref(false);
+const showAsAuthorizeFailure = ref(false);
 
+/**
+ * Build the headline to be shown
+ */
+function headline(addition = '') {
   const head = (tasksStore.taskIds > 0) ? t('allEssay') :  tasksStore.currentTask.title;
   return addition ? (head +  ' - ' + addition) : head;
 }
 
+/**
+ * Finalize the writing
+ * - send the written content to the server
+ * - clear data and return to the backend
+ * @param {boolean} authorize the final content should be authorized for correction
+ */
+async function finalize(authorize) {
+  console.log('authorize', authorize);
+  const result = await apiStore.saveFinalContentToBackend(authorize);
+  console.log(result);
+  if (!result.success || authorize && !writerStore.isAuthorized) {
+    showFinalizeFailure.value = true;
+    showAsAuthorizeFailure.value = authorize;
+    return;
+  }
+
+  await clearAllStores();
+  window.location = apiStore.returnUrl
+}
+
+/**
+ * Retry sending the final content
+ * - should not authorize and close the writer
+ * - Instead the review screen is shown again and allows to authorize
+ */
+async function retry() {
+  const result = apiStore.saveFinalContentToBackend(false);
+  if (!result.success) {
+    showFinalizeFailure.value = true
+    showAsAuthorizeFailure.value = false
+  }
+}
 </script>
 
 <template>
@@ -50,7 +89,7 @@ function headline(addition = '') {
         </div>
 
         <div class="col-footer bg-grey-lighten-4">
-          <v-btn class="ma-2" :color="configStore.primaryColorCss" @click="apiStore.retry()">
+          <v-btn class="ma-2" :color="configStore.primaryColorCss" @click="retry()">
             <v-icon :color="configStore.primaryTextColorCss" icon="mdi-refresh"></v-icon>
             <span :style="configStore.primaryTextColorFullCss">{{ $t('reviewContentTryAgain') }}</span>
           </v-btn>
@@ -90,12 +129,12 @@ function headline(addition = '') {
         </div>
 
         <div class="col-footer bg-grey-lighten-4">
-          <v-btn class="ma-2 primary" @click="apiStore.finalize(true)" :color="configStore.primaryColorCss"
+          <v-btn class="ma-2 primary" @click="finalize(true)" :color="configStore.primaryColorCss"
                  v-show="!writerStore.isExcluded">
             <v-icon :color="configStore.primaryTextColorCss" icon="mdi-file-send-outline"></v-icon>
             <span :style="configStore.primaryTextColorFullCss">{{ $t('reviewContentAuthorize', tasksStore.countTasks) }}</span>
           </v-btn>
-          <v-btn class="ma-2" @click="apiStore.finalize(false)"
+          <v-btn class="ma-2" @click="finalize(false)"
                  v-show="writerStore.writingEndReached || writerStore.isExcluded">
             <v-icon icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('reviewContentDontAuthorize') }}</span>
@@ -108,20 +147,20 @@ function headline(addition = '') {
         </div>
       </div>
 
-    <v-dialog max-width="1000" persistent v-model="apiStore.showFinalizeFailure">
+    <v-dialog max-width="1000" persistent v-model="showFinalizeFailure">
       <v-card>
         <v-card-text>
           <p>{{ $t('reviewContentNetworkProblem') }}</p>
           <p><br>{{ $t('reviewContentLeaveAndTryLater')}}</p>
-          <p v-show="apiStore.showAuthorizeFailure"><br>
+          <p v-show="showAsAuthorizeFailure"><br>
             {{ $t('reviewContentCallSupervisionToAuthorize') }}
           </p>
-          <p v-show="!apiStore.showAuthorizeFailure"><br>
+          <p v-show="!showAsAuthorizeFailure"><br>
             {{ $t('reviewContentCallSupervisionForHelp') }}
           </p>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="apiStore.showFinalizeFailure=false">
+          <v-btn @click="showFinalizeFailure=false">
             <v-icon left icon="mdi-close"></v-icon>
             <span>{{ $t('allCloseMessage') }}</span>
           </v-btn>

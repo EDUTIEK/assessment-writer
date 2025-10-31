@@ -117,7 +117,7 @@ export const useWriterStore = defineStore('writer', {
       const change = new Change({
         action: Change.ACTION_SAVE,
         type: Change.TYPE_WRITER,
-        key: 'W' + this.id,
+        key: 'W',
       });
       return [stores.changes().getChangeDataToSend(change, {is_authorized: authorized})];
     },

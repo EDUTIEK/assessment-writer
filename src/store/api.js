@@ -30,12 +30,6 @@ export const useApiStore = defineStore('api', {
 
       // not saved
       intervals: {},                      // list of all registered timer intervals, indexed by their name
-      showInitFailure: false,             // show a message that the initialisation failed
-      showReplaceConfirmation: false,     // show a confirmation that the stored data should be replaced by another task or user
-      showReloadConfirmation: false,      // show a confirmation that all data for the same task and user shod be reloaded from the server
-      showFinalizeFailure: false,         // show a failure message for the final saving
-      showAuthorizeFailure: false,        // show a failure message for the final authorization
-
       lastChangesTry: 0,                  // timestamp of the last try to send changes
       lastUpdateTry: 0,                   // timestamp of the last try to get an update from the server
       lastUpdateDone: 0                   // timestamp of the last successful update from the server
@@ -121,6 +115,10 @@ export const useApiStore = defineStore('api', {
 
   actions: {
 
+    /**
+     * Clear the store
+     * Don't clear local variables of the api store
+     */
     async clearStorage() {
       localStorage.clear();
     },
@@ -170,7 +168,7 @@ export const useApiStore = defineStore('api', {
       }
 
       if (!this.backendUrl || !this.returnUrl || !this.userId || !this.assId || !this.contextId || !this.dataToken) {
-        this.showInitFailure = true;
+        stores.layout().showInitFailure = true;
         return;
       }
 
@@ -179,11 +177,11 @@ export const useApiStore = defineStore('api', {
 
       if (newContext) {
         // switching to a new task or user always requires a load from the backend
-        // be shure that existing data is not unintentionally replaced
+        // be sure that existing data is not unintentionally replaced
 
         if (changesStore.countChanges > 0) {
           console.log('init: new context, open savings');
-          this.showReplaceConfirmation = true;
+          stores.layout().showReplaceConfirmation = true;
         } else {
           console.log('init: new context, no open savings');
           await this.loadDataFromBackend();
@@ -257,7 +255,7 @@ export const useApiStore = defineStore('api', {
       }
       catch (error) {
         console.error(error);
-        this.showInitFailure = true;
+        stores.layout().showInitFailure = true;
         return;
       }
 
@@ -322,7 +320,6 @@ export const useApiStore = defineStore('api', {
      * @return SendingResult|null
      */
     async saveChangesToBackend(wait = false) {
-
       // wait up to five second for a running request to finish before giving up
       if (wait) {
         let tries = 0;
@@ -371,40 +368,14 @@ export const useApiStore = defineStore('api', {
           }
 
           this.lastChangesTry = 0;
-          return new SendingResult({
-            success: true,
-            message: response.statusText,
-            details: response.data
-          })
+          return sendingSuccessResult(response);
         }
         catch (error) {
           this.lastChangesTry = 0;
           console.log(error);
-
-          if (error.response) {
-            return new SendingResult({
-              success: false,
-              message: error.response.statusText,
-              details: error.response.data
-            })
-          }
-          else if (error.message) {
-            return new SendingResult({
-              success: false,
-              message: error.message,
-              details: ''
-            })
-          }
-          else {
-            return new SendingResult({
-              success: false,
-              message: 'Unknown error',
-              details: ''
-            })
-          }
+          return sendingErrorResult(error);
         }
       }
-
       return null;
     },
 
@@ -413,8 +384,6 @@ export const useApiStore = defineStore('api', {
      * @param bool set_authorized
      */
     async saveFinalContentToBackend(set_authorized) {
-      let response = {};
-
        const data = {
         'EssayTask': {
           'Steps': await stores.steps().getChangedData(0),
@@ -425,8 +394,9 @@ export const useApiStore = defineStore('api', {
           'Writer': await stores.writer().getStatusToSend(set_authorized)
         },
        };
+
       try {
-        response = await axios.put('/writer/final', data, this.getRequestConfig(this.dataToken));
+        const response = await axios.put('/writer/final', data, this.getRequestConfig(this.dataToken));
         this.refreshToken(response);
 
         if (response.data['EssayTask']) {
@@ -436,15 +406,11 @@ export const useApiStore = defineStore('api', {
         if (response.data['Assessment']) {
           await stores.writer().setStatusResponses(response.data['Assessment']['Writer'] ?? [])
         }
-
-        if (set_authorized && !stores.writer().is_authorized) {
-          return false;
-        }
-        return true;
+        return sendingSuccessResult(response);
       }
       catch (error) {
         console.error(error);
-        return false;
+        return sendingErrorResult(error);
       }
     },
 
@@ -510,40 +476,6 @@ export const useApiStore = defineStore('api', {
     },
 
     /**
-     * Finalize the writing
-     * This is called from the final review screen
-     * The written content is sent to the server and the local storage is cleared
-     * @param {boolean} authorize the final content should be authorized for correction
-     */
-    async finalize(authorize) {
-
-      if (authorize || stores.changes().hasWritingChanges) {
-        if (!await this.saveFinalContentToBackend(authorize)) {
-          this.review = true
-          this.showFinalizeFailure = true
-          this.showAuthorizeFailure = authorize
-          return;
-        }
-      }
-
-      await clearAllStores();
-      window.location = this.returnUrl;
-    },
-
-    /**
-     * Retry the final transmission
-     * This is called from the final review screen
-     * A retry should not authorize and close the writer
-     * Instead the review screen is shown again and allows to auhorize
-     */
-    async retry() {
-      if (!await this.saveFinalContentToBackend(false)) {
-        this.showFinalizeFailure = true
-      }
-      this.review = true;
-    },
-
-    /**
      * Set a timer interval
      * @param {string} name unique name of the interval to set
      * @param {function} handler function that is called
@@ -567,3 +499,35 @@ export const useApiStore = defineStore('api', {
     }
   }
 })
+
+function sendingSuccessResult(response) {
+  return new SendingResult({
+    success: true,
+    message: response.statusText,
+    details: response.data
+  })
+}
+
+function sendingErrorResult(error = null) {
+  if (error.response) {
+    return new SendingResult({
+      success: false,
+      message: error.response.statusText,
+      details: error.response.data
+    })
+  }
+  else if (error.message) {
+    return new SendingResult({
+      success: false,
+      message: error.message,
+      details: ''
+    })
+  }
+  else {
+    return new SendingResult({
+      success: false,
+      message: 'Unknown error',
+      details: ''
+    })
+  }
+}
