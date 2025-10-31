@@ -22,12 +22,17 @@ export const useLayoutStore = defineStore('layout', {
       showSendingStatus: false,
 
       // not saved in storage
+      initialized: false,             // used to switch from startup screen to the editing view
+      review: false,                  // used to switch to the review for a final submission
       focusTarget: '',                // target for setting the focus (header|navigation|left|right)
       focusChange: 0                  // indicator to set the focus to the target
     }
   },
 
   getters: {
+    isInitialized: (state) => state.initialized,
+    isReview: (state) => state.review,
+
     isLeftExpanded: (state) => state.expandedColumn == 'left',
     isRightExpanded: (state) => state.expandedColumn == 'right',
 
@@ -97,6 +102,7 @@ export const useLayoutStore = defineStore('layout', {
       if (!this.leftContent) {
         this.expandedColumn = 'right';
       }
+      this.initialized = true;
     },
 
     async clearStorage() {
@@ -143,6 +149,10 @@ export const useLayoutStore = defineStore('layout', {
       catch (err) {
         console.log(err);
       }
+    },
+
+    setReview(review) {
+      this.review = !!review;
     },
 
     showInstructions() {

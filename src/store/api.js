@@ -30,8 +30,6 @@ export const useApiStore = defineStore('api', {
 
       // not saved
       intervals: {},                      // list of all registered timer intervals, indexed by their name
-      initialized: false,                 // used to switch from startup screen to the editing view
-      review: false,                      // used to switch to the review and confirmation for a final submission
       showInitFailure: false,             // show a message that the initialisation failed
       showReplaceConfirmation: false,     // show a confirmation that the stored data should be replaced by another task or user
       showReloadConfirmation: false,      // show a confirmation that all data for the same task and user shod be reloaded from the server
@@ -53,8 +51,8 @@ export const useApiStore = defineStore('api', {
       return !state.isSending && stores.changes().countChanges == 0;
     },
 
-    isSending: state => {
-      state.lastChangesTry > 0;
+    isSending(state) {
+      return state.lastChangesTry > 0;
     },
 
     getRequestConfig(state) {
@@ -238,7 +236,6 @@ export const useApiStore = defineStore('api', {
       // directy check for updates of task settings to avoid delay
       await this.loadUpdateFromBackend();
       await stores.layout().initialize();
-      this.initialized = true;
     },
 
 
@@ -279,8 +276,6 @@ export const useApiStore = defineStore('api', {
       await stores.notes().prepareNotes(stores.settings().notice_boards);
 
       await stores.layout().initialize();
-
-      this.initialized = true;
     },
 
     /**

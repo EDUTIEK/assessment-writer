@@ -14,7 +14,6 @@ const writerStore = stores.writer();
 const alertStore = stores.alert();
 const essayStore = stores.essay();
 const layoutStore = stores.layout();
-const changesStore = stores.changes();
 
 async function handleFocusChange() {
   if (layoutStore.focusTarget == 'header') {
@@ -45,7 +44,7 @@ async function closeWriter() {
 async function openReview() {
   await essayStore.checkUpdates(true);
   await nextTick();
-  apiStore.review = true;
+  layoutStore.setReview(true);
 }
 
 </script>
@@ -60,12 +59,12 @@ async function openReview() {
     <alerts v-if="alertStore.hasAlerts"></alerts>
     <timer v-if="writerStore.hasWritingEnd"></timer>
 
-    <v-btn class="app-header-item" v-show="!apiStore.review" @click="closeWriter">
+    <v-btn class="app-header-item" v-show="!layoutStore.isReview" @click="closeWriter">
       <v-icon left icon="mdi-pause"></v-icon>
       <span>{{ $t("appBarInterrupt") }}</span>
     </v-btn>
 
-    <v-btn class="app-header-item" v-show="!apiStore.review" @click="openReview">
+    <v-btn class="app-header-item" v-show="!layoutStore.isReview" @click="openReview">
       <v-icon left icon="mdi-eye"></v-icon>
       <span>{{ $t("appBarReview") }}</span>
     </v-btn>

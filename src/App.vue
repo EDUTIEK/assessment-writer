@@ -11,19 +11,20 @@ import ReviewContent from "@/components/ReviewContent.vue";
 import { stores } from '@/store';
 
 const apiStore = stores.api();
+const layoutStore = stores.layout();
 apiStore.init();
 
 </script>
 
 <template>
   <v-app fill-height>
-    <startup-content v-if="!apiStore.initialized"/>
-    <app-bar v-if="apiStore.initialized"/>
-    <nav-bar v-if="apiStore.initialized && !apiStore.review"/>
+    <startup-content v-if="!layoutStore.isInitialized"/>
+    <app-bar v-if="layoutStore.isInitialized"/>
+    <nav-bar v-if="layoutStore.isInitialized && !layoutStore.isReview"/>
 
     <!-- use v-show to prevent a reload of resources after switching from review to main -->
-    <main-content v-if="apiStore.initialized" v-show="!apiStore.review"/>
-    <review-content v-if="apiStore.initialized" v-show="apiStore.review"/>
+    <main-content v-if="layoutStore.isInitialized" v-show="!layoutStore.isReview"/>
+    <review-content v-if="layoutStore.isInitialized" v-show="layoutStore.isReview"/>
   </v-app>
 </template>
 

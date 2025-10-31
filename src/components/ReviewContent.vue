@@ -19,6 +19,7 @@ const settingsStore = stores.settings();
 const preferencesStore = stores.preferences();
 const changesStore = stores.changes();
 const tasksStore = stores.tasks();
+const layoutStore = stores.layout();
 
 const { t } = i18n.global;
 
@@ -53,7 +54,7 @@ function headline(addition = '') {
             <v-icon :color="configStore.primaryTextColorCss" icon="mdi-refresh"></v-icon>
             <span :style="configStore.primaryTextColorFullCss">{{ $t('reviewContentTryAgain') }}</span>
           </v-btn>
-          <v-btn class="ma-2" @click="apiStore.review=false"
+          <v-btn class="ma-2" @click="layoutStore.setReview(false)"
                  v-show="!writerStore.writingEndReached && !writerStore.isExcluded">
             <v-icon icon="mdi-file-edit-outline"></v-icon>
             <span>{{ $t('reviewContentContinueEditing') }}</span>
@@ -99,7 +100,7 @@ function headline(addition = '') {
             <v-icon icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('reviewContentDontAuthorize') }}</span>
           </v-btn>
-          <v-btn class="ma-2" @click="apiStore.review=false"
+          <v-btn class="ma-2" @click="layoutStore.setReview(false)"
                  v-show="!writerStore.writingEndReached && !writerStore.isExcluded">
             <v-icon icon="mdi-file-edit-outline"></v-icon>
             <span>{{ $t('reviewContentContinueEditing') }}</span>
