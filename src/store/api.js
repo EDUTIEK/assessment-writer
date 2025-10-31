@@ -320,7 +320,6 @@ export const useApiStore = defineStore('api', {
      * @return SendingResult|null
      */
     async saveChangesToBackend(wait = false) {
-      return null;
       // wait up to five second for a running request to finish before giving up
       if (wait) {
         let tries = 0;

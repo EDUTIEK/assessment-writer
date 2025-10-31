@@ -5,6 +5,7 @@
  */
 import SendingResult from "@/data/SendingResult";
 import Change from '@/data/Change';
+import Essay from "@/data/Essay";
 import FileHandling from "@/lib/FileHandling";
 import {stores} from "@/store";
 import {ref} from "vue";
@@ -58,11 +59,10 @@ async function sendUpdate() {
   showSending.value = false;
 }
 
-async function downloadEssay() {
+async function downloadEssay(task) {
   const fileHandling = new FileHandling();
-  // todo: refactor to multiple essay
-  const blob = new Blob([essayStore.currentContent], { type: 'text/html' });
-  await fileHandling.saveFile(blob, writerStore.writer_name + '.html');
+  const blob = new Blob([essayStore.editEssays[Essay.buildKey(task.task_id)].content], { type: 'text/html' });
+  await fileHandling.saveFile(blob, task.title + '-' + writerStore.writer_name + '.html');
 }
 
 </script>
@@ -124,10 +124,21 @@ async function downloadEssay() {
             <v-icon left icon="mdi-file-send-outline"></v-icon>
             <span>{{ $t('sendingStatusSend') }}</span>
           </v-btn>
-          <v-btn @click="downloadEssay()">
+          <v-btn @click="downloadEssay()" id="app-export-menu-activator">
             <v-icon left icon="mdi-file-download-outline"></v-icon>
             <span>{{ $t('sendingStatusExport') }}</span>
           </v-btn>
+          <v-menu activator="#app-export-menu-activator">
+            <v-list>
+              <v-list-item v-for="task in stores.tasks().sortedTasks"
+                  :key="task.task_id"
+                  :value="task.task_id"
+              >
+                <v-list-item-title @click="downloadEssay(task)">{{ task.title }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+
           <v-btn @click="closePopup()">
             <v-icon left icon="mdi-close"></v-icon>
             <span>{{ $t('allClose') }}</span>
