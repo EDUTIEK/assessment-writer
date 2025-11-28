@@ -69,23 +69,4 @@ export default class ChangeResponse {
     getData() {
         return Object.assign({}, this);
     }
-
-    /**
-     * Get a new key from the response
-     */
-    getNewKey() {
-        if (this.action === Change.ACTION_DELETE) {
-            return null;
-        }
-        switch (this.type) {
-
-            // these types don't change key when being saved
-            // for other types call the class to build a key from the result
-            case Change.TYPE_ANNOTATIONS:
-            case Change.TYPE_NOTES:
-            case Change.TYPE_PREFERENCES:
-            default:
-                return this.key;
-        }
-    }
 }

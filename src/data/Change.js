@@ -57,7 +57,7 @@ export default class Change {
 
 
   /**
-   * Payload to be added in apiStore.getChangeDataToSend()
+   * Payload to be added in changesStore.getChangeDataToSend()
    * The keys of deleted objects may be added before
    * @type {object|null}
    */
@@ -83,7 +83,6 @@ export default class Change {
     if (data.payload !== undefined && data.payload !== null) {
       this.payload = data.payload;
     }
-
     if (this.last_change === null) {
       this.last_change = Date.now();
     }

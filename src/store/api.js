@@ -353,7 +353,7 @@ export const useApiStore = defineStore('api', {
           for (const component in response.data ?? []) {
             const changes = response.data[component];
             for (const type in changes ?? []) {
-              changesStore.setChangesSent(type, changes[type],  this.lastChangesTry)
+              await changesStore.setChangesSent(type, changes[type],  this.lastChangesTry)
             }
           }
 

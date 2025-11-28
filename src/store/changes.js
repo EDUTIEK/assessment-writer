@@ -207,49 +207,33 @@ export const useChangesStore = defineStore('changes', {
      * This will delete all changes that are responded as processed and that are not newer than the sending time
      *
      * @param {string} type see Change.ALLOWED_TYPES
-     * @param {object} response - old key: new key or null if the data has been deleted
+     * @param {object} response
      * @param {integer} maxDeleteTime maximum timestamp until processed changes should be deleted
      * @see getChangesFor
      */
     async setChangesSent(type, responses = [], maxDeleteTime) {
 
-      let store_keys = false;
+      let some_removed = false;
 
-      for (const response_data of responses) {
-        const response = new ChangeResponse(response_data);
-        const old_key = response.key;
-        const new_key = response.getNewKey();
-        const change = this.changes[type][old_key];
+      if (this.changes[type]) {
+        for (const response_data of responses) {
+          const response = new ChangeResponse(response_data);
+          const change = this.changes[type][response.key];
 
-        if (change && response.done) {
-          if (change.last_change <= maxDeleteTime) {
+          if (change && response.done) {
+            if (change.last_change <= maxDeleteTime) {
 
-            // change that has not been updated since the sending
-
-            // => delete it
-            delete this.changes[type][old_key];
-            await storage.removeItem(change.getChangeKey());
-            store_keys = true;
-
-          } else if (new_key !== null && new_key !== old_key) {
-
-            // a new key is returned for a change that was update meanwhile
-
-            // => delete the change with the old key
-            delete this.changes[type][old_key];
-            await storage.removeItem(change.getChangeKey());
-
-            // => save the same change with the new key
-            change.key = new_key;
-            this.changes[type][new_key] = change;
-            await storage.setItem(change.getChangeKey(), JSON.stringify(change.getData()));
-            store_keys = true;
+              // change that has not been updated since the sending => delete it
+              delete this.changes[type][response.key];
+              await storage.removeItem(change.getChangeKey());
+              some_removed = true;
+            }
           }
         }
       }
 
-      // finally save the keys if needed (avoid multiple writes)
-      if (store_keys) {
+      // save the keys if needed (avoid multiple writes)
+      if (some_removed) {
         this.lastSave = Date.now();
         await storage.setItem(type, Object.keys(this.changes[type]));
         await storage.setItem('lastSave', this.lastSave);
