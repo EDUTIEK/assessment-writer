@@ -199,6 +199,7 @@ export const useApiStore = defineStore('api', {
         }
       }
 
+      // todo: re-initialize, e.g. by click on cloud symbol
       this.setInterval('apiStore.timedSync', this.timedSync, syncInterval);
     },
 
@@ -339,32 +340,21 @@ export const useApiStore = defineStore('api', {
         this.lastChangesTry = Date.now();
 
         try {
-          const data = {
-            'Task': {
-              'Annotations': await stores.annotations().getChangedData(this.lastChangesTry)
-            },
-            'EssayTask': {
-              'WriterPrefs': await stores.preferences().getChangedData(this.lastChangesTry),
-              'Notes': await stores.notes().getChangedData(this.lastChangesTry),
-              'Steps': await stores.steps().getChangedData(this.lastChangesTry),
-            }
-          };
+          const data = {'Task': {}, 'EssayTask': {}};
+          data['Task'][Change.TYPE_ANNOTATIONS] = await stores.annotations().getChangedData(this.lastChangesTry);
+          data['EssayTask'][Change.TYPE_PREFERENCES] =  await stores.preferences().getChangedData(this.lastChangesTry);
+          data['EssayTask'][Change.TYPE_NOTES] = await stores.notes().getChangedData(this.lastChangesTry);
+          data['EssayTask'][Change.TYPE_STEPS] = await stores.steps().getChangedData(this.lastChangesTry);
 
           const response = await axios.put('/writer/changes', data, this.getRequestConfig(this.dataToken));
           this.setTimeOffset(response);
           this.refreshToken(response);
 
-          if (response.data['Task']) {
-            await changesStore.setChangesSent(Change.TYPE_ANNOTATIONS,
-                response.data['Task']['Annotations'] ?? [], this.lastChangesTry);
-          }
-          if (response.data['EssayTask']) {
-            await changesStore.setChangesSent(Change.TYPE_STEPS,
-                response.data['EssayTask']['Steps'] ?? [], this.lastChangesTry);
-            await changesStore.setChangesSent(Change.TYPE_NOTES,
-                response.data['EssayTask']['Notes'] ?? [], this.lastChangesTry);
-            await changesStore.setChangesSent(Change.TYPE_PREFERENCES,
-                response.data['EssayTask']['WriterPrefs'] ?? [], this.lastChangesTry);
+          for (const component in response.data ?? []) {
+            const changes = response.data[component];
+            for (const type in changes ?? []) {
+              changesStore.setChangesSent(type, changes[type],  this.lastChangesTry)
+            }
           }
 
           this.lastChangesTry = 0;
@@ -384,27 +374,27 @@ export const useApiStore = defineStore('api', {
      * @param bool set_authorized
      */
     async saveFinalContentToBackend(set_authorized) {
-       const data = {
-        'EssayTask': {
-          'Steps': await stores.steps().getChangedData(0),
-          'Essays': await stores.essay().getFinalData(),
-        },
-        'Assessment': {
-          // queue as last because authorization may block other updates
-          'Writer': await stores.writer().getStatusToSend(set_authorized)
-        },
-       };
+
+      // queue Assesment as last because authorization may block other updates
+      const data = {'EssayTask': {}, 'Assessment': {}};
+      data['EssayTask'][Change.TYPE_STEPS] = await stores.steps().getChangedData(0);
+      data['EssayTask'][Change.TYPE_ESSAY] = await stores.essay().getFinalData();
+      data['Assessment'][Change.TYPE_WRITER] = await stores.writer().getStatusToSend(set_authorized);
 
       try {
         const response = await axios.put('/writer/final', data, this.getRequestConfig(this.dataToken));
         this.refreshToken(response);
 
-        if (response.data['EssayTask']) {
-          await stores.changes().setChangesSent(Change.TYPE_STEPS,
-              response.data['EssayTask']['Steps'] ?? [], Date.now());
+        const changesStore = stores.changes();
+        for (const component in response.data ?? []) {
+          const changes = response.data[component];
+          for (const type in changes ?? []) {
+            changesStore.setChangesSent(type, changes[type],  this.lastChangesTry)
+          }
         }
+
         if (response.data['Assessment']) {
-          await stores.writer().setStatusResponses(response.data['Assessment']['Writer'] ?? [])
+          await stores.writer().setStatusResponses(response.data['Assessment'][Change.TYPE_WRITER] ?? [])
         }
         return sendingSuccessResult(response);
       }

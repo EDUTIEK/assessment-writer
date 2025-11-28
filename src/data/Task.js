@@ -9,9 +9,9 @@ export default class Task {
 
     static ALLOWED_TYPES = [Task.TYPE_ESSAY];
 
-    static order(alert1, alert2) {
-        return alert1.position < alert2.position ? -1
-            : alert1.position > alert2.position ? 1
+    static order(task1, task2) {
+        return task1.position < task2.position ? -1
+            : task1.position > task2.position ? 1
                 : 0
     }
 
