@@ -162,17 +162,6 @@ export const useChangesStore = defineStore('changes', {
     },
 
     /**
-     * Check if changes are in the storage
-     * (called from api store at initialisation)
-     */
-    async hasChangesInStorage() {
-      for (const type in this.changes) {
-        const keys = await storage.getItem(type) ?? [];
-        return keys.length > 0;
-      }
-    },
-
-    /**
      * Set a change and save the changes
      * Changes with same key and type will be updated, so that only the last change time is saved
      * This prevents multiple sending of the same data
