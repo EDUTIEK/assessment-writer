@@ -7,8 +7,6 @@
  */
 import {stores} from "@/store";
 
-const apiStore = stores.api();
-const layoutStore = stores.layout();
 </script>
 
 <template>
@@ -17,19 +15,24 @@ const layoutStore = stores.layout();
     <v-app-bar elevation="1" color="white" density="compact">
       <p>{{ $t('startupPageLoadData') }}</p>
       <v-spacer></v-spacer>
-      <v-btn :href="apiStore.returnUrl">
+      <v-btn :href="stores.api().returnUrl">
         <v-icon left icon="mdi-logout-variant"></v-icon>
         <span>{{ $t('allEnd') }}</span>
       </v-btn>
     </v-app-bar>
 
-    <v-dialog max-width="1000" persistent v-model="layoutStore.showInitFailure">
+    <v-dialog persistent  max-width="60em" v-model="stores.layout().hasInitFailure">
       <v-card>
+        <v-card-title>
+          {{ $t('startupPageLoadError') }}
+        </v-card-title>
         <v-card-text>
-          <p>{{ $t('startupPageLoadError') }}</p>
+          <v-alert type="warning" variant="text" color="#0000A0" >
+            {{ stores.layout().initFailure }}
+          </v-alert>
         </v-card-text>
         <v-card-actions>
-          <v-btn :href="apiStore.returnUrl">
+          <v-btn :href="stores.api().returnUrl">
             <v-icon left icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('allEnd') }}</span>
           </v-btn>
@@ -37,18 +40,18 @@ const layoutStore = stores.layout();
       </v-card>
     </v-dialog>
 
-    <v-dialog max-width="1000" persistent v-model="layoutStore.showReplaceConfirmation">
+    <v-dialog max-width="60em" persistent v-model="stores.layout().showReplaceConfirmation">
       <v-card>
         <v-card-text>
           <p>{{ $t('startupPageOverwriteInfo') }}</p>
           <p>{{ $t('startupPageOverwriteQuestion') }}</p>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="apiStore.loadDataFromBackend()">
+          <v-btn @click="stores.api().loadDataFromBackend()">
             <v-icon left icon="mdi-reload"></v-icon>
             <span>{{ $t('allLoad') }}</span>
           </v-btn>
-          <v-btn :href="apiStore.returnUrl">
+          <v-btn :href="stores.api().returnUrl">
             <v-icon left icon="mdi-logout-variant"></v-icon>
             <span>{{ $t('allCancel') }}</span>
           </v-btn>

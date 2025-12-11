@@ -41,6 +41,6 @@ export const stores = {
 export async function clearAllStores() {
     for (const key of Object.values(stores)) {
         const store = key();
-        store.clearStorage();
+        await store.clearStorage();
     }
 }
