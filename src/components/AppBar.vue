@@ -14,6 +14,7 @@ const writerStore = stores.writer();
 const alertStore = stores.alert();
 const essayStore = stores.essay();
 const layoutStore = stores.layout();
+const tasksStore = stores.tasks();
 
 async function handleFocusChange() {
   if (layoutStore.focusTarget == 'header') {
@@ -52,7 +53,7 @@ async function openReview() {
 <template>
   <v-app-bar elevation="1" color="white" density="compact">
     <v-app-bar-title>{{ getTitle() }}</v-app-bar-title>
-    <tasks></tasks>
+    <tasks v-if="tasksStore.countTasks > 1"></tasks>
     <v-spacer></v-spacer>
 
     <help></help>
