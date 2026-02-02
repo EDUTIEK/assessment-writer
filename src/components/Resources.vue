@@ -38,6 +38,26 @@ watch(() => tasksStore.currentKey, setActiveResource);
                     :resource="resource">
       </resource-url>
 
+      <audio controls
+             v-if="resource.isAudio()"
+             v-show="layoutStore.isResourceShown(resource)"
+      >
+        <source :src="resource.url" :type="resource.mimetype" :aria-label="resource.title">
+      </audio>
+
+      <video controls
+             v-if="resource.isVideo()"
+             v-show="layoutStore.isResourceShown(resource)"
+      >
+        <source :src="resource.url" :type="resource.mimetype" :aria-label="resource.title">
+      </video>
+
+      <img :src="resource.url"
+             v-if="resource.isImage()"
+             v-show="layoutStore.isResourceShown(resource)"
+      >
+      </img>
+
     </template>
   </div>
 </template>
@@ -47,6 +67,10 @@ watch(() => tasksStore.currentKey, setActiveResource);
 
 div {
   height: 100%;
+}
+
+audio, video, img {
+  width: 100%;
 }
 
 </style>

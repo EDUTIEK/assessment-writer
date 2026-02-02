@@ -135,8 +135,24 @@ export default class Resource {
     return Object.assign({}, this);
   }
 
-  isPdf() {
+  isFile() {
     return [Resource.TYPE_FILE, Resource.TYPE_SOLUTION, Resource.TYPE_INSTRUCTION].includes(this.type);
+  }
+
+  isPdf() {
+    return this.isFile() && this.mimetype === 'application/pdf';
+  }
+
+  isAudio() {
+    return this.isFile() && this.mimetype.startsWith('audio/');
+  }
+
+  isVideo() {
+    return this.isFile() && this.mimetype.startsWith('video/');
+  }
+
+  isImage() {
+    return this.isFile() && this.mimetype.startsWith('image/');
   }
 
   isExternalUrl() {
