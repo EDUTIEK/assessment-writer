@@ -122,7 +122,7 @@ async function retry() {
           <div
               v-for="essay in essayStore.essays"
               v-show="tasksStore.currentKey == Task.buildKey(essay.task_id)"
-              :class="'long-essay-content ' + settingsStore.contentClass"
+              :class="'review-content long-essay-content ' + settingsStore.contentClass"
               :style="'font-size:' + (preferencesStore.editor_zoom) + 'rem;'"
               v-html="essay.content"
           ></div>
@@ -211,5 +211,19 @@ async function retry() {
   max-width: 60em;
 }
 
+</style>
+
+<style>
+
+.review-content hr {
+  position: relative;
+  width: 100vw;
+  left: -20px;
+  overflow: hidden;
+  border: none;
+  height: 20px;
+  background-color: #eeeeee;
+  border-top: 1px solid #ccc;
+}
 
 </style>

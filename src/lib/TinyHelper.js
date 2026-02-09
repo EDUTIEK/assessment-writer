@@ -41,7 +41,8 @@ export default class TinyHelper {
             plugins: 'lists charmap wordcount table pagebreak',
             toolbar1: 'undo redo styles bold italic underline bullist numlist forecolor backcolor removeformat charmap table pagebreak wordcount',
             pagebreak_split_block: true,
-            // valid_elements: settingsStore.tinyValidElements,
+            valid_elements: settingsStore.tinyValidElements,
+            valid_styles: settingsStore.tinyValidStyles,
             // formats: settingsStore.tinyFormats,
             // style_formats: settingsStore.tinyStyles,
             custom_undo_redo_levels: 10,
@@ -60,7 +61,18 @@ export default class TinyHelper {
             paste_data_images: false,     // don't paste images
             paste_remove_styles_if_webkit: true,  // default
             paste_webkit_styles: 'none',          // default
-            paste_preprocess: this.handlePaste
+            paste_preprocess: this.handlePaste,
+            table_appearance_options: false,
+            table_advtab: false,
+            table_cell_advtab: false,
+            table_row_advtab: false,
+            table_sizing_mode: 'responsive',
+            table_default_styles: {},         // no inline styles on new tables
+            table_default_attributes: {},      // no default attributes like width
+            table_resize_bars: false,
+            table_toolbar: 'tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+            pagebreak_separator: '<hr>',
+            pagebreak_split_block: true,  // ensures clean split, important for xsl in backend
         }
     }
 

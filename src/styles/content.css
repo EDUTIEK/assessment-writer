@@ -77,9 +77,26 @@
 }
 
 .mce-pagebreak {
-    width: 100%;
+    width: calc(100% + 40px);
     height: 1px;
+    height: 20px;
+    background-color: #eeeeee;
+    border-top: 1px solid #ccc;
+    margin-left: -20px;
+
+}
+
+.mce-content-body table, .long-essay-content table {
+    border-collapse: collapse;
     border: 1px solid gray;
+    width: 100%;
+}
+
+.mce-content-body td, .long-essay-content td,
+.mce-content-body th, .long-essay-content th {
+    border: 1px solid gray;
+    min-width: 1em;
+    min-height: 1em;
 }
 
 /*

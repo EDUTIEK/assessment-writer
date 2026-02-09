@@ -101,11 +101,12 @@ html {
   margin-bottom: 0 !important
 }
 
-/* hide the statusbar */
-/*
-.tox-statusbar {
-  display: none!important;
+/* Hide property dialogs of tinymce */
+div[aria-label="Tabelleneigenschaften"],
+div[aria-label="Zeileneigenschaften"],
+div[aria-label="Zelleigenschaften"]
+{
+  display: none !important;
 }
-*/
 
 </style>
