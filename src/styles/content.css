@@ -8,6 +8,7 @@
     font-size: 1em;
     max-width: 60em;
     line-height: 150%;
+    text-align: justify;
 }
 
 .mce-content-body h1, .long-essay-content h1,

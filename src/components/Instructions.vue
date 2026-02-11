@@ -2,7 +2,7 @@
 /**
  * HTML Instructions shown on the left side
  * - can be marked with annotations
- * - the html must be prepares with specific <w-p> elements surrounding single wirds
+ * - the html must be prepared with specific <w-p> elements surrounding single words
  */
 import Annotation from "@/data/Annotation";
 import TextMarker from '@/lib/TextMarker';

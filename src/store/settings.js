@@ -56,7 +56,7 @@ export const useSettingsStore = defineStore('settings', {
       switch (state.formatting_options) {
         case 'extended':
           return '@[style|border|colspan|rowspan],'
-            + 'p/div,br,strong/b,em/i,u,ol,ul,li,h1,h2,h3,h4,h5,h6,pre,code,blockquote,span,sub,sup,table,thead,tbody,th,tr,td,hr,'
+            + 'p/div,br,strong/b,em/i,u,s,ol,ul,li,h1,h2,h3,h4,h5,h6,pre,code,blockquote,span,sub,sup,table,thead,tbody,th,tr,td,hr,'
             + 'img[class<mce-pagebreak|src|data-mce-resize|data-mce-placeholder|data-mce-selected]';
         case 'full':
           return 'p/div,br,strong/b,em/i,u,ol,ul,li,h1,h2,h3,h4,h5,h6,pre';
@@ -74,7 +74,7 @@ export const useSettingsStore = defineStore('settings', {
       switch (state.formatting_options) {
         case 'extended':
           return {
-            '*': 'background-color,color,text-align,mce-pagebreak'
+            '*': 'background-color,color,text-align,mce-pagebreak,padding-left'
           };
         default:
           return {};
@@ -88,34 +88,107 @@ export const useSettingsStore = defineStore('settings', {
       return state.headline_scheme == 'three' ? 1.15 : 1;
     },
 
-    tinyStyles(state) {
+    tinyStyleFormats(state) {
+
+      const headings = {title: t('settingsHeadings'), items: [] };
       switch (state.headline_scheme) {
         case 'single':
-          return [
-            { title: t('settingsParagraph'), format: 'p' },
-            { title: t('settingsHeading'), format: 'h1' },
-            { title: t('settingsTypewriter'), format: 'pre' },
+          headings.items = [
+            { title: t('settingsHeadings'), format: 'h1' },
           ];
+          break;
         case 'three':
-          return [
-            { title: t('settingsParagraph'), format: 'p' },
+          headings.items = [
             { title: t('settingsHeading1'), format: 'h1' },
             { title: t('settingsHeading2'), format: 'h2' },
             { title: t('settingsHeading3'), format: 'h3' },
-            { title: t('settingsTypewriter'), format: 'pre' },
           ];
+          break;
         default:
-          return [
-            { title: t('settingsParagraph'), format: 'p' },
+          headings.items = [
             { title: t('settingsHeading1'), format: 'h1' },
             { title: t('settingsHeading2'), format: 'h2' },
             { title: t('settingsHeading3'), format: 'h3' },
             { title: t('settingsHeading4'), format: 'h4' },
             { title: t('settingsHeading5'), format: 'h5' },
             { title: t('settingsHeading6'), format: 'h6' },
-            { title: t('settingsTypewriter'), format: 'pre' },
           ];
       }
+
+      const inline = {title: t('settingsInline'), items: [] };
+      switch (state.formatting_options) {
+        case 'extended':
+          inline.items = [
+            { title: t('settingsBold'), format: 'bold' },
+            { title: t('settingsItalic'), format: 'italic' },
+            { title: t('settingsUnderline'), format: 'underline' },
+            { title: t('settingsStrikethrough'), format: 'strikethrough' },
+            { title: t('settingsSuperscript'), format: 'superscript' },
+            { title: t('settingsSubscript'), format: 'subscript' },
+            { title: t('settingsCode'), format: 'code' }
+          ];
+          break;
+        case 'full':
+        case 'medium':
+        case'minimal':
+          inline.items = [
+            { title: t('settingsBold'), format: 'bold' },
+            { title: t('settingsItalic'), format: 'italic' },
+            { title: t('settingsUnderline'), format: 'underline' },
+          ];
+          break;
+      }
+
+      const blocks = { title: t('settingsBlocks'), items: [] };
+      switch (state.formatting_options) {
+        case 'extended':
+          blocks.items = [
+            { title: t('settingsParagraph'), format: 'p' },
+            { title: t('settingsBlockquote'), format: 'blockquote' },
+            { title: t('settingsTypewriter'), format: 'pre' },
+          ];
+          break;
+        case 'full':
+          blocks.items = [
+            { title: t('settingsParagraph'), format: 'p' },
+            { title: t('settingsTypewriter'), format: 'pre' },
+          ];
+          break;
+        case 'medium':
+        case 'minimal':
+          blocks.items = [
+            { title: t('settingsParagraph'), format: 'p' },
+          ];
+          break;
+      }
+
+      const align = { title: t('settingsAlign'), items: [] };
+      switch (state.formatting_options) {
+        case 'extended':
+         align.items = [
+            { title: t('settingsAlignLeft'), format: 'alignleft' },
+            { title: t('settingsAlignCenter'), format: 'aligncenter' },
+            { title: t('settingsAlignRight'), format: 'alignright' },
+            { title: t('settingsAlignJustify'), format: 'alignjustify' }
+          ];
+          break;
+      }
+
+      const formats = [];
+      if (headings.items.length) {
+        formats.push(headings);
+      }
+      if (inline.items.length) {
+        formats.push(inline);
+      }
+      if (blocks.items.length) {
+        formats.push(blocks);
+      }
+      if (align.items.length) {
+        formats.push(align);
+      }
+
+      return formats;
     },
 
     /**
@@ -123,7 +196,8 @@ export const useSettingsStore = defineStore('settings', {
      */
     tinyFormats(state) {
       return {
-        underline: { inline: 'u', remove: 'all' }
+        underline: { inline: 'u', remove: 'all' },
+        strikethrough: { inline: 's', remove: 'all' }
       }
     },
 
