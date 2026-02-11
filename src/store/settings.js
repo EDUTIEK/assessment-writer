@@ -37,6 +37,8 @@ export const useSettingsStore = defineStore('settings', {
 
     tinyToolbar(state) {
       switch (state.formatting_options) {
+        case 'extended':
+          return 'undo redo styles bold italic underline bullist numlist indent outdent forecolor backcolor removeformat charmap table pagebreak wordcount'
         case 'full':
           return 'undo redo styles bold italic underline bullist numlist removeformat charmap wordcount';
         case 'medium':
@@ -145,13 +147,13 @@ export const useSettingsStore = defineStore('settings', {
           blocks.items = [
             { title: t('settingsParagraph'), format: 'p' },
             { title: t('settingsBlockquote'), format: 'blockquote' },
-            { title: t('settingsTypewriter'), format: 'pre' },
+            { title: t('settingsPre'), format: 'pre' },
           ];
           break;
         case 'full':
           blocks.items = [
             { title: t('settingsParagraph'), format: 'p' },
-            { title: t('settingsTypewriter'), format: 'pre' },
+            { title: t('settingsPre'), format: 'pre' },
           ];
           break;
         case 'medium':

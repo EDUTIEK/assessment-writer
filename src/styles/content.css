@@ -91,6 +91,7 @@
     border-collapse: collapse;
     border: 1px solid gray;
     width: 100%;
+    table-layout: fixed;
 }
 
 .mce-content-body td, .long-essay-content td,
