@@ -185,6 +185,7 @@ async function retry() {
   width: 100%;
   display: flex;
   flex-direction: column;
+  background-color:  #eeeeee;
 }
 
 .col-header {
@@ -195,10 +196,10 @@ async function retry() {
 .col-content {
   flex-grow: 1;
   height: calc(100% - 200px);
+  max-width: 250mm;
   background-color: white;
   overflow-y: scroll;
-  padding: 10px;
-  padding-left: 20px;
+  padding: 20px;
   font-family: Serif;
 }
 
@@ -207,7 +208,7 @@ async function retry() {
   background-color: lightgray;
 }
 
-.review-text, p {
+.review-content .review-text, p {
   max-width: 60em;
 }
 
@@ -217,13 +218,15 @@ async function retry() {
 
 .xlas-content.review-content hr {
   position: relative;
-  width: 100vw;
+  width: calc(100% + 40px);
   left: -20px;
   overflow: hidden;
   border: none;
   height: 20px;
   background-color: #eeeeee;
   border-top: 1px solid #ccc;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 </style>

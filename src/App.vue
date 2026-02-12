@@ -31,11 +31,9 @@ apiStore.init();
 <style>
 
 /**
- * Global content styles will be applied by class
+ * Content styles will be applied by class
  */
 @import '@/styles/content.css';
-@import '@/styles/headlines.css';
-
 
 html {
   overflow-y: hidden !important;

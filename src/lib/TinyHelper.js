@@ -38,7 +38,7 @@ export default class TinyHelper {
             menubar: false,
             statusbar: false,
             statusbar: false,
-            body_class: 'xlas-content ' +settingsStore.contentClass,     // used by content.css
+            body_class: 'xlas-content ' + settingsStore.contentClass,     // used by content.css
             plugins: 'lists charmap wordcount table pagebreak',
             toolbar: settingsStore.tinyToolbar,
             valid_elements: settingsStore.tinyValidElements,

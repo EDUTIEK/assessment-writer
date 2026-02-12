@@ -7,7 +7,6 @@ import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
 
 import contentCss from '@/styles/content.css?inline';
-import headlinesCss from '@/styles/headlines.css?inline';
 
 const storage = getStorage('settings');
 const { t } = i18n.global
@@ -201,7 +200,7 @@ export const useSettingsStore = defineStore('settings', {
     },
 
     tinyContentStyle(state) {
-      return contentCss.toString() + '\n' + headlinesCss.toString();
+      return contentCss.toString();
     },
 
     contentClass(state) {
@@ -218,7 +217,6 @@ export const useSettingsStore = defineStore('settings', {
           return '';
       }
     }
-
   },
 
   actions: {
