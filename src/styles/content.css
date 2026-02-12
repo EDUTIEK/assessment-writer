@@ -31,7 +31,7 @@
 }
 
 .xlas-content pre {
-    max-width: 150mm;               /* dompdf needs a fixed value */
+    max-width: 80em;                /* dompdf needs a fixed value */
     white-space: pre-wrap;          /* keep line breaks and break if needed */
     word-wrap: break-word;          /* legacy setting (older browsers) */
     overflow-wrap: break-word;      /* modern variant of word-wrap */
@@ -39,22 +39,25 @@
 
 .xlas-content ol,
 .xlas-content ul {
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-left: 10px;
+    margin: 0;
+    padding: 0;
     margin-bottom: 10px;
 }
 
 .xlas-content li {
-    margin-top: 0;
-    margin-bottom: 10px;
-    margin-left: 20px;
+    margin: 0;
+    margin-left: 40px;
     min-height: 1.5em;
 }
 
-.xlas-content li ol,
-.xlas-content li ul {
+.xlas-content li + li {
     margin-top: 10px;
+}
+
+.xlas-content li > ol,
+.xlas-content li > ul {
+    margin-top: 10px;
+    margin-bottom: 0;
 }
 
 .xlas-content table {
@@ -62,6 +65,7 @@
     border: 1px solid gray;
     width: 100%;
     table-layout: fixed;
+    margin-bottom: 10px;
 }
 
 .xlas-content tr {
@@ -113,6 +117,7 @@
 .xlas-content h4,
 .xlas-content h5,
 .xlas-content h6 {
+    font-family: serif;
     font-size: 1em;
     font-weight: bold;
     padding: 0;
