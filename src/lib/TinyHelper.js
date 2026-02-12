@@ -3,8 +3,25 @@
  */
 import {stores} from "@/store";
 import i18n from "@/plugins/i18n";
-import tinymce from "tinymce";
 import {nextTick, ref, watch} from 'vue';
+
+import tinymce from "tinymce";
+import 'tinymce/icons/default/icons.min.js';
+import 'tinymce/themes/silver/theme.min.js';
+import 'tinymce/models/dom/model.min.js';
+
+import 'tinymce/skins/ui/oxide/skin.js';
+import 'tinymce/skins/ui/oxide/content.js';
+import 'tinymce/skins/content/default/content.js';
+
+import '@/plugins/tiny_de.js';
+import 'tinymce/plugins/lists';
+import 'tinymce/plugins/charmap';
+import 'tinymce/plugins/wordcount';
+import 'tinymce/plugins/table';
+import 'tinymce/plugins/pagebreak';
+
+import contentCss from '@/styles/content.css?inline';
 
 let settingsStore;
 let clipboardStore;
@@ -40,16 +57,16 @@ export default class TinyHelper {
             statusbar: false,
             body_class: 'xlas-content ' + settingsStore.contentClass,     // used by content.css
             plugins: 'lists charmap wordcount table pagebreak',
-            toolbar: settingsStore.tinyToolbar,
-            valid_elements: settingsStore.tinyValidElements,
-            valid_styles: settingsStore.tinyValidStyles,
-            formats: settingsStore.tinyFormats,
-            style_formats: settingsStore.tinyStyleFormats,
+            toolbar: this.tinyToolbar(settingsStore.formatting_options),
+            valid_elements: this.tinyValidElements(settingsStore.formatting_options),
+            valid_styles: this.tinyValidStyles(settingsStore.formatting_options),
+            formats: this.tinyFormats(),
+            style_formats: this.tinyStyleFormats(settingsStore.formatting_options, settingsStore.headline_scheme),
             custom_undo_redo_levels: 10,
             text_patterns: false,
             skin_url: 'default',
             content_css: 'default',
-            content_style: settingsStore.tinyContentStyle,
+            content_style: this.tinyContentStyle(),
             browser_spellcheck: settingsStore.allow_spellcheck,
             highlight_on_focus: true,
             iframe_aria_text: t('tinyHelperIframeAriaText'),
@@ -212,5 +229,170 @@ export default class TinyHelper {
             this.characterCount.value = plugin.body.getCharacterCount();
         } catch (e) {
         }
+    }
+
+    tinyToolbar(formatting_options) {
+        switch (formatting_options) {
+            case 'extended':
+                return 'undo redo styles bold italic underline bullist numlist indent outdent forecolor backcolor removeformat charmap table pagebreak wordcount'
+            case 'full':
+                return 'undo redo styles bold italic underline bullist numlist removeformat charmap wordcount';
+            case 'medium':
+                return 'undo redo bold italic underline bullist numlistremoveformat charmap wordcount';
+            case 'minimal':
+                return 'undo redo bold italic underline removeformat charmap wordcount';
+            case 'none':
+            default:
+                return 'undo redo charmap wordcount';
+        }
+    }
+
+    /**
+     * @see https://www.tiny.cloud/docs/configure/content-filtering/#valid_elements
+     */
+    tinyValidElements(formatting_options) {
+        switch (formatting_options) {
+            case 'extended':
+                return '@[style|border|colspan|rowspan],'
+                    + 'p/div,br,strong/b,em/i,u,s,ol,ul,li,h1,h2,h3,h4,h5,h6,pre,code,blockquote,span,sub,sup,table,thead,tbody,th,tr,td,hr,'
+                    + 'img[class<mce-pagebreak|src|data-mce-resize|data-mce-placeholder|data-mce-selected]';
+            case 'full':
+                return 'p/div,br,strong/b,em/i,u,ol,ul,li,h1,h2,h3,h4,h5,h6,pre';
+            case 'medium':
+                return 'p/div,br,strong/b,em/i,u,ol,ul,li';
+            case 'minimal':
+                return 'p/div,p/li,br,strong/b,em/i,u';
+            case 'none':
+            default:
+                return 'p/div,p/li,br';
+        }
+    }
+
+    tinyValidStyles(formatting_options) {
+        switch (formatting_options) {
+            case 'extended':
+                return {
+                    '*': 'background-color,color,text-align,mce-pagebreak,padding-left'
+                };
+            default:
+                return {};
+        }
+    }
+
+    tinyStyleFormats(formatting_options, headline_scheme) {
+
+        const headings = {title: t('settingsHeadings'), items: [] };
+        switch (headline_scheme) {
+            case 'single':
+                headings.items = [
+                    { title: t('settingsHeadings'), format: 'h1' },
+                ];
+                break;
+            case 'three':
+                headings.items = [
+                    { title: t('settingsHeading1'), format: 'h1' },
+                    { title: t('settingsHeading2'), format: 'h2' },
+                    { title: t('settingsHeading3'), format: 'h3' },
+                ];
+                break;
+            default:
+                headings.items = [
+                    { title: t('settingsHeading1'), format: 'h1' },
+                    { title: t('settingsHeading2'), format: 'h2' },
+                    { title: t('settingsHeading3'), format: 'h3' },
+                    { title: t('settingsHeading4'), format: 'h4' },
+                    { title: t('settingsHeading5'), format: 'h5' },
+                    { title: t('settingsHeading6'), format: 'h6' },
+                ];
+        }
+
+        const inline = {title: t('settingsInline'), items: [] };
+        switch (formatting_options) {
+            case 'extended':
+                inline.items = [
+                    { title: t('settingsBold'), format: 'bold' },
+                    { title: t('settingsItalic'), format: 'italic' },
+                    { title: t('settingsUnderline'), format: 'underline' },
+                    { title: t('settingsStrikethrough'), format: 'strikethrough' },
+                    { title: t('settingsSuperscript'), format: 'superscript' },
+                    { title: t('settingsSubscript'), format: 'subscript' },
+                    { title: t('settingsCode'), format: 'code' }
+                ];
+                break;
+            case 'full':
+            case 'medium':
+            case'minimal':
+                inline.items = [
+                    { title: t('settingsBold'), format: 'bold' },
+                    { title: t('settingsItalic'), format: 'italic' },
+                    { title: t('settingsUnderline'), format: 'underline' },
+                ];
+                break;
+        }
+
+        const blocks = { title: t('settingsBlocks'), items: [] };
+        switch (formatting_options) {
+            case 'extended':
+                blocks.items = [
+                    { title: t('settingsParagraph'), format: 'p' },
+                    { title: t('settingsBlockquote'), format: 'blockquote' },
+                    { title: t('settingsPre'), format: 'pre' },
+                ];
+                break;
+            case 'full':
+                blocks.items = [
+                    { title: t('settingsParagraph'), format: 'p' },
+                    { title: t('settingsPre'), format: 'pre' },
+                ];
+                break;
+            case 'medium':
+            case 'minimal':
+                blocks.items = [
+                    { title: t('settingsParagraph'), format: 'p' },
+                ];
+                break;
+        }
+
+        const align = { title: t('settingsAlign'), items: [] };
+        switch (formatting_options) {
+            case 'extended':
+                align.items = [
+                    { title: t('settingsAlignLeft'), format: 'alignleft' },
+                    { title: t('settingsAlignCenter'), format: 'aligncenter' },
+                    { title: t('settingsAlignRight'), format: 'alignright' },
+                    { title: t('settingsAlignJustify'), format: 'alignjustify' }
+                ];
+                break;
+        }
+
+        const formats = [];
+        if (headings.items.length) {
+            formats.push(headings);
+        }
+        if (inline.items.length) {
+            formats.push(inline);
+        }
+        if (blocks.items.length) {
+            formats.push(blocks);
+        }
+        if (align.items.length) {
+            formats.push(align);
+        }
+
+        return formats;
+    }
+
+    /**
+     * @see https://www.tiny.cloud/docs/configure/content-formatting/#formats
+     */
+    tinyFormats() {
+        return {
+            underline: { inline: 'u', remove: 'all' },
+            strikethrough: { inline: 's', remove: 'all' }
+        }
+    }
+
+    tinyContentStyle(state) {
+        return contentCss.toString();
     }
 }
