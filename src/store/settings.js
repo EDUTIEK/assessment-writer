@@ -6,11 +6,8 @@ import i18n from "@/plugins/i18n";
 import {getStorage} from "@/lib/Storage";
 import {defineStore} from 'pinia';
 
-import contentLocalCss from '@/styles/content.css?inline';
-import headlinesSingleCss from '@/styles/headlines-single.css?inline';
-import headlinesThreeCss from '@/styles/headlines-three.css?inline';
-import headlinesNumericCss from '@/styles/headlines-numeric.css?inline';
-import headlinesEdutiekCss from '@/styles/headlines-edutiek.css?inline';
+import contentCss from '@/styles/content.css?inline';
+import headlinesCss from '@/styles/headlines.css?inline';
 
 const storage = getStorage('settings');
 const { t } = i18n.global
@@ -204,20 +201,7 @@ export const useSettingsStore = defineStore('settings', {
     },
 
     tinyContentStyle(state) {
-      const baseStyle = contentLocalCss.toString();
-
-      switch (state.headline_scheme) {
-        case 'single':
-          return baseStyle + '\n' + headlinesSingleCss.toString();
-        case 'three':
-          return baseStyle + '\n' + headlinesThreeCss.toString();
-        case 'numeric':
-          return baseStyle + '\n' + headlinesNumericCss.toString();
-        case 'edutiek':
-          return baseStyle + '\n' + headlinesEdutiekCss.toString();
-        default:
-          return baseStyle;
-      }
+      return contentCss.toString() + '\n' + headlinesCss.toString();
     },
 
     contentClass(state) {

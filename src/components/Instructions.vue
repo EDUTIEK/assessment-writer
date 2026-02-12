@@ -189,7 +189,7 @@ function getHTMLOfSelection() {
                @click="preferencesStore.zoomInstructionsIn()"></v-btn>
       </v-btn-group>
     </div>
-    <div id="app-instructions" class="app-instructions-scroll long-essay-content"
+    <div id="app-instructions" class="app-instructions-scroll xlas-content"
          contenteditable="true"
          :style="'font-size:' + (preferencesStore.instructions_zoom) + 'rem;'"
          v-html="tasksStore.currentTask?.instructions ?? ''"

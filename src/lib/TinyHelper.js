@@ -38,6 +38,7 @@ export default class TinyHelper {
             menubar: false,
             statusbar: false,
             statusbar: false,
+            body_class: 'xlas-content ' +settingsStore.contentClass,     // used by content.css
             plugins: 'lists charmap wordcount table pagebreak',
             toolbar: settingsStore.tinyToolbar,
             valid_elements: settingsStore.tinyValidElements,
@@ -126,6 +127,7 @@ export default class TinyHelper {
     applyFormat() {
         if (settingsStore.contentClass) {
             for (const element of document.getElementsByClassName('tox-tinymce-aux')) {
+                element.classList.add('xlas-content');
                 element.classList.add(settingsStore.contentClass);
             }
         }

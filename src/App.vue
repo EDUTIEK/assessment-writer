@@ -34,10 +34,7 @@ apiStore.init();
  * Global content styles will be applied by class
  */
 @import '@/styles/content.css';
-@import '@/styles/headlines-single.css';
-@import '@/styles/headlines-three.css';
-@import '@/styles/headlines-numeric.css';
-@import '@/styles/headlines-edutiek.css';
+@import '@/styles/headlines.css';
 
 
 html {
@@ -90,16 +87,26 @@ html {
 }
 
 .tox-editor-header {
-  /*
-  width: 134%!important;
-  transform: scale(0.75)!important;
-  transform-origin: 0% 0% 0px!important;
-  */
-
   box-shadow: none !important;
   border-bottom: 1px solid #cccccc !important;
   margin-bottom: 0 !important
 }
+
+.tox-menu {
+  counter-reset: h1 h2 h3 h4 h5 h6;
+}
+
+/**
+ *   Make font sizes in the tiny formats menu independent from changing font sizes in the content area
+ *   May be refined by headlines css files
+ */
+.tox-menu h1, .tox-menu h2, .tox-menu h3, .tox-menu h4, .tox-menu h5, .tox-menu h6,
+.tox-menu p, .tox-menu pre, .tox-menu li, .tox-menu blockquote, .tox-menu div,
+.tox-menu strong, .tox-menu em, .tox-menu u, .tox-menu s, .tox-menu sup, .tox-menu sub, .tox-menu code
+{
+  font-size: 1rem !important;
+}
+
 
 /* Hide property dialogs of tinymce */
 div[aria-label="Tabelleneigenschaften"],
