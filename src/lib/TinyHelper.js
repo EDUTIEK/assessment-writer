@@ -4,6 +4,7 @@
 import {stores} from "@/store";
 import i18n from "@/plugins/i18n";
 import {nextTick, ref, watch} from 'vue';
+import contentCss from '@/styles/content.css?inline';
 
 import tinymce from "tinymce";
 import 'tinymce/icons/default/icons.min.js';
@@ -20,8 +21,6 @@ import 'tinymce/plugins/charmap';
 import 'tinymce/plugins/wordcount';
 import 'tinymce/plugins/table';
 import 'tinymce/plugins/pagebreak';
-
-import contentCss from '@/styles/content.css?inline';
 
 let settingsStore;
 let clipboardStore;
@@ -54,7 +53,6 @@ export default class TinyHelper {
             height: '100%',
             menubar: false,
             statusbar: false,
-            statusbar: false,
             body_class: 'xlas-content ' + settingsStore.contentClass,     // used by content.css
             plugins: 'lists charmap wordcount table pagebreak',
             toolbar: this.tinyToolbar(settingsStore.formatting_options),
@@ -66,7 +64,7 @@ export default class TinyHelper {
             text_patterns: false,
             skin_url: 'default',
             content_css: 'default',
-            content_style: this.tinyContentStyle(),
+            content_style: contentCss.toString(),
             browser_spellcheck: settingsStore.allow_spellcheck,
             highlight_on_focus: true,
             iframe_aria_text: t('tinyHelperIframeAriaText'),
@@ -390,9 +388,5 @@ export default class TinyHelper {
             underline: { inline: 'u', remove: 'all' },
             strikethrough: { inline: 's', remove: 'all' }
         }
-    }
-
-    tinyContentStyle(state) {
-        return contentCss.toString();
     }
 }

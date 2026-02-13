@@ -71,10 +71,10 @@ html {
   transition: none !important;
 }
 
-
 /**
- * Tiny styles must be global
+ * Tiny UI styles (must be global)
  */
+
 .tox-tinymce {
   border: 1px solid #cccccc !important;
   border-radius: 0 !important;
@@ -94,17 +94,13 @@ html {
   counter-reset: h1 h2 h3 h4 h5 h6;
 }
 
-/**
- *   Make font sizes in the tiny formats menu independent from changing font sizes in the content area
- *   May be refined by headlines css files
- */
+/* Make font sizes in the tiny formats menu independent from changing font sizes in the content area */
 .tox-menu h1, .tox-menu h2, .tox-menu h3, .tox-menu h4, .tox-menu h5, .tox-menu h6,
 .tox-menu p, .tox-menu pre, .tox-menu li, .tox-menu blockquote, .tox-menu div,
 .tox-menu strong, .tox-menu em, .tox-menu u, .tox-menu s, .tox-menu sup, .tox-menu sub, .tox-menu code
 {
   font-size: 1rem !important;
 }
-
 
 /* Hide property dialogs of tinymce */
 div[aria-label="Tabelleneigenschaften"],
