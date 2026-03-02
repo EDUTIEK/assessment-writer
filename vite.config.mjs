@@ -26,12 +26,6 @@ export default defineConfig({
     Vuetify(),
     Components(),
     ViteFonts({
-      google: {
-        families: [{
-          name: 'Roboto',
-          styles: 'wght@100;300;400;500;700;900',
-        }],
-      },
     }),
     viteStaticCopy({targets: [
       {dest: 'annotate-pdf', src: path.resolve(__dirname, 'node_modules/annotate-pdf') + '/*'},
