@@ -60,7 +60,6 @@ export default class TinyHelper {
             valid_styles: this.tinyValidStyles(settingsStore.formatting_options),
             formats: this.tinyFormats(),
             style_formats: this.tinyStyleFormats(settingsStore.formatting_options, settingsStore.headline_scheme),
-            custom_undo_redo_levels: 10,
             text_patterns: false,
             skin_url: 'default',
             content_css: 'default',
