@@ -64,8 +64,10 @@ export const useAlertStore = defineStore('alerts', {
       }
     },
 
-    async loadFromBackend(data = []) {
+    async loadFromBackend(data = [], show_new = false) {
       try {
+        const old_keys = Object.keys(this.alerts);
+
         await storage.clear();
         this.$reset();
 
@@ -73,6 +75,10 @@ export const useAlertStore = defineStore('alerts', {
           const alert = new Alert(item);
           this.alerts[alert.getKey()] = alert;
           await storage.setItem(alert.getKey(), alert.getData());
+
+          if (show_new && !old_keys.includes(alert.getKey())) {
+            this.activeKey = alert.getKey();
+          }
         }
         await storage.setItem('keys', Object.keys(this.alerts));
       }

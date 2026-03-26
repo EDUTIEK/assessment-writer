@@ -321,7 +321,7 @@ export const useApiStore = defineStore('api', {
 
         await stores.config().loadFromBackend(response.data['Assessment']['Config']);
         await stores.writer().loadFromBackend(response.data['Assessment']['Writer']);
-        await stores.alert().loadFromBackend(response.data['Assessment']['Alerts']);
+        await stores.alert().loadFromBackend(response.data['Assessment']['Alerts'], true);
         await stores.settings().loadFromBackend(response.data['EssayTask']['WritingSettings']);
 
         this.lastUpdateTry = 0;
