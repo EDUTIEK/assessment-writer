@@ -12,6 +12,7 @@ import { stores } from '@/store';
 
 const apiStore = stores.api();
 const layoutStore = stores.layout();
+const writerStore = stores.writer();
 apiStore.init();
 
 </script>
@@ -20,11 +21,11 @@ apiStore.init();
   <v-app fill-height>
     <startup-page v-if="!layoutStore.isInitialized"/>
     <app-bar v-if="layoutStore.isInitialized"/>
-    <nav-bar v-if="layoutStore.isInitialized && !layoutStore.isReview"/>
+    <nav-bar v-if="layoutStore.isInitialized && writerStore.canWrite && !layoutStore.isReview"/>
 
     <!-- use v-show to prevent a reload of resources after switching from review to main -->
-    <main-content v-if="layoutStore.isInitialized" v-show="!layoutStore.isReview"/>
-    <review-content v-if="layoutStore.isInitialized" v-show="layoutStore.isReview"/>
+    <main-content v-if="layoutStore.isInitialized" v-show="writerStore.canWrite && !layoutStore.isReview"/>
+    <review-content v-if="layoutStore.isInitialized" v-show="!writerStore.canWrite || layoutStore.isReview"/>
   </v-app>
 </template>
 

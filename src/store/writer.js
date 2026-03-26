@@ -39,6 +39,9 @@ export const useWriterStore = defineStore('writer', {
     },
     isExcluded(state) {
       return state.is_excluded > 0;
+    },
+    canWrite(state) {
+      return !state.isAuthorized && !state.isExcluded && !state.writingEndReached
     }
   },
 
@@ -99,10 +102,6 @@ export const useWriterStore = defineStore('writer', {
         this.remaining_time = Math.max(0, this.working_deadline - apiStore.getServerTime(Date.now()));
       } else {
         this.remaining_time = null;
-      }
-
-      if (this.writingEndReached || this.isExcluded || this.isAuthorized) {
-        apiStore.review = true;
       }
     },
 

@@ -65,7 +65,7 @@ async function openReview() {
       <span>{{ $t("appBarInterrupt") }}</span>
     </v-btn>
 
-    <v-btn class="app-header-item" v-show="!layoutStore.isReview" @click="openReview">
+    <v-btn class="app-header-item" v-show="writerStore.canWrite && !layoutStore.isReview" @click="openReview">
       <v-icon left icon="mdi-eye"></v-icon>
       <span>{{ $t("appBarReview") }}</span>
     </v-btn>
