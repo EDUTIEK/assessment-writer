@@ -5,7 +5,7 @@ export default class Resource {
 
   static TYPE_FILE = 'file';
   static TYPE_URL = 'url';
-  static TYPE_INSTRUCTION = 'instruct';
+  static TYPE_INSTRUCTION = 'instructions';
   static TYPE_SOLUTION = 'solution';
 
   static ALLOWED_TYPES = [Resource.TYPE_FILE, Resource.TYPE_URL, Resource.TYPE_INSTRUCTION, Resource.TYPE_SOLUTION];
