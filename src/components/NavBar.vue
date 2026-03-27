@@ -36,7 +36,7 @@ function closeNavigation(event) {
 
 function selectResource(resource) {
   if (resource.type == Resource.TYPE_URL && !resource.embedded) {
-    window.open(resource.source, 'long-essay-writer-resource-' + resource.key)
+    window.open(resource.source, 'xlas-writer-resource-' + resource.key)
   } else {
     resourcesStore.selectResource(resource);
     layoutStore.showResources();

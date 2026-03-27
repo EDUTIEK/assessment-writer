@@ -3,7 +3,6 @@
  * Container for resources shown in the left column of the main content
  * Resources of different types are shown here
  * Their visibility is controlled by the layoutStore
- * todo: add resource components for media (audio, video, html)
  */
 import ResourcePdf from "@/components/ResourcePdf.vue";
 import ResourceUrl from "@/components/ResourceUrl.vue";

@@ -114,6 +114,9 @@ export const useResourcesStore = defineStore('resources', {
           if (resource.hasFileToLoad()) {
             resource.url = apiStore.getResourceUrl(resource);
           }
+          if (resource.type == Resource.TYPE_URL) {
+            resource.url = resource.source
+          }
           this.resources[resource.getKey()] = resource;
           await storage.setItem(resource.getKey(), resource.getData());
         }
