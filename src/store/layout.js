@@ -63,12 +63,14 @@ export const useLayoutStore = defineStore('layout', {
     isResourceShown(state) {
 
       const resourcesStore = stores.resources();
+      const taskStore = stores.tasks();
       /**
        * Check if a resource is visible
        * @returns {bool}
        */
       const fn = function (resource) {
-        return (state.isInstructionsPdfVisible && resource.type === Resource.TYPE_INSTRUCTION ||
+        return resource.task_id == taskStore.currentTask?.task_id &&
+        (state.isInstructionsPdfVisible && resource.type === Resource.TYPE_INSTRUCTION ||
             state.isResourcesVisible && resourcesStore.isActive(resource));
       }
       return fn;
