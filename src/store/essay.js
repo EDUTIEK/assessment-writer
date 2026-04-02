@@ -248,7 +248,7 @@ export const useEssayStore = defineStore('essay', {
 
             essay.content = currentContent;
             essay.hash = currentHash;
-            essay.last_change = currentTime;
+            essay.last_change = apiStore.getServerTime(currentTime);
             essay.last_check = currentTime;
             essay.sum_of_distances = step.is_delta ? step.distance : 0
 
@@ -289,7 +289,6 @@ export const useEssayStore = defineStore('essay', {
           key: essay.getKey(),
         });
         const data = essay.getData();
-        data.last_change = stores.api().getServerTime(data.last_change);
         changes.push(stores.changes().getChangeDataToSend(change, data));
       }
       return changes;

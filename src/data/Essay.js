@@ -26,7 +26,7 @@ export default class Essay {
   hash = '';
 
   /**
-   * Sum of levenshtine distances sice the last full save
+   * Sum of levenshtein distances since the last full save
    * @type {integer}
    */
   sum_of_distances = 0;
@@ -38,10 +38,10 @@ export default class Essay {
   last_check = 0;
 
   /**
-   * Timestamp (ms) of the last saving in the storage
+   * Timestamp of the last change (server time)
    * @type {number}
    */
-  last_save = 0;
+  last_change = 0;
 
   /**
    * Constructor - gets properties from a data object
@@ -71,8 +71,8 @@ export default class Essay {
     if (data.last_check !== undefined && data.last_check !== null) {
       this.last_check = parseInt(data.last_check);
     }
-    if (data.last_save !== undefined && data.last_save !== null) {
-      this.last_save = parseInt(data.last_save);
+    if (data.last_change !== undefined && data.last_change !== null) {
+      this.last_change = parseInt(data.last_change);
     }
   }
 
