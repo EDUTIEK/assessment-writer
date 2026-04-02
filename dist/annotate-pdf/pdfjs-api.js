@@ -6,11 +6,13 @@
  *     id: {string},
  *     page: {number},
  *     intern: {Object},
+ *     text: {string},
  * }} Annotation
  *
  * @param {string} parent   id of the parent element to add the iframe
  * @param {string} viewer   url of the viewer html (source of iframe, without parameter)
  * @param {string} pdf      url of the pdf file to load
+ * @param {{viewOnly: bool}} options init pdfjs in view only or not.
  *
  * @return {{
  *   on: {function(string, function(CustomEvent)): void},
@@ -25,18 +27,30 @@
  *   select: {function(string): Promise},
  *   currentPage: {function(): Promise<number>},
  *   destroy: {function(): void},
- *   rebuild: {function(): void}
+ *   rebuild: {function(): void},
+ *   setViewOnly: {function(bool): Promise},
  * }}
  */
-export default (parent, viewer, pdf) => {
+export default (parent, viewer, pdf, options = {}) => {
     let currentRequest = Promise.resolve();
     const t = new EventTarget();
     const dispatch = (name, detail = null) => t.dispatchEvent(new CustomEvent(name, {detail}));
     const nextId = ((i = 0) => () => ++i)();
     const pending = {};
     const frame = document.createElement('iframe');
-    const ready = Promise.withResolvers();
-    frame.src = viewer + '?file=' + encodeURIComponent(pdf);
+    const ready = (function(){
+        const ret = {};
+        ret.promise = new Promise(function(resolve, reject){
+            ret.resolve = resolve;
+            ret.reject = reject;
+        });
+        return ret;
+    })();
+    const iframeParams = new URLSearchParams({file: pdf});
+    if (options.viewOnly) {
+        iframeParams.set('viewOnly', 'yes');
+    }
+    frame.src = viewer + '?' + iframeParams;
     frame.style.width = '100%';
     frame.style.height = '100%';
     parent.appendChild(frame);
@@ -63,6 +77,7 @@ export default (parent, viewer, pdf) => {
             window.addEventListener('message', dispatchOrRespond);
             parent.appendChild(frame);
         },
+        setViewOnly: viewOnly => request('viewOnly', viewOnly),
     };
 
     function request(name, ...args)
