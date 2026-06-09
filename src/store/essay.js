@@ -16,6 +16,7 @@ const storage = getStorage('essay');
 const dmp = new DiffMatchPatch();
 
 const checkInterval = 200;      // time (ms) to wait for a new update check (e.g. 0.2s to 1s)
+const forceInterval = 60000;    // max time to wait for a new update check if update check is locked
 const saveInterval = 1000;      // maximum time (ms) to wait for saving a writing step if content is changed
 const saveDistance = 10;        // maximum levenshtein distance to wait for or saving a writing step if content is changed
 const maxDistance = 1000;       // maximum cumulated levenshtein distance of patches before a new full save is done
@@ -169,21 +170,26 @@ export const useEssayStore = defineStore('essay', {
         return false;
       }
 
+      // don't accept changes after writing end
+      if (writerStore.writingEndReached) {
+        return false;
+      }
+
       // avoid too many checks
       const currentTime = Date.now();
       if (!forced && currentTime - essay.last_check < checkInterval) {
         return false;
       }
 
-      // don't accept changes after writing end
-      if (writerStore.writingEndReached) {
-        return false;
+      // force a check if update is locked fpr too long
+      if (!forced && currentTime - this.lastCheck > forceInterval) {
+        forced = true;
       }
 
       // avoid parallel updates
       // no need to wait because updateContent is permanently called
       // use post-increment for test-and-set
-      if (lockUpdate++) {
+      if (!forced && lockUpdate++) {
         return false;
       }
 
