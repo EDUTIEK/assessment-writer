@@ -77,7 +77,7 @@ async function downloadEssay(task) {
         :title="apiStore.isSending ? $t('sendingStatusSending') : (apiStore.isAllSent ? $t('sendingStatusAllSent') : $t('sendingStatusOpenSendings'))"
     >
       <template v-slot:prepend>
-        <v-icon aria-role="hidden"
+        <v-icon aria-hidden="true"
                 :icon="apiStore.isSending ? 'mdi-cloud-upload' : (apiStore.isAllSent ? 'mdi-cloud-check-outline' : 'mdi-cloud-outline')"></v-icon>
       </template>
     </v-list-item>
