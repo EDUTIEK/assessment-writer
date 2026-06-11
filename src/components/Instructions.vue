@@ -190,7 +190,7 @@ function getHTMLOfSelection() {
       </v-btn-group>
     </div>
     <div id="app-instructions" class="app-instructions-scroll xlas-content"
-         contenteditable="true"
+         contenteditable="true" role="document"
          :style="'font-size:' + (preferencesStore.instructions_zoom) + 'rem;'"
          v-html="tasksStore.currentTask?.instructions ?? ''"
          @beforeinput="handleBeforeinput"
