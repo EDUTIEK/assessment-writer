@@ -50,7 +50,7 @@ function handleKeyUp() {
 
 <template>
   <div id="app-essay-edit-wrapper">
-    <label for="app-essay" class="hidden">{{ $t("editEssayHiddenField") }}</label>
+    <label :for="'app-essay-' + props.essayKey" class="hidden">{{ $t("editEssayHiddenField") }}</label>
     <div class="tinyWrapper">
       <editor
           :id="'app-essay-' + props.essayKey"

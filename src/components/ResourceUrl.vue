@@ -31,6 +31,7 @@ watch(() => layoutStore.focusChange, handleFocusChange);
     <div tabindex="0" class="appResourceNode" ref="ResourceNode">
       <iframe
           :src="resource.url"
+          :title="resource.title"
           width="100%"
           height="100%"
           frameborder = 0

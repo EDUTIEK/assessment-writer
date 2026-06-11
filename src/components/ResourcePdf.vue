@@ -22,6 +22,10 @@ let pdfjs;
 
 onMounted(() => {
   pdfjs = createPDFJsApi(ResourceNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', resource.url);
+  const iframe = ResourceNode.value.querySelector('iframe');
+  if (iframe) {
+    iframe.title = resource.title;
+  }
   loadAnnotations();
   pdfjs.on('create', createAnnotation);
   pdfjs.on('update', updateAnnotation);
