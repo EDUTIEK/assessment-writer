@@ -71,10 +71,13 @@ async function downloadEssay(task) {
 
   <v-list tabindex="-1">
     <v-list-item
-        tabindex="-1"
-        @click = "openPopup()"
+        role="button"
+        class="app-navigation-item"
+        tabindex="0"
+        @click="openPopup()"
         :aria-label="apiStore.isSending ? $t('sendingStatusSending') : (apiStore.isAllSent ? $t('sendingStatusAllSent') : $t('sendingStatusOpenSendings'))"
         :title="apiStore.isSending ? $t('sendingStatusSending') : (apiStore.isAllSent ? $t('sendingStatusAllSent') : $t('sendingStatusOpenSendings'))"
+        :ripple="false"
     >
       <template v-slot:prepend>
         <v-icon aria-hidden="true"
