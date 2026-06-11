@@ -107,7 +107,7 @@ onMounted(async () => {
     <v-dialog width="500" persistent v-model="clipboardStore.show_warning">
       <v-card>
         <v-card-text>
-          <p>{{ $t('mainContentCopyPrevented') }}</p>
+          <p role="alert">{{ $t('mainContentCopyPrevented') }}</p>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
