@@ -56,6 +56,7 @@ export default class TinyHelper {
             body_class: 'xlas-content ' + settingsStore.contentClass,     // used by content.css
             plugins: 'lists charmap wordcount table pagebreak',
             toolbar: this.tinyToolbar(settingsStore.formatting_options),
+            toolbar_mode: 'wrap',
             valid_elements: this.tinyValidElements(settingsStore.formatting_options),
             valid_styles: this.tinyValidStyles(settingsStore.formatting_options),
             formats: this.tinyFormats(),
