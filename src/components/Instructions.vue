@@ -183,14 +183,14 @@ function getHTMLOfSelection() {
       </v-btn-toggle>
       &nbsp;
       <v-btn-group density="comfortable" variant="outlined" divided>
-        <v-btn :title="$t('instructionsZoomOut')" size="small" icon="mdi-magnify-minus-outline"
+        <v-btn :title="$t('instructionsZoomOut')" :aria-label="$t('instructionsZoomOut')" size="small" icon="mdi-magnify-minus-outline"
                @click="preferencesStore.zoomInstructionsOut()"></v-btn>
-        <v-btn :title="$t('instructionsZoomIn')" size="small" icon="mdi-magnify-plus-outline"
+        <v-btn :title="$t('instructionsZoomIn')" :aria-label="$t('instructionsZoomIn')" size="small" icon="mdi-magnify-plus-outline"
                @click="preferencesStore.zoomInstructionsIn()"></v-btn>
       </v-btn-group>
     </div>
     <div id="app-instructions" class="app-instructions-scroll xlas-content"
-         contenteditable="true"
+         contenteditable="true" role="document"
          :style="'font-size:' + (preferencesStore.instructions_zoom) + 'rem;'"
          v-html="tasksStore.currentTask?.instructions ?? ''"
          @beforeinput="handleBeforeinput"

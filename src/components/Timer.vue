@@ -3,10 +3,16 @@
  * Counter of remaining working time shown in the app bar
  * can be hidden
  */
+import i18n from "@/plugins/i18n";
 import {stores} from "@/store";
+import {ref, watch} from 'vue';
 
 const writerStore = stores.writer();
 const layoutStore = stores.layout();
+const { t } = i18n.global;
+
+const liveMessage = ref('');
+const urgentLiveMessage = ref('');
 
 /**
  *
@@ -32,6 +38,24 @@ function formatTimespan(timespan) {
   }
 }
 
+function announceRemainingTime() {
+  if (layoutStore.showTimer && writerStore.remaining_time !== null && !writerStore.writingEndReached) {
+    liveMessage.value = t('timerLiveRemaining', { time: formatTimespan(writerStore.remaining_time) });
+  }
+}
+
+watch(() => writerStore.writingEndReached, (reached) => {
+  if (reached) {
+    urgentLiveMessage.value = t('reviewContentTimeOver');
+  }
+});
+
+watch(() => layoutStore.showTimer, (shown) => {
+  if (shown) {
+    announceRemainingTime();
+  }
+});
+
 </script>
 
 
@@ -41,6 +65,8 @@ function formatTimespan(timespan) {
     <span v-show=layoutStore.showTimer>{{ formatTimespan(writerStore.remaining_time) }}</span>
     <span v-show=!layoutStore.showTimer>Restzeit</span>
   </v-btn>
+  <span class="sr-only" aria-live="assertive" aria-atomic="true">{{ urgentLiveMessage }}</span>
+  <span class="sr-only" aria-live="polite" aria-atomic="true">{{ liveMessage }}</span>
 </template>
 
 

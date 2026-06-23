@@ -52,6 +52,7 @@ watch(() => tasksStore.currentKey, setActiveResource);
       </video>
 
       <img :src="resource.url"
+             :alt="resource.title"
              v-if="resource.isImage()"
              v-show="layoutStore.isResourceShown(resource)"
       >

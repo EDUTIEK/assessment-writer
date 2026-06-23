@@ -109,12 +109,14 @@ watch(() => annotationsStore.selectionChange, showAnnotations);
       &nbsp;
       <span aria-hidden="true" v-if="settingsStore.hasNotes">&nbsp;</span>
       <v-btn-group density="comfortable" variant="outlined" divided>
-        <v-btn :title="$t('editSelectZoomOut')" size="small" icon="mdi-magnify-minus-outline"
+        <v-btn :title="$t('editSelectZoomOut')" :aria-label="$t('editSelectZoomOut')" size="small" icon="mdi-magnify-minus-outline"
                @click="preferencesStore.zoomEditorOut()"></v-btn>
-        <v-btn :title="$t('editSelectZoomIn')" size="small" icon="mdi-magnify-plus-outline"
+        <v-btn :title="$t('editSelectZoomIn')" :aria-label="$t('editSelectZoomIn')" size="small" icon="mdi-magnify-plus-outline"
                @click="preferencesStore.zoomEditorIn()"></v-btn>
         <v-btn
-            :title="preferencesStore.word_count_enabled ? $t('editSelectCounterHide') : $t('editSelectCounterShow')" size="small"
+            :title="preferencesStore.word_count_enabled ? $t('editSelectCounterHide') : $t('editSelectCounterShow')"
+            :aria-label="preferencesStore.word_count_enabled ? $t('editSelectCounterHide') : $t('editSelectCounterShow')"
+            size="small"
             :icon="preferencesStore.word_count_enabled ? 'mdi-numeric' : 'mdi-numeric-off'"
             @click="preferencesStore.toggleWordCountEnabled()">
         </v-btn>

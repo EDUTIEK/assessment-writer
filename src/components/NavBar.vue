@@ -76,31 +76,31 @@ function getResourceIcon(resource) {
       https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex
     -->
     <v-list tabindex="-1">
-      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+      <v-list-item role="button" class="app-navigation-item" tabindex="0"
                    v-if="tasksStore.hasInstructions"
                    @click="closeNavigation; layoutStore.showInstructions();"
                    :aria-label="$t('allInstructions') + (layoutStore.isInstructionsVisible ? $t('navBarSelectedAria') : '')"
                    :title="$t('allInstructions') + (layoutStore.isInstructionsVisible ? $t('navBarSelected') : '')"
                    :ripple="false">
         <template v-slot:prepend>
-          <v-icon aria-role="hidden"
+          <v-icon aria-hidden="true"
                   :icon="layoutStore.isInstructionsVisible ? 'mdi-text-box': 'mdi-text-box-outline'"></v-icon>
         </template>
       </v-list-item>
 
-      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+      <v-list-item role="button" class="app-navigation-item" tabindex="0"
                    v-if="resourcesStore.hasInstruction"
                    @click="closeNavigation; layoutStore.showInstructionsPdf();"
                    :aria-label="$t('allInstructionsPdf') + (layoutStore.isInstructionsPdfVisible ?  $t('navBarSelectedAria') : '')"
                    :title="$t('allInstructionsPdf') + (layoutStore.isInstructionsPdfVisible ? $t('navBarSelected') : '')"
                    :ripple="false">
         <template v-slot:prepend>
-          <v-icon aria-role="hidden"
+          <v-icon aria-hidden="true"
                   :icon="layoutStore.isInstructionsPdfVisible ? 'mdi-file-document': 'mdi-file-document-outline'"></v-icon>
         </template>
       </v-list-item>
 
-      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+      <v-list-item role="button" class="app-navigation-item" tabindex="0"
                    v-for="resource in resourcesStore.getFileOrUrlResources"
                    @click="closeNavigation; selectResource(resource);"
                    :aria-label="resource.title + (resourcesStore.isActive(resource) && layoutStore.isResourcesVisible ?  $t('navBarSelectedAria') : '')"
@@ -108,44 +108,44 @@ function getResourceIcon(resource) {
                    :key="resource.key"
                    :ripple="false">
         <template v-slot:prepend>
-          <v-icon aria-role="hidden"
+          <v-icon aria-hidden="true"
                   :icon="getResourceIcon(resource)"></v-icon>
         </template>
       </v-list-item>
 
       <v-divider v-show="tasksStore.hasInstructions || resourcesStore.hasResources" class="border-opacity-75"></v-divider>
 
-      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+      <v-list-item role="button" class="app-navigation-item" tabindex="0"
                    v-if="tasksStore.hasInstructions || resourcesStore.hasAnnotatableResource"
                    @click="closeNavigation; layoutStore.showAnnotations();"
                    :aria-label="$t('allAnnotations') + (layoutStore.isAnnotationsVisible ? $t('navBarSelectedAria') : '')"
                    :title="$t('allAnnotations') + (layoutStore.isAnnotationsVisible ? $t('navBarSelected') : '')"
                    :ripple="false">
         <template v-slot:prepend>
-          <v-icon aria-role="hidden"
+          <v-icon aria-hidden="true"
                   :icon="layoutStore.isAnnotationsVisible ? 'mdi-pencil-box': 'mdi-pencil-box-outline'"></v-icon>
         </template>
       </v-list-item>
 
 
-      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0"
+      <v-list-item role="button" class="app-navigation-item" tabindex="0"
                    @click="closeNavigation; layoutStore.showEssay();"
                    :aria-label="$t('allEssay') + (layoutStore.isEssayVisible ? $t('navBarSelectedAria') : '')"
                    :title="$t('allEssay') + (layoutStore.isEssayVisible ? $t('navBarSelected') : '')"
                    :ripple="false">
         <template v-slot:prepend>
-          <v-icon aria-role="hidden"
+          <v-icon aria-hidden="true"
                   :icon="layoutStore.isEssayVisible ? 'mdi-file-edit': 'mdi-file-edit-outline'"></v-icon>
         </template>
       </v-list-item>
 
-      <v-list-item aria-role="button" class="app-navigation-item" tabindex="0" v-if="settingsStore.hasNotes"
+      <v-list-item role="button" class="app-navigation-item" tabindex="0" v-if="settingsStore.hasNotes"
                    @click="closeNavigation; layoutStore.showNotes();"
                    :aria-label="$t('allNotesWillPurged') + (layoutStore.isNotesVisible ? $t('navBarSelectedAria') : '')"
                    :title="$t('allNotesWillPurged') + (layoutStore.isNotesVisible ? $t('navBarSelected') : '')"
                    :ripple="false">
         <template v-slot:prepend>
-          <v-icon aria-role="hidden"
+          <v-icon aria-hidden="true"
                   :icon="layoutStore.isNotesVisible ? 'mdi-clipboard': 'mdi-clipboard-outline'"></v-icon>
         </template>
       </v-list-item>

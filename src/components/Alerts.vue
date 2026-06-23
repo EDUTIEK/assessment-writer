@@ -13,6 +13,10 @@ const alertStore = stores.alert();
     {{ $t("alertsMessage", alertStore.countAlerts) }}
   </v-btn>
 
+  <span class="sr-only" aria-live="assertive" aria-atomic="true">
+    {{ alertStore.hasActiveAlert ? $t('alertsSupervisionMessage', 1) + ': ' + alertStore.activeMessage : '' }}
+  </span>
+
   <v-dialog persistent v-model="alertStore.hasActiveAlert" max-width="1000">
     <v-card>
       <v-card-title>
