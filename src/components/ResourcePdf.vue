@@ -27,6 +27,7 @@ onMounted(() => {
     iframe.title = resource.title;
   }
   loadAnnotations();
+  pdfjs.enableFreeFormHighlight(false);
   pdfjs.on('create', createAnnotation);
   pdfjs.on('update', updateAnnotation);
   pdfjs.on('delete', deleteAnnotation);
