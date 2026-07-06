@@ -16,12 +16,26 @@ const startState = {
   primary_text_color: null,       // color for the text of primary actions
 }
 
+function hexToRgba(hex, alpha) {
+  hex = hex.replace(/^#/, '');
+
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export const useConfigStore = defineStore('config', {
   state: () => {
     return startState;
   },
 
   getters: {
+
+    commentColor(state) {
+      return hexToRgba('FF00FF', 0.4);
+    },
 
     primaryColorCss(state) {
       if (state.primary_color) {

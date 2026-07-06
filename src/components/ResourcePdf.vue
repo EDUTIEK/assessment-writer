@@ -27,7 +27,11 @@ onMounted(() => {
     iframe.title = resource.title;
   }
   loadAnnotations();
+
   pdfjs.enableFreeFormHighlight(false);
+  pdfjs.enableTokenButtons(false);
+  pdfjs.enableTypeButtons(false);
+
   pdfjs.on('create', createAnnotation);
   pdfjs.on('update', updateAnnotation);
   pdfjs.on('delete', deleteAnnotation);
@@ -50,6 +54,8 @@ function loadAnnotations() {
     all.push({
       id: annotation.mark_key,
       page: annotation.parent_number,
+      type: 'marker',
+      token: '',
       intern: JSON.parse(annotation.mark_value),
     })
   }
