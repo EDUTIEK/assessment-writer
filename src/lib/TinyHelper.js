@@ -78,6 +78,7 @@ export default class TinyHelper {
             paste_webkit_styles: 'none',          // default
             paste_preprocess: this.handlePaste,
             table_appearance_options: false,
+            table_tab_navigation: true,
             table_advtab: false,
             table_cell_advtab: false,
             table_row_advtab: false,
@@ -85,7 +86,7 @@ export default class TinyHelper {
             table_default_styles: {},         // no inline styles on new tables
             table_default_attributes: {},      // no default attributes like width
             table_resize_bars: false,
-            table_toolbar: 'tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+            table_toolbar: 'tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol  | tablecellbackgroundcolor',
             pagebreak_separator: '<hr>',
             pagebreak_split_block: true,  // ensures clean split, important for xsl in backend
         }
@@ -252,7 +253,9 @@ export default class TinyHelper {
         switch (formatting_options) {
             case 'extended':
                 return '@[style|border|colspan|rowspan],'
-                    + 'p/div,br,strong/b,em/i,u,s,ol,ul,li,h1,h2,h3,h4,h5,h6,pre,code,blockquote,span,sub,sup,table,thead,tbody,th,tr,td,hr,'
+                  // #td/#th: pad empty cells with &nbsp; so caret/arrow-key navigation works after reload
+                  // (fresh inserts already get this; loaded HTML with custom valid_elements does not otherwise)
+                    + 'p/div,br,strong/b,em/i,u,s,ol,ul,li,h1,h2,h3,h4,h5,h6,pre,code,blockquote,span,sub,sup,table,thead,tbody,#th,tr,#td,hr,'
                     + 'img[class<mce-pagebreak|src|data-mce-resize|data-mce-placeholder|data-mce-selected]';
             case 'full':
                 return 'p/div,br,strong/b,em/i,u,ol,ul,li,h1,h2,h3,h4,h5,h6,pre';
@@ -270,7 +273,7 @@ export default class TinyHelper {
         switch (formatting_options) {
             case 'extended':
                 return {
-                    '*': 'background-color,color,text-align,mce-pagebreak,padding-left'
+                    '*': 'background-color,background,color,text-align,mce-pagebreak,padding-left'
                 };
             default:
                 return {};
