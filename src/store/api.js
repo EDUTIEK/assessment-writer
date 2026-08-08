@@ -5,6 +5,7 @@
  */
 import Change from "@/data/Change";
 import SendingResult from "@/data/SendingResult";
+import Status from "@/lib/Status";
 import {clearAllStores, stores} from "@/store";
 import {defineStore} from 'pinia';
 import axios from 'axios'
@@ -340,7 +341,10 @@ export const useApiStore = defineStore('api', {
             }
           };
 
-          data['Update']['Assessment']['Status'] = {'battery': 0.5, 'hidden': false};
+          data['Update']['Assessment']['Status'] = {
+            'battery': await Status.getBatteryLevel(),
+            'hidden': await Status.getHidden(),
+          };
 
           data['Changes']['Task'][Change.TYPE_ANNOTATIONS] = await stores.annotations().getChangedData(this.lastSyncTry);
           data['Changes']['EssayTask'][Change.TYPE_PREFERENCES] =  await stores.preferences().getChangedData(this.lastSyncTry);
