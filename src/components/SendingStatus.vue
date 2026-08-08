@@ -49,7 +49,7 @@ async function sendUpdate() {
   showFailure.value = false;
   showSending.value = true;
 
-  const result = await apiStore.saveChangesToBackend(true);
+  const result = await apiStore.syncWithBackend(true);
   if (result && !result.success) {
     sendingResult.value = result;
     showSending.value = false;

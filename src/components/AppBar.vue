@@ -38,7 +38,7 @@ function sleep(ms) {
 
 async function closeWriter() {
   await essayStore.checkUpdates(true);
-  await apiStore.saveChangesToBackend(true);
+  await apiStore.syncWithBackend(true);
   window.location = apiStore.returnUrl;
 }
 

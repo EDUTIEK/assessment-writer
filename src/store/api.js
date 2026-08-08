@@ -13,8 +13,17 @@ import i18n from "@/plugins/i18n";
 import md5 from 'md5';
 
 const { t } = i18n.global;
-const syncInterval = 1000;      // time (ms) to wait for syncing with the backend
-const updateInterval = 5000;    // time (ms) for next update from the backend (min. syncInterval)
+
+/**
+ * Interval (ms) to check if something needs to be synced with the backend
+ * this can be either getting an update or sending open changes
+ */
+const syncInterval = 1000;
+
+/**
+ * Maximum time (ms) to get an update from the backend, even if no changes exist
+ */
+const updateInterval = 5000;
 
 export const useApiStore = defineStore('api', {
 
@@ -32,9 +41,10 @@ export const useApiStore = defineStore('api', {
 
       // not saved
       intervals: {},                      // list of all registered timer intervals, indexed by their name
-      lastChangesTry: 0,                  // timestamp of the last try to send changes
-      lastUpdateTry: 0,                   // timestamp of the last try to get an update from the server
-      lastUpdateDone: 0                   // timestamp of the last successful update from the server
+
+
+      lastSyncTry: 0,                     // timestamp of the last try to get an update from the server
+      lastSyncDone: 0                     // timestamp of the last successful update from the server
     }
   },
 
@@ -48,7 +58,7 @@ export const useApiStore = defineStore('api', {
     },
 
     isSending(state) {
-      return state.lastChangesTry > 0;
+      return this.lastSyncDone < this.lastSyncTry && this.lastSyncTry > Date.now() - updateInterval;
     },
 
     getRequestConfig(state) {
@@ -224,16 +234,9 @@ export const useApiStore = defineStore('api', {
       }
 
       // todo: re-initialize, e.g. by click on cloud symbol
-      this.setInterval('apiStore.timedSync', this.timedSync, syncInterval);
+      this.setInterval('apiStore.syncWithBackend', this.syncWithBackend, syncInterval);
     },
 
-    /**
-     * Do the regular synchronisation (called from timer)
-     */
-    async timedSync() {
-      await this.saveChangesToBackend();
-      await this.loadUpdateFromBackend();
-    },
 
 
     /**
@@ -299,91 +302,73 @@ export const useApiStore = defineStore('api', {
       await stores.layout().initialize();
     },
 
-    /**
-     * Check for updates from the backend
-     * - new writing end
-     * - messages
-     * - settings
-     */
-    async loadUpdateFromBackend() {
-
-      // don't interfer with a running request and respect update interval
-      if (this.lastUpdateTry > 0 ||
-          (this.lastUpdateDone > Date.now() - updateInterval)) {
-        return;
-      }
-      this.lastUpdateTry = Date.now();
-
-      try {
-        const response = await axios.get('/writer/update', this.getRequestConfig(this.dataToken));
-        this.setTimeOffset(response);
-        this.refreshToken(response);
-
-        await stores.config().loadFromBackend(response.data['Assessment']['Config']);
-        await stores.writer().loadFromBackend(response.data['Assessment']['Writer']);
-        await stores.alert().loadFromBackend(response.data['Assessment']['Alerts'], true);
-        await stores.settings().loadFromBackend(response.data['EssayTask']['WritingSettings']);
-
-        this.lastUpdateTry = 0;
-        this.lastUpdateDone = Date.now();
-        return;
-      }
-      catch (error) {
-        console.error(error);
-        this.lastUpdateTry = 0;
-        return;
-      }
-    },
 
     /**
-     * Periodically send changes to the backend
+     * Periodically sync with the backend
      * Timer is set in initialisation
      *
      * @param bool wait    wait some seconds for a running sending to finish (if not called by timer)
      * @return SendingResult|null
      */
-    async saveChangesToBackend(wait = false) {
-      // wait up to five second for a running request to finish before giving up
+    async syncWithBackend(wait = false) {
+      const changesStore = stores.changes();
+
+      // wait wile a sync try is open and young
       if (wait) {
-        let tries = 0;
-        while (tries < 5 && this.lastChangesTry > 0) {
-          tries++;
+        while (this.isSending) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
 
-      // don't interfer with a running request
-      if (this.lastChangesTry > 0) {
+      // don't interfer with a running sync
+      if (this.isSending) {
         return null;
       }
 
-      const changesStore = stores.changes();
-      if (changesStore.countChanges > 0) {
-        this.lastChangesTry = Date.now();
+      // sync if update is due or changes exist
+      if (this.lastSyncDone < Date.now() - updateInterval || changesStore.countChanges > 0) {
+        this.lastSyncTry = Date.now();
 
         try {
-          const data = {'Task': {}, 'EssayTask': {}};
-          data['Task'][Change.TYPE_ANNOTATIONS] = await stores.annotations().getChangedData(this.lastChangesTry);
-          data['EssayTask'][Change.TYPE_PREFERENCES] =  await stores.preferences().getChangedData(this.lastChangesTry);
-          data['EssayTask'][Change.TYPE_NOTES] = await stores.notes().getChangedData(this.lastChangesTry);
-          data['EssayTask'][Change.TYPE_STEPS] = await stores.steps().getChangedData(this.lastChangesTry);
+          const data = {
+            'Update': {
+              'Assessment': {}
+            },
+            'Changes': {
+              'Task': {},
+              'EssayTask': {}
+            }
+          };
 
-          const response = await axios.put('/writer/changes', data, this.getRequestConfig(this.dataToken));
+          data['Update']['Assessment']['Status'] = {'battery': 0.5, 'hidden': false};
+
+          data['Changes']['Task'][Change.TYPE_ANNOTATIONS] = await stores.annotations().getChangedData(this.lastSyncTry);
+          data['Changes']['EssayTask'][Change.TYPE_PREFERENCES] =  await stores.preferences().getChangedData(this.lastSyncTry);
+          data['Changes']['EssayTask'][Change.TYPE_NOTES] = await stores.notes().getChangedData(this.lastSyncTry);
+          data['Changes']['EssayTask'][Change.TYPE_STEPS] = await stores.steps().getChangedData(this.lastSyncTry);
+
+          const response = await axios.put('/writer/sync', data, this.getRequestConfig(this.dataToken));
           this.setTimeOffset(response);
           this.refreshToken(response);
 
-          for (const component in response.data ?? []) {
-            const changes = response.data[component];
-            for (const type in changes ?? []) {
-              await changesStore.setChangesSent(type, changes[type],  this.lastChangesTry)
+          if (response.data) {
+            for (const component in response.data['Changes']) {
+              const changes = response.data['Changes'][component];
+              for (const type in changes ?? []) {
+                await changesStore.setChangesSent(type, changes[type],  this.lastSyncTry)
+              }
             }
+
+            await stores.config().loadFromBackend(response.data['Update']['Assessment']['Config']);
+            await stores.writer().loadFromBackend(response.data['Update']['Assessment']['Writer']);
+            await stores.alert().loadFromBackend(response.data['Update']['Assessment']['Alerts'], true);
+            await stores.settings().loadFromBackend(response.data['Update']['EssayTask']['WritingSettings']);
           }
 
-          this.lastChangesTry = 0;
+          this.lastSyncDone = Date.now();
           return sendingSuccessResult(response);
         }
         catch (error) {
-          this.lastChangesTry = 0;
           console.log(error);
           return sendingErrorResult(error);
         }
@@ -411,7 +396,7 @@ export const useApiStore = defineStore('api', {
         for (const component in response.data ?? []) {
           const changes = response.data[component];
           for (const type in changes ?? []) {
-            changesStore.setChangesSent(type, changes[type],  this.lastChangesTry)
+            changesStore.setChangesSent(type, changes[type],  Date.now());
           }
         }
 

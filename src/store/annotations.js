@@ -318,7 +318,6 @@ export const useAnnotationsStore = defineStore('annotations', {
      * @return {array} Change objects
      */
     async getChangedData(sendingTime = 0) {
-      const apiStore = stores.api();
       const changesStore = stores.changes();
       const changes = [];
       for (const change of changesStore.getChangesFor(Change.TYPE_ANNOTATIONS, sendingTime)) {
