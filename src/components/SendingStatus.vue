@@ -123,7 +123,7 @@ async function downloadEssay(task) {
 
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="sendUpdate()">
+          <v-btn :disabled="stores.changes().countChanges == 0" @click="sendUpdate()">
             <v-icon left icon="mdi-file-send-outline"></v-icon>
             <span>{{ $t('sendingStatusSend') }}</span>
           </v-btn>
