@@ -43,9 +43,7 @@ function headline(addition = '') {
  * @param {boolean} authorize the final content should be authorized for correction
  */
 async function finalize(authorize) {
-  console.log('authorize', authorize);
   const result = await apiStore.saveFinalContentToBackend(authorize);
-  console.log(result);
   if (!result.success || authorize && !writerStore.isAuthorized) {
     showFinalizeFailure.value = true;
     showAsAuthorizeFailure.value = authorize;

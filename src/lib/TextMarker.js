@@ -136,8 +136,6 @@ class TextMarker {
     if (!selection || !range) {
       return {};
     }
-    // console.log(selection)
-    // console.log(range);
 
     let ancestor = range.commonAncestorContainer;
     // part of a text node is selected - get parent of the surrounding w-p element

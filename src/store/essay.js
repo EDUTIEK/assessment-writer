@@ -165,7 +165,6 @@ export const useEssayStore = defineStore('essay', {
 
       const essay = this.essays[key];
       if (!essay) {
-        console.log('essay with key ' + key + ' not found!');
         return false;
       }
 

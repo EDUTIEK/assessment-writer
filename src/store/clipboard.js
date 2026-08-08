@@ -51,17 +51,9 @@ export const useClipboardStore = defineStore('clipboard', {
           return false;
         }
 
-        console.log('content:', content);
-        console.log('normalized content:', normalize(content));
-
-        console.log('state.content:', state.content);
-        console.log('normalized state.content:', normalize(state.content));
-
         if (normalize(content) == normalize(state.content)) {
-          console.log('paste allowed');
           return true;
         }
-        console.log('paste forbidden');
         return false;
 
       };
@@ -94,7 +86,6 @@ export const useClipboardStore = defineStore('clipboard', {
      * @param content
      */
     setContent(content) {
-      console.log('copy: ', content);
       this.content = content;
     },
 

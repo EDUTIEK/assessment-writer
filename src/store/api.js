@@ -322,7 +322,6 @@ export const useApiStore = defineStore('api', {
 
       // don't interfer with a running sync
       if (this.lastSyncDone < this.lastSyncTry && this.lastSyncTry > Date.now() - updateInterval) {
-        console.log('still sending');
         return null;
       }
 
