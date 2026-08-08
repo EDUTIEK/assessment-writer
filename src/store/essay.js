@@ -28,7 +28,6 @@ const startState = {
 
   // not saved in storage
   editEssays: {},              // notes that are actively edited
-  lastCheck: 0,               // timestamp (ms) of the last check if an update needs a storage
 }
 
 let lockUpdate = 0;             // prevent updates during a processing
@@ -181,8 +180,8 @@ export const useEssayStore = defineStore('essay', {
         return false;
       }
 
-      // force a check if update is locked fpr too long
-      if (!forced && currentTime - this.lastCheck > forceInterval) {
+      // force a check if update is locked for too long
+      if (!forced && currentTime - essay.last_check > forceInterval) {
         forced = true;
       }
 
@@ -216,8 +215,8 @@ export const useEssayStore = defineStore('essay', {
           const result = dmp.patch_apply(dmp.patch_fromText(difftext), storedContent);
 
           // make a full save if ...
-          if (!(stepsStore.counts[essay.task_id] ?? 0)              // it is the first save
-            || forced
+          if (forced
+            || !(stepsStore.counts[essay.task_id] ?? 0)             // it is the first save
             || difftext.length > currentContent.length              // or diff would be longer than full text
             || essay.sum_of_distances + distance > maxDistance      // or enough changes are saved as diffs
             || result[0] != currentContent                          // or patch is wrong

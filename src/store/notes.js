@@ -181,9 +181,23 @@ export const useNotesStore = defineStore('notes', {
      */
     async checkUpdates(forced = false) {
 
+      // avoid too many checks
+      const currentTime = Date.now();
+      if (!forced && currentTime - this.lastCheck < checkInterval) {
+        return false;
+      }
+
+      // force a check if update is locked fpr too long
+      if (!forced && currentTime - this.lastCheck > forceInterval) {
+        forced = true;
+      }
+
       for (const key in this.notes) {
         await this.updateContent(key, forced);
       }
+
+      // set this here
+      this.lastCheck = currentTime;
 
       // reset the interval
       // this should start the interval again if it stopped accidentally
@@ -200,17 +214,6 @@ export const useNotesStore = defineStore('notes', {
       const apiStore = stores.api();
       const changesStore = stores.changes();
       const writerStore = stores.writer();
-
-      // avoid too many checks
-      const currentTime = Date.now();
-      if (!forced && currentTime - this.lastCheck < checkInterval) {
-        return false;
-      }
-
-      // force a check if update is locked fpr too long
-      if (!forced && currentTime - this.lastCheck > forceInterval) {
-        forced = true;
-      }
 
       // avoid parallel updates
       // no need to wait because updateContent is called by interval
@@ -246,8 +249,6 @@ export const useNotesStore = defineStore('notes', {
         console.error(error);
       }
 
-      // set this here
-      this.lastCheck = currentTime;
       lockUpdate = 0;
     },
 
