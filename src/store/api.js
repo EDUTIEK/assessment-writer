@@ -58,7 +58,7 @@ export const useApiStore = defineStore('api', {
     },
 
     isSending(state) {
-      return this.lastSyncDone < this.lastSyncTry && this.lastSyncTry > Date.now() - updateInterval;
+      return ((state.lastSyncDone < state.lastSyncTry) && (state.lastSyncTry > (Date.now() - updateInterval)));
     },
 
     getRequestConfig(state) {
@@ -259,7 +259,7 @@ export const useApiStore = defineStore('api', {
       await stores.annotations().loadFromStorage();
 
       // directy check for updates of task settings to avoid delay
-      await this.loadUpdateFromBackend();
+      this.syncWithBackend();
       await stores.layout().initialize();
     },
 
@@ -315,13 +315,14 @@ export const useApiStore = defineStore('api', {
 
       // wait wile a sync try is open and young
       if (wait) {
-        while (this.isSending) {
+        while (this.lastSyncDone < this.lastSyncTry && this.lastSyncTry > Date.now() - updateInterval) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
 
       // don't interfer with a running sync
-      if (this.isSending) {
+      if (this.lastSyncDone < this.lastSyncTry && this.lastSyncTry > Date.now() - updateInterval) {
+        console.log('still sending');
         return null;
       }
 
