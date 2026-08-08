@@ -14,12 +14,15 @@ export default class Change {
   static TYPE_PREFERENCES = 'pref';
   static TYPE_STEPS = 'step';
 
+  // created with every sync
+  static TYPE_STATUS = 'status';
+
   // only for final content
   static TYPE_ESSAY = 'essay';
   static TYPE_WRITER = 'writer';
 
   static ALLOWED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_NOTES, Change.TYPE_PREFERENCES, Change.TYPE_STEPS,
-    Change.TYPE_ESSAY, Change.TYPE_WRITER];
+    Change.TYPE_ESSAY, Change.TYPE_WRITER, Change.TYPE_STATUS];
 
   static STORED_TYPES = [Change.TYPE_ANNOTATIONS, Change.TYPE_PREFERENCES, Change.TYPE_STEPS, Change.TYPE_NOTES];
   static WRITING_TYPES = [Change.TYPE_STEPS];

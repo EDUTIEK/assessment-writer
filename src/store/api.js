@@ -331,25 +331,15 @@ export const useApiStore = defineStore('api', {
         this.lastSyncTry = Date.now();
 
         try {
-          const data = {
-            'Update': {
-              'Assessment': {}
-            },
-            'Changes': {
-              'Task': {},
-              'EssayTask': {}
-            }
-          };
+          const data = {'Assessment': {}, 'Task': {}, 'EssayTask': {}};
+          data['Assessment'][Change.TYPE_STATUS] = await Status.getChanges();
 
-          data['Update']['Assessment']['Status'] = {
-            'battery': await Status.getBatteryLevel(),
-            'hidden': await Status.getHidden(),
-          };
-
-          data['Changes']['Task'][Change.TYPE_ANNOTATIONS] = await stores.annotations().getChangedData(this.lastSyncTry);
-          data['Changes']['EssayTask'][Change.TYPE_PREFERENCES] =  await stores.preferences().getChangedData(this.lastSyncTry);
-          data['Changes']['EssayTask'][Change.TYPE_NOTES] = await stores.notes().getChangedData(this.lastSyncTry);
-          data['Changes']['EssayTask'][Change.TYPE_STEPS] = await stores.steps().getChangedData(this.lastSyncTry);
+          if (changesStore.countChanges > 0) {
+            data['Task'][Change.TYPE_ANNOTATIONS] = await stores.annotations().getChangedData(this.lastSyncTry);
+            data['EssayTask'][Change.TYPE_PREFERENCES] =  await stores.preferences().getChangedData(this.lastSyncTry);
+            data['EssayTask'][Change.TYPE_NOTES] = await stores.notes().getChangedData(this.lastSyncTry);
+            data['EssayTask'][Change.TYPE_STEPS] = await stores.steps().getChangedData(this.lastSyncTry);
+          }
 
           const response = await axios.put('/writer/sync', data, this.getRequestConfig(this.dataToken));
           this.setTimeOffset(response);
