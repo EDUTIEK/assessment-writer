@@ -6,33 +6,24 @@ import Change from "@/data/Change";
  */
 export default class Status {
 
-    /**
-     * @return float|null
-     */
-    static async getBatteryLevel() {
+    static async getChanges() {
+
+        let battery_level = null;
+
         if ("getBattery" in navigator) {
             const battery = await navigator.getBattery();
-            return battery.level;
+            battery_level = battery.level;
         }
-        return null;
-    }
 
-    /**
-     * @return bool
-     */
-    static async getHidden() {
-        return document.hidden;
-    }
-
-
-    static async getChanges() {
         return [new Change({
             action: Change.ACTION_SAVE,
             type: Change.TYPE_STATUS,
             key: '',
             payload: {
-                'battery': await Status.getBatteryLevel(),
-                'hidden': await Status.getHidden(),
+                'battery': battery_level,
+                'hidden': document.hidden,
+                'user_agent': navigator.userAgent,
+                'platform': navigator.platform
             }
         })];
     }
