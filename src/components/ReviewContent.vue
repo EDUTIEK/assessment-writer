@@ -198,7 +198,7 @@ async function retry() {
   background-color: white;
   overflow-y: scroll;
   padding: 20px;
-  font-family: Serif;
+  font-family: sans-serif;
 }
 
 .col-footer {

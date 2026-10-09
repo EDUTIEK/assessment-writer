@@ -201,13 +201,13 @@ function handlePaste(event) {
 
 .annotationInput {
   width: 100%;
-  font-family: serif;
+  font-family: sans-serif;
   margin-bottom: 5px;
 }
 
 .annotationDisplay {
   width: 100%;
-  font-family: serif;
+  font-family: sans-serif;
   font-size: 0.9rem;
   padding: 2px 15px;
   margin-bottom: 5px;
