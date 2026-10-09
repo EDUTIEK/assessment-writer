@@ -89,6 +89,11 @@ export default class TinyHelper {
             table_toolbar: 'tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol  | tablecellbackgroundcolor',
             pagebreak_separator: '<hr>',
             pagebreak_split_block: true,  // ensures clean split, important for xsl in backend
+
+            setup: function (editor) {
+                editor.on('keyup', this.handleKeyUp.bind(this));
+
+            }.bind(this)
         }
     }
 
@@ -113,6 +118,15 @@ export default class TinyHelper {
      */
     handleCopy(event) {
         clipboardStore.setContent(event.clipboardData.getData('text/html'));
+    }
+
+    handleKeyUp(event) {
+        switch (event.key) {
+            case "Tab":
+                // caret is already in the cell
+                this.editor.selection.scrollIntoView();
+                break;
+        }
     }
 
     /**
