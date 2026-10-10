@@ -312,6 +312,7 @@ export const useApiStore = defineStore('api', {
      * @return SendingResult|null
      */
     async syncWithBackend(wait = false) {
+      const configStore = stores.config();
       const changesStore = stores.changes();
 
       // wait wile a sync try is open and young
@@ -332,8 +333,10 @@ export const useApiStore = defineStore('api', {
 
         try {
           const data = {'Assessment': {}, 'Task': {}, 'EssayTask': {}};
-          data['Assessment'][Change.TYPE_STATUS] = await Status.getChanges();
 
+          if (configStore.send_status) {
+            data['Assessment'][Change.TYPE_STATUS] = await Status.getChanges();
+          }
           if (changesStore.countChanges > 0) {
             data['Task'][Change.TYPE_ANNOTATIONS] = await stores.annotations().getChangedData(this.lastSyncTry);
             data['EssayTask'][Change.TYPE_PREFERENCES] =  await stores.preferences().getChangedData(this.lastSyncTry);

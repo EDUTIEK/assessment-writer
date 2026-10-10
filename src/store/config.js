@@ -14,6 +14,7 @@ const startState = {
   // saved in storage
   primary_color: null,            // color for the background of primary actions
   primary_text_color: null,       // color for the text of primary actions
+  send_status: false
 }
 
 function hexToRgba(hex, alpha) {
@@ -86,6 +87,7 @@ export const useConfigStore = defineStore('config', {
         this.$patch({
           primary_color: data.primary_color ?? null,
           primary_text_color: data.primary_text_color ?? null,
+          send_status: !!data.send_status
         });
         await storage.setItem('config',  Object.assign({}, this.$state));
       }
