@@ -37,7 +37,6 @@ export const useApiStore = defineStore('api', {
       assId: '',                          // identifying id of the assesment
       contextId: '',                      // identifying id of the context fpr permission checks
       dataToken: '',                      // authentication token for transmission of data
-      fileToken: '',                      // authentication token for loading files
       timeOffset: 0,                      // differnce between server time and client time (ms)
 
       // not saved
@@ -69,7 +68,7 @@ export const useApiStore = defineStore('api', {
        * @param {string}  token
        * @return {object}
        */
-      const fn = function (token) {
+      const fn = function () {
         let baseURL = state.backendUrl;
         let params = new URLSearchParams();
 
@@ -77,16 +76,13 @@ export const useApiStore = defineStore('api', {
         // a REST path is added as url to the baseURL by axias calls
         let position = baseURL.search(/\?+/);
         if (position != -1) {
-          params = new URLSearchParams(baseURL.substr(position))
+          params = new URLSearchParams(baseURL.substr(position));
           baseURL = baseURL.substr(0, position);
         }
 
         // add authentication info as url parameters
         // use signature instead of token because it is visible
-        params.append('user_id', state.userId);
-        params.append('ass_id', state.assId);
         params.append('context_id', state.contextId);
-        params.append('signature', md5(state.userId + state.assId + state.contextId + token));
 
         return {
           baseURL: baseURL,
@@ -94,6 +90,7 @@ export const useApiStore = defineStore('api', {
           timeout: 30000,             // milliseconds
           responseType: 'json',       // default
           responseEncoding: 'utf8',   // default
+          headers: {Authorization: 'Bearer ' + state.dataToken},
         }
       }
       return fn;
@@ -106,7 +103,7 @@ export const useApiStore = defineStore('api', {
        * @param {Resource}
        */
       const fn = function (resource) {
-        const config = this.getRequestConfig(this.fileToken);
+        const config = this.getRequestConfig();
         return config.baseURL + '/writer/file/task/resource/' + resource.id + '?' + config.params.toString();
       }
       return fn;
@@ -127,6 +124,18 @@ export const useApiStore = defineStore('api', {
   },
 
   actions: {
+    request(method, url, config = {}) {
+      return axios.request(Object.assign({
+        method: method.toUpperCase(),
+        url,
+      }, this.getRequestConfig(), config)).then(r => {
+        if (r.headers['x-edutiek-token']) {
+          console.log('new token', r.headers['x-edutiek-token']);
+          this.dataToken = r.headers['x-edutiek-token'];
+        }
+        return r;
+      });
+    },
 
     /**
      * Clear the store
@@ -151,7 +160,6 @@ export const useApiStore = defineStore('api', {
       this.assId = localStorage.getItem('xlasWriterAssId') ?? '';
       this.contextId = localStorage.getItem('xlasWriterContextId') ?? '';
       this.dataToken = localStorage.getItem('xlasWriterDataToken') ?? '';
-      this.fileToken = localStorage.getItem('xlasWriterFileToken') ?? '';
       this.timeOffset = Math.floor(localStorage.getItem('xlasWriterTimeOffset') ?? 0);
 
       // check if context given by cookies differs and force a reload if neccessary
@@ -178,13 +186,10 @@ export const useApiStore = defineStore('api', {
       if (Cookies.get('xlasDataToken') != undefined && Cookies.get('xlasDataToken') != this.dataToken) {
         this.dataToken = Cookies.get('xlasDataToken');
       }
-      if (Cookies.get('xlasFileToken') != undefined && Cookies.get('xlasFileToken') != this.dataToken) {
-        this.fileToken = Cookies.get('xlasFileToken');
-      }
 
       if (!this.backendUrl || !this.returnUrl
           || !this.userId || !this.assId || !this.contextId
-          || !this.dataToken || !this.fileToken) {
+          || !this.dataToken) {
         stores.layout().initFailure = t('apiMissingParams');
         return;
       }
@@ -197,7 +202,6 @@ export const useApiStore = defineStore('api', {
       Cookies.remove('xlasAssId');
       Cookies.remove('xlasContextId');
       Cookies.remove('xlasDataToken');
-      Cookies.remove('xlasFileToken');
 
       localStorage.setItem('xlasWriterBackendUrl', this.backendUrl);
       localStorage.setItem('xlasWriterReturnUrl', this.returnUrl);
@@ -205,7 +209,6 @@ export const useApiStore = defineStore('api', {
       localStorage.setItem('xlasWriterAssId', this.assId);
       localStorage.setItem('xlasWriterContextId', this.contextId);
       localStorage.setItem('xlasWriterDataToken', this.dataToken);
-      localStorage.setItem('xlasWriterFileToken', this.fileToken);
 
       const changesStore = stores.changes();
       await changesStore.loadFromStorage();
@@ -276,7 +279,7 @@ export const useApiStore = defineStore('api', {
 
       let response = {};
       try {
-        response = await axios.get('/writer/data', this.getRequestConfig(this.dataToken));
+        response = await this.request('get', '/writer/data');
         this.setTimeOffset(response);
         this.refreshToken(response);
       }
@@ -344,7 +347,7 @@ export const useApiStore = defineStore('api', {
             data['EssayTask'][Change.TYPE_STEPS] = await stores.steps().getChangedData(this.lastSyncTry);
           }
 
-          const response = await axios.put('/writer/sync', data, this.getRequestConfig(this.dataToken));
+          const response = await this.request('put', '/writer/sync', {data});
           this.setTimeOffset(response);
           this.refreshToken(response);
 
@@ -386,7 +389,7 @@ export const useApiStore = defineStore('api', {
       data['Assessment'][Change.TYPE_WRITER] = await stores.writer().getStatusToSend(set_authorized);
 
       try {
-        const response = await axios.put('/writer/final', data, this.getRequestConfig(this.dataToken));
+        const response = await this.request('put', '/writer/final', {data});
         this.refreshToken(response);
 
         const changesStore = stores.changes();
@@ -434,11 +437,6 @@ export const useApiStore = defineStore('api', {
       if (response.headers['xlasdatatoken']) {
         this.dataToken = response.headers['xlasdatatoken'];
         localStorage.setItem('xlasWriterDataToken', this.dataToken);
-      }
-
-      if (response.headers['xlasfiletoken']) {
-        this.fileToken = response.headers['xlasfiletoken'];
-        localStorage.setItem('xlasWriterFileToken', this.fileToken);
       }
     },
 

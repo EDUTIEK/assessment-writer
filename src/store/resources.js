@@ -6,7 +6,6 @@ import Resource from "@/data/Resource";
 import {getStorage} from "@/lib/Storage";
 import {stores} from "@/store";
 import {defineStore} from 'pinia';
-import axios from 'axios';
 
 const storage = getStorage('resources');
 const startState = {
@@ -162,7 +161,7 @@ export const useResourcesStore = defineStore('resources', {
         let response = null;
         if (resource.hasFileToLoad()) {
           try {
-            response = await axios(resource.url, { responseType: 'blob', timeout: 60000 });
+            response = await stores.api().request('get', resource.url, { responseType: 'blob', timeout: 60000 });
             // resource.objectUrl = URL.createObjectURL(response.data)
           }
           catch (error) {

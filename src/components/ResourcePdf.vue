@@ -21,7 +21,7 @@ const ResourceNode = ref();
 let pdfjs;
 
 onMounted(() => {
-  pdfjs = createPDFJsApi(ResourceNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', resource.url);
+  pdfjs = createPDFJsApi(ResourceNode.value, './annotate-pdf/pdfjs-dist/web/viewer.html', resource.url, {headers: stores.api().getRequestConfig().headers});
   const iframe = ResourceNode.value.querySelector('iframe');
   if (iframe) {
     iframe.title = resource.title;
