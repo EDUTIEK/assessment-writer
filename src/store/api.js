@@ -80,8 +80,9 @@ export const useApiStore = defineStore('api', {
           baseURL = baseURL.substr(0, position);
         }
 
-        // add authentication info as url parameters
-        // use signature instead of token because it is visible
+        // add assessment info as url parameters
+        // the user_id is determined from the token header
+        params.append('ass_id', state.assId);
         params.append('context_id', state.contextId);
 
         return {
@@ -128,12 +129,32 @@ export const useApiStore = defineStore('api', {
       return axios.request(Object.assign({
         method: method.toUpperCase(),
         url,
-      }, this.getRequestConfig(), config)).then(r => {
-        if (r.headers['x-edutiek-token']) {
-          console.log('new token', r.headers['x-edutiek-token']);
-          this.dataToken = r.headers['x-edutiek-token'];
+      }, this.getRequestConfig(), config)).then(response => {
+
+        // Refresh the auth token with the value from the REST response
+        // Each REST call will generate a new auth token
+        // A token has only a certain valid time (e.g. one our)
+        // Within this time a new REST call must be made to get a new valid token
+        const token = response.headers['x-access-token'];
+        if (token) {
+          console.log('new token', token);
+          this.dataToken = token;
+          localStorage.setItem('xlasWriterDataToken', token);
         }
-        return r;
+
+        // Set the offset between server time and client time
+        // The offset is used to calculate the correct remaining time of the task
+        // The offset should be set from the response of a REST call
+        // when the response data transfer is short (JSON)
+        const time = response.headers['x-server-time'];
+        if (time) {
+          console.log('new time', time);
+          const serverTimeMs = time * 1000;
+          const clientTimeMs = Date.now();
+          this.timeOffset = clientTimeMs - serverTimeMs;
+          localStorage.setItem('xlasWriterTimeOffset', this.timeOffset);
+        }
+        return response;
       });
     },
 
@@ -183,8 +204,8 @@ export const useApiStore = defineStore('api', {
       if (!!Cookies.get('xlasReturnUrl') && Cookies.get('xlasReturnUrl') != this.returnUrl) {
         this.returnUrl = Cookies.get('xlasReturnUrl');
       }
-      if (Cookies.get('xlasDataToken') != undefined && Cookies.get('xlasDataToken') != this.dataToken) {
-        this.dataToken = Cookies.get('xlasDataToken');
+      if (Cookies.get('xlasUserToken') != undefined && Cookies.get('xlasUserToken') != this.dataToken) {
+        this.dataToken = Cookies.get('xlasUserToken');
       }
 
       if (!this.backendUrl || !this.returnUrl
@@ -201,7 +222,7 @@ export const useApiStore = defineStore('api', {
       Cookies.remove('xlasUserId');
       Cookies.remove('xlasAssId');
       Cookies.remove('xlasContextId');
-      Cookies.remove('xlasDataToken');
+      Cookies.remove('xlasUserToken');
 
       localStorage.setItem('xlasWriterBackendUrl', this.backendUrl);
       localStorage.setItem('xlasWriterReturnUrl', this.returnUrl);
@@ -280,8 +301,6 @@ export const useApiStore = defineStore('api', {
       let response = {};
       try {
         response = await this.request('get', '/writer/data');
-        this.setTimeOffset(response);
-        this.refreshToken(response);
       }
       catch (error) {
         console.error(error);
@@ -348,8 +367,6 @@ export const useApiStore = defineStore('api', {
           }
 
           const response = await this.request('put', '/writer/sync', {data});
-          this.setTimeOffset(response);
-          this.refreshToken(response);
 
           if (response.data) {
             for (const component in response.data['Changes']) {
@@ -390,7 +407,6 @@ export const useApiStore = defineStore('api', {
 
       try {
         const response = await this.request('put', '/writer/final', {data});
-        this.refreshToken(response);
 
         const changesStore = stores.changes();
         for (const component in response.data ?? []) {
@@ -408,35 +424,6 @@ export const useApiStore = defineStore('api', {
       catch (error) {
         console.error(error);
         return sendingErrorResult(error);
-      }
-    },
-
-    /**
-     * Set the offset between server time and client time
-     * The offset is used to calculate the correct remaining time of the task
-     * The offset should be set from the response of a REST call
-     * when the response data transfer is short (no files)
-     */
-    setTimeOffset(response) {
-      if (response.headers['xlastime']) {
-        const serverTimeMs = response.headers['xlastime'] * 1000;
-        const clientTimeMs = Date.now();
-
-        this.timeOffset = clientTimeMs - serverTimeMs;
-        localStorage.setItem('xlasWriterTimeOffset', this.timeOffset);
-      }
-    },
-
-    /**
-     * Refresh the auth token with the value from the REST response
-     * Each REST call will generate a new auth token
-     * A token has only a certain valid time (e.g. one our)
-     * Within this time a new REST call must be made to get a new valid token
-     */
-    refreshToken(response) {
-      if (response.headers['xlasdatatoken']) {
-        this.dataToken = response.headers['xlasdatatoken'];
-        localStorage.setItem('xlasWriterDataToken', this.dataToken);
       }
     },
 
